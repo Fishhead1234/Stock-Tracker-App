@@ -97,3 +97,4 @@ npx cap open android
 > - **NO GUARANTEED RETURNS**: Signals and timing recommendations are based on educational technical indicators, not insider information or professional advice.
 > - **USE AT YOUR OWN RISK**: By using this application, you acknowledge that you are responsible for all investment decisions made through or influenced by the information provided herein.
 # Stock-Tracker-App
+# Stock-Tracker-App
