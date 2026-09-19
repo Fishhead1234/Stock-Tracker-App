@@ -5,11 +5,14 @@ import {
   TrendingUp, 
   TrendingDown, 
   Lock,
-  Globe2
+  Globe2,
+  Edit2,
+  Check
 } from 'lucide-react';
 import { useMarketStore } from '../../store/marketStore';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { useSettingsStore } from '../../store/settingsStore';
+import { stockService } from '../../services/stockService';
 import { PriceChart } from '../../components/StockDetail/PriceChart';
 import { TechnicalGauges } from '../../components/StockDetail/TechnicalGauges';
 import { SignalExplanation } from '../../components/StockDetail/SignalExplanation';
@@ -24,6 +27,8 @@ export const StockDetailScreen: React.FC = () => {
   const { setActiveTab } = useSettingsStore();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditingPrice, setIsEditingPrice] = useState(false);
+  const [editPriceInput, setEditPriceInput] = useState('');
 
   const stock = selectedTicker ? quotes[selectedTicker.toUpperCase()] : Object.values(quotes)[0];
 
@@ -87,12 +92,57 @@ export const StockDetailScreen: React.FC = () => {
         <div className="bg-navy-900/90 border border-navy-800 rounded-3xl p-4 shadow-sm">
           <div className="flex items-baseline justify-between">
             <div>
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-3xl font-extrabold text-white font-mono tracking-tight">
-                  {curr}{stock.price.toLocaleString('en-US', { minimumFractionDigits: stock.price < 10 ? 2 : stock.price > 1000 ? 0 : 2 })}
-                </span>
-                <span className="text-xs font-mono text-slate-500">{stock.currency}</span>
-              </div>
+              {isEditingPrice ? (
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xl font-bold text-slate-300 font-mono">{curr}</span>
+                  <input
+                    type="number"
+                    step="any"
+                    autoFocus
+                    value={editPriceInput}
+                    onChange={(e) => setEditPriceInput(e.target.value)}
+                    placeholder={stock.price.toString()}
+                    className="w-32 bg-navy-950 border border-growth-500 rounded-lg px-2.5 py-1 text-white font-mono text-lg focus:outline-none"
+                  />
+                  <button
+                    onClick={() => {
+                      const val = parseFloat(editPriceInput);
+                      if (val > 0) {
+                        stockService.updateStockPrice(stock.ticker, val);
+                      }
+                      setIsEditingPrice(false);
+                    }}
+                    className="p-1.5 bg-growth-600 hover:bg-growth-500 text-white rounded-lg transition"
+                    title="Save New Price"
+                  >
+                    <Check className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setIsEditingPrice(false)}
+                    className="p-1.5 bg-navy-800 text-slate-400 hover:text-white rounded-lg transition text-xs"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-3xl font-extrabold text-white font-mono tracking-tight">
+                    {curr}{stock.price.toLocaleString('en-US', { minimumFractionDigits: stock.price < 10 ? 2 : stock.price > 1000 ? 0 : 2 })}
+                  </span>
+                  <span className="text-xs font-mono text-slate-500">{stock.currency}</span>
+                  <button
+                    onClick={() => {
+                      setEditPriceInput(stock.price.toString());
+                      setIsEditingPrice(true);
+                    }}
+                    className="ml-1 text-slate-500 hover:text-slate-300 transition"
+                    title="Sync or Update Price"
+                  >
+                    <Edit2 className="w-3 h-3" />
+                  </button>
+                </div>
+              )}
+
               <div className={`flex items-center gap-1 mt-1 text-xs font-mono font-bold ${
                 isPositive ? 'text-growth-400' : 'text-loss-500'
               }`}>

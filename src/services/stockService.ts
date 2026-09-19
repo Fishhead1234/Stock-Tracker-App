@@ -206,6 +206,57 @@ class StockService {
     return newStock;
   }
 
+  public updateStockPrice(ticker: string, newPrice: number) {
+    const stock = this.stockDatabase[ticker.toUpperCase()];
+    if (!stock) return;
+    const price = Math.max(0.0001, Number(newPrice.toFixed(2)));
+    const change = Number((price - stock.previousClose).toFixed(2));
+    const changePercent = Number(((change / stock.previousClose) * 100).toFixed(2));
+    const high = Math.max(stock.high, price);
+    const low = Math.min(stock.low, price);
+
+    const history1D = [...stock.history['1D']];
+    if (history1D.length > 0) {
+      history1D[history1D.length - 1] = {
+        ...history1D[history1D.length - 1],
+        price
+      };
+    }
+
+    const updatedIndicators = calculateAllIndicators(stock.history['1M']);
+
+    this.stockDatabase[ticker.toUpperCase()] = {
+      ...stock,
+      price,
+      change,
+      changePercent,
+      high,
+      low,
+      indicators: updatedIndicators,
+      history: {
+        ...stock.history,
+        '1D': history1D
+      },
+      lastUpdated: new Date().toLocaleTimeString()
+    };
+
+    try {
+      const raw = localStorage.getItem(CUSTOM_STOCKS_KEY);
+      if (raw) {
+        const list: StockQuote[] = JSON.parse(raw);
+        const idx = list.findIndex(s => s.ticker.toUpperCase() === ticker.toUpperCase());
+        if (idx >= 0) {
+          list[idx] = this.stockDatabase[ticker.toUpperCase()];
+          localStorage.setItem(CUSTOM_STOCKS_KEY, JSON.stringify(list));
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    this.notify();
+  }
+
   public getDataSourceName(): string {
     return this.currentDataSource;
   }
