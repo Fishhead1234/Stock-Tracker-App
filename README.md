@@ -96,3 +96,4 @@ npx cap open android
 > - **DATA DELAY NOTICE**: Free tier data may be delayed by up to 15 minutes. Always verify prices before executing live trades.
 > - **NO GUARANTEED RETURNS**: Signals and timing recommendations are based on educational technical indicators, not insider information or professional advice.
 > - **USE AT YOUR OWN RISK**: By using this application, you acknowledge that you are responsible for all investment decisions made through or influenced by the information provided herein.
+# Stock-Tracker-App
