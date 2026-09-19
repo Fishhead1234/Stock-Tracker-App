@@ -1,16 +1,13 @@
 import React, { useState } from 'react';
 import { 
   ShieldAlert, 
-  Key, 
   RotateCcw, 
-  Sparkles, 
   Trash2, 
-  Check, 
-  AlertCircle, 
-  ExternalLink, 
+  Lock, 
   Smartphone, 
-  Globe,
-  Radio
+  Globe, 
+  Radio, 
+  Coins 
 } from 'lucide-react';
 import { useSettingsStore } from '../../store/settingsStore';
 import { usePortfolioStore } from '../../store/portfolioStore';
@@ -25,10 +22,12 @@ export const SettingsScreen: React.FC = () => {
     setFinnhubApiKey, 
     resetOnboarding,
     isPhoneFrameView,
-    setPhoneFrameView
+    setPhoneFrameView,
+    currency,
+    setCurrency
   } = useSettingsStore();
 
-  const { clearPortfolio, loadStarterPracticePortfolio } = usePortfolioStore();
+  const { clearPortfolio } = usePortfolioStore();
 
   const [inputKey, setInputKey] = useState(finnhubApiKey);
   const [testResult, setTestResult] = useState<string | null>(null);
@@ -38,7 +37,7 @@ export const SettingsScreen: React.FC = () => {
   const handleSaveKey = async () => {
     setFinnhubApiKey(inputKey.trim());
     if (!inputKey.trim()) {
-      setTestResult('Switched to Educational 24/7 Simulation Engine.');
+      setTestResult('Switched to Universal Global Simulation Engine.');
       return;
     }
 
@@ -54,6 +53,15 @@ export const SettingsScreen: React.FC = () => {
     }
   };
 
+  const currencyOptions = [
+    { code: 'USD', symbol: '$', label: 'US Dollar (USD)' },
+    { code: 'TWD', symbol: 'NT$', label: 'New Taiwan Dollar (TWD)' },
+    { code: 'KRW', symbol: '₩', label: 'South Korean Won (KRW)' },
+    { code: 'GBP', symbol: '£', label: 'British Pound (GBP)' },
+    { code: 'NZD', symbol: 'NZ$', label: 'New Zealand Dollar (NZD)' },
+    { code: 'EUR', symbol: '€', label: 'Euro (EUR)' }
+  ];
+
   return (
     <div className="flex-1 flex flex-col pb-24 space-y-4">
       <DisclaimerBanner />
@@ -66,17 +74,28 @@ export const SettingsScreen: React.FC = () => {
           </span>
           <h2 className="text-xl font-extrabold text-white">App Settings & Compliance</h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            Configure live market data feeds, review regulatory disclosures, and manage portfolio state.
+            Configure global feeds, currency preferences, and review legal notices.
           </p>
         </div>
 
-        {/* 1. Legal Compliance & Risk Disclosures Card */}
+        {/* 1. NO IN-APP TRADING WARNING CARD */}
+        <div className="bg-gold-950/20 border border-gold-500/40 rounded-2xl p-4 space-y-2 shadow-sm">
+          <div className="flex items-center gap-2 text-gold-400 font-bold text-xs uppercase tracking-wider">
+            <Lock className="w-4 h-4" />
+            <span>Strict Informational Disclosure</span>
+          </div>
+          <p className="text-xs text-slate-200 leading-relaxed font-medium">
+            {COMPLIANCE_NOTICES.NO_IN_APP_TRADING.text}
+          </p>
+        </div>
+
+        {/* 2. Legal Compliance & Risk Disclosures Card */}
         <div className="bg-navy-900/90 border border-navy-800 rounded-2xl p-4 space-y-3 shadow-sm">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <ShieldAlert className="w-4 h-4 text-gold-400" />
               <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                Legal & Compliance Disclosures
+                Legal & Regulatory Disclosures
               </h3>
             </div>
             <span className="text-[10px] bg-growth-500/20 text-growth-400 px-2 py-0.5 rounded-full font-bold">
@@ -93,26 +112,52 @@ export const SettingsScreen: React.FC = () => {
             onClick={() => setShowComplianceModal(true)}
             className="w-full py-2.5 bg-navy-800 hover:bg-navy-750 text-white rounded-xl text-xs font-semibold border border-navy-700 transition"
           >
-            Review Full Compliance & Warning Statements
+            Review All Compliance & Risk Disclosures
           </button>
         </div>
 
-        {/* 2. Market Data Feed & API Setup */}
+        {/* 3. Preferred Base Currency */}
+        <div className="bg-navy-900/90 border border-navy-800 rounded-2xl p-4 space-y-3 shadow-sm">
+          <div className="flex items-center gap-2">
+            <Coins className="w-4 h-4 text-growth-400" />
+            <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+              Preferred Currency
+            </h3>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {currencyOptions.map(opt => (
+              <button
+                key={opt.code}
+                onClick={() => setCurrency(opt.code as any)}
+                className={`p-2.5 rounded-xl border text-xs font-mono text-left transition ${
+                  currency === opt.code
+                    ? 'bg-growth-600/20 border-growth-500 text-white font-bold'
+                    : 'bg-navy-950/60 border-navy-800 text-slate-400 hover:text-white'
+                }`}
+              >
+                <div className="text-slate-200">{opt.code} ({opt.symbol})</div>
+                <div className="text-[10px] text-slate-500 font-sans truncate">{opt.label}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 4. Market Data Feed & API Setup */}
         <div className="bg-navy-900/90 border border-navy-800 rounded-2xl p-4 space-y-3 shadow-sm">
           <div className="flex items-center gap-2">
             <Radio className="w-4 h-4 text-growth-400" />
             <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-              Market Data Strategy
+              Market Data Engine
             </h3>
           </div>
 
           <p className="text-xs text-slate-300 leading-relaxed">
-            By default, InvestLearn operates on an <strong>Educational 24/7 Simulation Engine</strong> with realistic ticks and candles for 25+ major equities. You can also plug in a free Finnhub API key below.
+            InvestLearn tracks global equities across <strong>Taiwan (TWSE), Korea (KRX), US (NYSE/NASDAQ), UK (LSE), NZ (NZX), and Australia (ASX)</strong>.
           </p>
 
           <div className="space-y-2">
             <label className="text-[11px] font-semibold text-slate-400 block">
-              Finnhub API Key (Optional)
+              Finnhub API Key (Optional Pro Feed)
             </label>
             <div className="flex gap-2">
               <input
@@ -136,14 +181,9 @@ export const SettingsScreen: React.FC = () => {
               </p>
             )}
           </div>
-
-          <div className="text-[11px] text-slate-400 bg-navy-950/50 p-2.5 rounded-lg border border-navy-800 space-y-1">
-            <strong className="text-slate-200 block">Data Delay Notice:</strong>
-            <p>Free tier API data may be delayed up to 15 minutes. Never rely on delayed quotes for active market order execution.</p>
-          </div>
         </div>
 
-        {/* 3. Display & Viewport Mode */}
+        {/* 5. Display & Viewport Mode */}
         <div className="bg-navy-900/90 border border-navy-800 rounded-2xl p-4 space-y-3 shadow-sm">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -164,27 +204,19 @@ export const SettingsScreen: React.FC = () => {
           </p>
         </div>
 
-        {/* 4. Portfolio Data Management */}
+        {/* 6. Portfolio Data Management (Zero Sample Seeding) */}
         <div className="bg-navy-900/90 border border-navy-800 rounded-2xl p-4 space-y-2.5 shadow-sm">
           <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-1">
-            Data & Portfolio Management
+            Data Management
           </h3>
 
           <div className="space-y-2">
-            <button
-              onClick={loadStarterPracticePortfolio}
-              className="w-full py-2.5 bg-navy-800 hover:bg-navy-750 text-gold-300 rounded-xl text-xs font-semibold border border-gold-500/20 flex items-center justify-center gap-1.5 transition"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-gold-400" />
-              <span>Reload Sample $10,000 Beginner Portfolio</span>
-            </button>
-
             <button
               onClick={clearPortfolio}
               className="w-full py-2.5 bg-navy-800 hover:bg-navy-750 text-loss-400 rounded-xl text-xs font-semibold border border-navy-700 flex items-center justify-center gap-1.5 transition"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              <span>Clear All Portfolio Positions</span>
+              <span>Clear Tracked Portfolio Positions</span>
             </button>
 
             <button
@@ -192,15 +224,15 @@ export const SettingsScreen: React.FC = () => {
               className="w-full py-2.5 bg-navy-800 hover:bg-navy-750 text-slate-300 rounded-xl text-xs font-semibold border border-navy-700 flex items-center justify-center gap-1.5 transition"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset & Re-Take Onboarding Wizard</span>
+              <span>Reset & Re-Take Onboarding</span>
             </button>
           </div>
         </div>
 
         {/* App Version & Packaging Info */}
         <div className="text-center pt-2 text-[11px] text-slate-500 space-y-1">
-          <p>InvestLearn v1.0.0 • Mobile-First PWA & Capacitor Native Bundle</p>
-          <p>Capacitor App ID: <span className="font-mono text-slate-400">com.stocklearner.app</span></p>
+          <p>InvestLearn v1.1.0 • Universal Global Stock Exchange Tracker</p>
+          <p>Taiwan • Korea • United States • UK • New Zealand • Australia • Japan</p>
         </div>
       </div>
 

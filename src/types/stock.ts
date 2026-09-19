@@ -27,6 +27,11 @@ export interface TechnicalIndicators {
 export interface StockQuote {
   ticker: string;
   name: string;
+  exchange: string; // e.g. TWSE, KRX, NASDAQ, NYSE, LSE, NZX, ASX, TSE
+  country: string;  // e.g. Taiwan, South Korea, United States, United Kingdom, New Zealand, Australia, Japan
+  countryCode: 'TW' | 'KR' | 'US' | 'UK' | 'NZ' | 'AU' | 'JP';
+  currency: string; // e.g. TWD, KRW, USD, GBP, NZD, AUD, JPY
+  currencySymbol: string; // e.g. NT$, ₩, $, £, NZ$, A$, ¥
   price: number;
   change: number;
   changePercent: number;
@@ -50,3 +55,15 @@ export interface StockQuote {
 }
 
 export type MarketStatus = 'open' | 'closed' | 'simulated';
+
+export interface GlobalExchangeInfo {
+  code: string;
+  name: string;
+  city: string;
+  country: string;
+  flag: string;
+  timezone: string;
+  currency: string;
+  currencySymbol: string;
+  isOpen: boolean;
+}

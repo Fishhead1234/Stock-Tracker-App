@@ -1,12 +1,12 @@
-import { StockQuote } from '../types/stock';
-import { buildMockStockDatabase } from './mockData';
+import { StockQuote, GlobalExchangeInfo } from '../types/stock';
+import { buildMockStockDatabase, GLOBAL_EXCHANGES } from './mockData';
 import { calculateAllIndicators } from './technicalAnalysis';
 
 class StockService {
   private stockDatabase: Record<string, StockQuote> = {};
   private listeners: Array<(db: Record<string, StockQuote>) => void> = [];
   private simulationInterval: number | null = null;
-  private currentDataSource: string = 'Educational Simulation Engine (Real-Time)';
+  private currentDataSource: string = 'Universal Global Exchange Engine';
 
   constructor() {
     this.stockDatabase = buildMockStockDatabase();
@@ -21,11 +21,24 @@ class StockService {
     return this.stockDatabase[ticker.toUpperCase()];
   }
 
+  public getGlobalExchanges(): GlobalExchangeInfo[] {
+    return GLOBAL_EXCHANGES;
+  }
+
+  public getStocksByCountry(countryCode: string): StockQuote[] {
+    if (countryCode === 'ALL') return this.getAllStocks();
+    return this.getAllStocks().filter(s => s.countryCode === countryCode);
+  }
+
   public searchStocks(query: string): StockQuote[] {
     const q = query.trim().toUpperCase();
     if (!q) return this.getAllStocks().slice(0, 10);
     return this.getAllStocks().filter(
-      s => s.ticker.includes(q) || s.name.toUpperCase().includes(q) || s.sector.toUpperCase().includes(q)
+      s => s.ticker.toUpperCase().includes(q) || 
+           s.name.toUpperCase().includes(q) || 
+           s.exchange.toUpperCase().includes(q) ||
+           s.country.toUpperCase().includes(q) ||
+           s.sector.toUpperCase().includes(q)
     );
   }
 
@@ -46,21 +59,19 @@ class StockService {
   }
 
   /**
-   * Simulates real-time price tick fluctuations every 4 seconds
+   * Simulates real-time price tick fluctuations across global markets
    */
   public startSimulation() {
     if (this.simulationInterval) return;
 
     this.simulationInterval = window.setInterval(() => {
       const tickers = Object.keys(this.stockDatabase);
-      // Pick 3-5 random stocks to wiggle
       const count = Math.floor(Math.random() * 4) + 2;
       for (let i = 0; i < count; i++) {
         const randomTicker = tickers[Math.floor(Math.random() * tickers.length)];
         const stock = this.stockDatabase[randomTicker];
         if (!stock) continue;
 
-        // Small 0.05% - 0.25% tick
         const tickPercent = (Math.random() - 0.49) * 0.003;
         const newPrice = Number((stock.price * (1 + tickPercent)).toFixed(2));
         const newChange = Number((newPrice - stock.previousClose).toFixed(2));
@@ -68,7 +79,6 @@ class StockService {
         const newHigh = Math.max(stock.high, newPrice);
         const newLow = Math.min(stock.low, newPrice);
 
-        // Update 1D history latest point
         const history1D = [...stock.history['1D']];
         if (history1D.length > 0) {
           history1D[history1D.length - 1] = {
@@ -77,7 +87,6 @@ class StockService {
           };
         }
 
-        // Recompute indicators if price moved
         const updatedIndicators = calculateAllIndicators(stock.history['1M']);
 
         this.stockDatabase[randomTicker] = {
@@ -106,9 +115,6 @@ class StockService {
     }
   }
 
-  /**
-   * Optional live API test with Finnhub
-   */
   public async fetchLiveFinnhubQuote(ticker: string, apiKey: string): Promise<Partial<StockQuote> | null> {
     try {
       this.currentDataSource = `Finnhub Live API (Free Tier - 15m delay)`;

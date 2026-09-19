@@ -2,14 +2,10 @@ import React, { useState } from 'react';
 import { 
   ArrowLeft, 
   Star, 
-  Share2, 
   TrendingUp, 
   TrendingDown, 
-  Plus, 
-  Briefcase,
-  HelpCircle,
-  Building2,
-  Calendar
+  Lock,
+  Globe2
 } from 'lucide-react';
 import { useMarketStore } from '../../store/marketStore';
 import { usePortfolioStore } from '../../store/portfolioStore';
@@ -49,6 +45,7 @@ export const StockDetailScreen: React.FC = () => {
   const position = positions.find(p => p.ticker.toUpperCase() === stock.ticker.toUpperCase());
   const isWatched = watchlist.includes(stock.ticker.toUpperCase());
   const isPositive = stock.change >= 0;
+  const curr = stock.currencySymbol || '$';
 
   return (
     <div className="flex-1 flex flex-col pb-24 space-y-4">
@@ -65,8 +62,13 @@ export const StockDetailScreen: React.FC = () => {
           </button>
 
           <div className="text-center">
-            <h2 className="text-base font-bold text-white font-mono">{stock.ticker}</h2>
-            <p className="text-[11px] text-slate-400 truncate max-w-[180px]">{stock.name}</p>
+            <div className="flex items-center justify-center gap-1.5">
+              <h2 className="text-base font-bold text-white font-mono">{stock.ticker}</h2>
+              <span className="text-[10px] bg-navy-800 text-slate-300 px-1.5 py-0.2 rounded border border-navy-700 font-mono">
+                {stock.exchange}
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-400 truncate max-w-[200px]">{stock.name} ({stock.country})</p>
           </div>
 
           <button
@@ -85,22 +87,25 @@ export const StockDetailScreen: React.FC = () => {
         <div className="bg-navy-900/90 border border-navy-800 rounded-3xl p-4 shadow-sm">
           <div className="flex items-baseline justify-between">
             <div>
-              <span className="text-3xl font-extrabold text-white font-mono tracking-tight">
-                ${stock.price.toFixed(2)}
-              </span>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-3xl font-extrabold text-white font-mono tracking-tight">
+                  {curr}{stock.price.toLocaleString('en-US', { minimumFractionDigits: stock.price < 10 ? 2 : stock.price > 1000 ? 0 : 2 })}
+                </span>
+                <span className="text-xs font-mono text-slate-500">{stock.currency}</span>
+              </div>
               <div className={`flex items-center gap-1 mt-1 text-xs font-mono font-bold ${
                 isPositive ? 'text-growth-400' : 'text-loss-500'
               }`}>
                 {isPositive ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
-                <span>{isPositive ? '+' : ''}${stock.change.toFixed(2)}</span>
+                <span>{isPositive ? '+' : ''}{curr}{Math.abs(stock.change).toFixed(2)}</span>
                 <span>({isPositive ? '+' : ''}{stock.changePercent.toFixed(2)}%)</span>
                 <span className="text-[10px] text-slate-500 font-sans ml-1">Today</span>
               </div>
             </div>
 
             <div className="text-right text-[11px] text-slate-400 font-mono space-y-0.5">
-              <div>High: <strong className="text-slate-200">${stock.high.toFixed(2)}</strong></div>
-              <div>Low: <strong className="text-slate-200">${stock.low.toFixed(2)}</strong></div>
+              <div>High: <strong className="text-slate-200">{curr}{stock.high.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong></div>
+              <div>Low: <strong className="text-slate-200">{curr}{stock.low.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong></div>
             </div>
           </div>
 
@@ -119,6 +124,14 @@ export const StockDetailScreen: React.FC = () => {
               <strong className="text-white text-xs">{(stock.volume / 1000000).toFixed(1)}M</strong>
             </div>
           </div>
+        </div>
+
+        {/* Informational Trading Disclaimer Callout */}
+        <div className="p-3 bg-navy-950/80 border border-navy-800 rounded-2xl flex items-start gap-2.5 text-xs text-slate-400">
+          <Lock className="w-4 h-4 text-gold-400 shrink-0 mt-0.5" />
+          <p className="leading-relaxed">
+            <strong className="text-slate-200">No In-App Trading:</strong> InvestLearn is an informational tracker. All actual trades for {stock.ticker} must be placed on your own brokerage account.
+          </p>
         </div>
 
         {/* Interactive Price Chart with Timeframes */}

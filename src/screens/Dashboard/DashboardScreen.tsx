@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
 import { 
-  Sparkles, 
   Lightbulb, 
   ArrowRight, 
-  Search, 
-  TrendingUp, 
   Zap, 
   Plus, 
+  Globe, 
   Compass, 
-  BookOpen,
-  Briefcase
+  Briefcase,
+  Layers
 } from 'lucide-react';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { useMarketStore } from '../../store/marketStore';
@@ -25,8 +23,8 @@ import { generateTimingSignal } from '../../services/signalEngine';
 import { SignalBadge } from '../../components/StockCard/SignalBadge';
 
 export const DashboardScreen: React.FC = () => {
-  const { positions, getSummary, loadStarterPracticePortfolio } = usePortfolioStore();
-  const { quotes, selectTicker, selectedCategory, setSelectedCategory } = useMarketStore();
+  const { positions, getSummary } = usePortfolioStore();
+  const { quotes, selectTicker, selectedCountry, setSelectedCountry } = useMarketStore();
   const { setActiveTab } = useSettingsStore();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -35,19 +33,27 @@ export const DashboardScreen: React.FC = () => {
   const summary = getSummary(quotes);
   const allQuotes = Object.values(quotes);
 
-  // Filter stocks by category
-  const categories = ['All', 'Technology', 'Index ETF', 'Financials', 'Healthcare', 'Watchlist'];
+  // Region filters
+  const regionFilters: { id: string; label: string; flag: string }[] = [
+    { id: 'ALL', label: 'All Global', flag: '🌐' },
+    { id: 'TW', label: 'Taiwan (TWSE)', flag: '🇹🇼' },
+    { id: 'KR', label: 'Korea (KRX)', flag: '🇰🇷' },
+    { id: 'US', label: 'United States', flag: '🇺🇸' },
+    { id: 'UK', label: 'United Kingdom', flag: '🇬🇧' },
+    { id: 'NZ', label: 'New Zealand', flag: '🇳🇿' },
+    { id: 'AU', label: 'Australia', flag: '🇦🇺' },
+    { id: 'JP', label: 'Japan (TSE)', flag: '🇯🇵' }
+  ];
+
   const filteredQuotes = allQuotes.filter(q => {
-    if (selectedCategory === 'All') return true;
-    if (selectedCategory === 'Watchlist') return true;
-    return q.sector.toLowerCase().includes(selectedCategory.toLowerCase());
+    if (selectedCountry === 'ALL') return true;
+    return q.countryCode === selectedCountry;
   });
 
-  // Calculate high-priority signals for owned stocks or market leaders
   const activeSignals = allQuotes
     .map(q => generateTimingSignal(q))
     .filter(s => s.action === 'STRONG_BUY' || s.action === 'BUY' || s.action === 'TRIM')
-    .slice(0, 3);
+    .slice(0, 4);
 
   const handleStockClick = (ticker: string) => {
     selectTicker(ticker);
@@ -59,15 +65,45 @@ export const DashboardScreen: React.FC = () => {
       <DisclaimerBanner />
 
       <div className="px-4 space-y-4">
-        {/* Header with Live Badge */}
+        {/* Header with Universal Exchange Badge */}
         <div className="flex items-center justify-between pt-1">
           <div>
-            <span className="text-[10px] font-bold text-growth-400 uppercase tracking-wider font-mono">
-              Investor Dashboard
-            </span>
-            <h2 className="text-xl font-extrabold text-white">Portfolio Overview</h2>
+            <div className="flex items-center gap-1.5 text-[10px] font-bold text-gold-400 uppercase tracking-wider font-mono">
+              <Globe className="w-3.5 h-3.5" />
+              <span>Universal Exchange Tracker</span>
+            </div>
+            <h2 className="text-xl font-extrabold text-white">Global Portfolio Hub</h2>
           </div>
           <DataStatusBadge />
+        </div>
+
+        {/* Global Market Status Strip */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 text-[11px] font-mono scrollbar-none">
+          <span className="text-slate-500 shrink-0 font-sans text-[10px] uppercase font-bold">Markets:</span>
+          <span className="px-2 py-0.5 rounded-md bg-navy-900 border border-navy-800 text-slate-300 flex items-center gap-1 shrink-0">
+            <span>🇹🇼 TWSE</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+          </span>
+          <span className="px-2 py-0.5 rounded-md bg-navy-900 border border-navy-800 text-slate-300 flex items-center gap-1 shrink-0">
+            <span>🇰🇷 KRX</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+          </span>
+          <span className="px-2 py-0.5 rounded-md bg-navy-900 border border-navy-800 text-growth-400 flex items-center gap-1 shrink-0">
+            <span>🇺🇸 US</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-growth-500 animate-pulse"></span>
+          </span>
+          <span className="px-2 py-0.5 rounded-md bg-navy-900 border border-navy-800 text-growth-400 flex items-center gap-1 shrink-0">
+            <span>🇬🇧 LSE</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-growth-500 animate-pulse"></span>
+          </span>
+          <span className="px-2 py-0.5 rounded-md bg-navy-900 border border-navy-800 text-slate-300 flex items-center gap-1 shrink-0">
+            <span>🇳🇿 NZX</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+          </span>
+          <span className="px-2 py-0.5 rounded-md bg-navy-900 border border-navy-800 text-slate-300 flex items-center gap-1 shrink-0">
+            <span>🇯🇵 TSE</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+          </span>
         </div>
 
         {/* Portfolio Summary Card */}
@@ -89,21 +125,21 @@ export const DashboardScreen: React.FC = () => {
             </div>
             <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] uppercase font-bold text-gold-400 tracking-wider">
-                  Today's Investor Lesson
+                <span className="text-[10px] uppercase font-bold text-gold-400 tracking-wider font-mono">
+                  Trading Insight
                 </span>
                 <button
                   onClick={() => setEducationTerm('RSI')}
                   className="text-[10px] text-slate-400 hover:text-white underline"
                 >
-                  Read Guide
+                  Learn RSI
                 </button>
               </div>
               <h4 className="text-xs font-bold text-white">
-                Never Buy When RSI Exceeds 75 (The Rubber Band Rule)
+                Track Global Timing: Don't Chase Overextended Rallies
               </h4>
               <p className="text-[11px] text-slate-300 leading-relaxed">
-                When a stock goes vertical, emotional buyers chase the hype. Wait for a pullback to key moving average support before entering.
+                Whether trading in Taipei, Seoul, London, or New York, buying when RSI &gt; 70 carries high pullback risk. Let healthy pullbacks come to you.
               </p>
             </div>
           </div>
@@ -116,7 +152,7 @@ export const DashboardScreen: React.FC = () => {
               <div className="flex items-center gap-1.5">
                 <Zap className="w-4 h-4 text-gold-400" />
                 <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                  Active Timing Opportunities
+                  Active Global Timing Signals
                 </h3>
               </div>
               <button
@@ -137,12 +173,12 @@ export const DashboardScreen: React.FC = () => {
                 >
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-lg bg-navy-800 flex items-center justify-center font-bold text-xs text-white font-mono">
-                      {sig.ticker}
+                      {sig.ticker.slice(0, 4)}
                     </div>
                     <div>
                       <div className="flex items-center gap-1.5">
                         <span className="text-xs font-bold text-white font-mono">{sig.ticker}</span>
-                        <span className="text-[10px] text-slate-400">${sig.currentPrice.toFixed(2)}</span>
+                        <span className="text-[10px] text-slate-400">${sig.currentPrice.toFixed(0)}</span>
                       </div>
                       <p className="text-[10px] text-slate-400 truncate max-w-[140px]">{sig.title}</p>
                     </div>
@@ -159,7 +195,7 @@ export const DashboardScreen: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <Briefcase className="w-4 h-4 text-growth-400" />
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider">Your Holdings</h3>
+              <h3 className="text-xs font-bold text-white uppercase tracking-wider">Your Personal Holdings</h3>
             </div>
             {positions.length > 0 && (
               <span className="text-xs font-mono text-slate-400">
@@ -174,25 +210,18 @@ export const DashboardScreen: React.FC = () => {
                 <Compass className="w-6 h-6 text-growth-400" />
               </div>
               <div>
-                <h4 className="text-sm font-bold text-white">Your portfolio is ready</h4>
+                <h4 className="text-sm font-bold text-white">Your portfolio tracker is ready</h4>
                 <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
-                  Log the shares you own or practice with sample positions to see intelligent timing alerts.
+                  Log the stocks you own across any global exchange to receive real-time updates and timing advice.
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-2 justify-center pt-1">
                 <button
                   onClick={() => setIsAddModalOpen(true)}
-                  className="px-4 py-2 bg-growth-600 hover:bg-growth-500 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center justify-center gap-1.5"
+                  className="px-5 py-2.5 bg-growth-600 hover:bg-growth-500 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center justify-center gap-1.5"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>Log First Stock</span>
-                </button>
-                <button
-                  onClick={loadStarterPracticePortfolio}
-                  className="px-4 py-2 bg-navy-800 hover:bg-navy-750 text-slate-200 border border-navy-700 font-semibold text-xs rounded-xl transition flex items-center justify-center gap-1.5"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-gold-400" />
-                  <span>Load Sample $10k Portfolio</span>
+                  <span>Log Your Stocks</span>
                 </button>
               </div>
             </div>
@@ -214,35 +243,38 @@ export const DashboardScreen: React.FC = () => {
           )}
         </div>
 
-        {/* Market Watchlist & Discovery Section */}
+        {/* Universal Market Discovery Section */}
         <div className="space-y-2.5 pt-3">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-              Market Discovery & Timing
+              Universal Market Explorer
             </h3>
-            <span className="text-[11px] text-slate-400">Tap for technical analysis</span>
+            <span className="text-[11px] text-slate-400 font-mono">
+              {filteredQuotes.length} equities
+            </span>
           </div>
 
-          {/* Sector Category Filters */}
+          {/* Country / Exchange Filter Pills */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
-            {categories.map(cat => (
+            {regionFilters.map(filter => (
               <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-3 py-1 rounded-xl whitespace-nowrap transition font-medium ${
-                  selectedCategory === cat
+                key={filter.id}
+                onClick={() => setSelectedCountry(filter.id)}
+                className={`px-3 py-1.5 rounded-xl whitespace-nowrap transition font-medium flex items-center gap-1.5 ${
+                  selectedCountry === filter.id
                     ? 'bg-navy-700 text-white border border-navy-600 shadow-sm'
                     : 'bg-navy-950 text-slate-400 hover:text-white border border-navy-850'
                 }`}
               >
-                {cat}
+                <span>{filter.flag}</span>
+                <span>{filter.label}</span>
               </button>
             ))}
           </div>
 
           {/* Stock Cards Grid */}
           <div className="space-y-2.5">
-            {filteredQuotes.slice(0, 6).map(stk => (
+            {filteredQuotes.map(stk => (
               <StockCard
                 key={stk.ticker}
                 stock={stk}

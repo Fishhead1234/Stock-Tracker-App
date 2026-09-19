@@ -9,12 +9,11 @@ interface PortfolioState {
   addPosition: (pos: Omit<Position, 'id'>) => void;
   updatePosition: (id: string, updates: Partial<Position>) => void;
   deletePosition: (id: string) => void;
-  loadStarterPracticePortfolio: () => void;
   clearPortfolio: () => void;
   getSummary: (marketQuotes: Record<string, StockQuote>) => PortfolioSummary;
 }
 
-const STORAGE_KEY = 'investlearn_portfolio_v1';
+const STORAGE_KEY = 'investlearn_portfolio_v2';
 
 const loadSavedState = () => {
   try {
@@ -27,7 +26,7 @@ const loadSavedState = () => {
   }
   return {
     positions: [],
-    cashBalance: 10000,
+    cashBalance: 0,
     transactions: []
   };
 };
@@ -53,7 +52,6 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => {
       const newPos: Position = { ...posData, id };
       const currentPositions = get().positions;
 
-      // Check if position already exists for this ticker -> update average price & shares
       const existingIndex = currentPositions.findIndex(p => p.ticker.toUpperCase() === posData.ticker.toUpperCase());
       let updatedPositions: Position[];
 
@@ -74,14 +72,14 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => {
         updatedPositions = [newPos, ...currentPositions];
       }
 
-      // Record transaction
       const txCost = posData.shares * posData.averageBuyPrice;
-      const newCash = Math.max(0, get().cashBalance - txCost);
       const newTx: Transaction = {
         id: 'tx_' + Date.now(),
         type: 'BUY',
         ticker: posData.ticker,
         companyName: posData.companyName,
+        exchange: posData.exchange || 'TWSE',
+        currencySymbol: posData.currencySymbol || '$',
         shares: posData.shares,
         price: posData.averageBuyPrice,
         date: posData.purchaseDate || new Date().toISOString().split('T')[0],
@@ -89,8 +87,8 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => {
       };
       const updatedTxs = [newTx, ...get().transactions];
 
-      set({ positions: updatedPositions, cashBalance: newCash, transactions: updatedTxs });
-      save(updatedPositions, newCash, updatedTxs);
+      set({ positions: updatedPositions, transactions: updatedTxs });
+      save(updatedPositions, get().cashBalance, updatedTxs);
     },
 
     updatePosition: (id, updates) => {
@@ -103,13 +101,13 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => {
       const target = get().positions.find(p => p.id === id);
       if (!target) return;
       const updated = get().positions.filter(p => p.id !== id);
-      // Refund cash equivalent of original basis or keep cash
-      const newCash = get().cashBalance + (target.shares * target.averageBuyPrice);
       const newTx: Transaction = {
         id: 'tx_' + Date.now(),
         type: 'SELL',
         ticker: target.ticker,
         companyName: target.companyName,
+        exchange: target.exchange,
+        currencySymbol: target.currencySymbol,
         shares: target.shares,
         price: target.averageBuyPrice,
         date: new Date().toISOString().split('T')[0],
@@ -117,50 +115,13 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => {
       };
       const updatedTxs = [newTx, ...get().transactions];
 
-      set({ positions: updated, cashBalance: newCash, transactions: updatedTxs });
-      save(updated, newCash, updatedTxs);
-    },
-
-    loadStarterPracticePortfolio: () => {
-      const starterPositions: Position[] = [
-        {
-          id: 'pos_starter_spy',
-          ticker: 'SPY',
-          companyName: 'SPDR S&P 500 ETF',
-          shares: 5,
-          averageBuyPrice: 545.20,
-          purchaseDate: '2026-08-15',
-          notes: 'Foundational diversified core index'
-        },
-        {
-          id: 'pos_starter_aapl',
-          ticker: 'AAPL',
-          companyName: 'Apple Inc.',
-          shares: 8,
-          averageBuyPrice: 215.00,
-          purchaseDate: '2026-08-20',
-          notes: 'Strong cash flow tech leader'
-        },
-        {
-          id: 'pos_starter_nvda',
-          ticker: 'NVDA',
-          companyName: 'NVIDIA Corporation',
-          shares: 10,
-          averageBuyPrice: 112.50,
-          purchaseDate: '2026-08-28',
-          notes: 'AI infrastructure growth'
-        }
-      ];
-
-      const totalCost = starterPositions.reduce((sum, p) => sum + p.shares * p.averageBuyPrice, 0);
-      const remainingCash = Math.max(1000, 10000 - totalCost);
-      set({ positions: starterPositions, cashBalance: remainingCash });
-      save(starterPositions, remainingCash, get().transactions);
+      set({ positions: updated, transactions: updatedTxs });
+      save(updated, get().cashBalance, updatedTxs);
     },
 
     clearPortfolio: () => {
-      set({ positions: [], cashBalance: 10000, transactions: [] });
-      save([], 10000, []);
+      set({ positions: [], cashBalance: 0, transactions: [] });
+      save([], 0, []);
     },
 
     getSummary: (quotes) => {
