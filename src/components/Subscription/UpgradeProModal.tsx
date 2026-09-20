@@ -161,51 +161,43 @@ export const UpgradeProModal: React.FC<UpgradeProModalProps> = ({ onClose }) => 
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
-          {/* Limited Lifetime Scarcity Callout */}
-          <div className="p-3.5 rounded-2xl bg-gradient-to-r from-gold-950/40 via-gold-900/20 to-navy-900 border border-gold-500/40 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gold-500/20 border border-gold-500/40 flex items-center justify-center text-gold-400 shrink-0">
-              <Flame className="w-5 h-5" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center justify-between">
-                <h4 className="text-xs font-extrabold text-gold-300 uppercase tracking-wide">
-                  {t('founders_lifetime_title', "Founder's Limited Lifetime Pass")}
-                </h4>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-gold-500/20 text-gold-300 font-bold border border-gold-500/30">
-                  {seatsLeft} / {lifetimeSeatsTotal} {t('spots_remaining', 'spots left')}
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-300 mt-0.5 leading-snug">
-                {t('founders_lifetime_desc', 'Pay once, yours forever. No recurring fees.')}
-              </p>
-            </div>
-          </div>
-
           {/* Pricing Options Cards */}
           <div className="space-y-2.5">
-            {/* 1. Lifetime Card */}
+            {/* 1. Merged Founder's Lifetime Card */}
             <div
               onClick={() => setSelectedPlan('LIFETIME')}
               className={`p-4 rounded-2xl border cursor-pointer transition relative ${
                 selectedPlan === 'LIFETIME'
-                  ? 'bg-navy-850 border-gold-500/80 shadow-md ring-1 ring-gold-500/40'
+                  ? 'bg-gradient-to-br from-navy-850 via-gold-950/20 to-navy-900 border-gold-500/80 shadow-md ring-1 ring-gold-500/40'
                   : 'bg-navy-950/70 border-navy-800 hover:border-navy-700'
               }`}
             >
-              <div className="absolute top-3 right-3 px-2 py-0.5 rounded-md bg-gold-500 text-navy-950 text-[10px] font-extrabold uppercase tracking-wide">
-                Best Value • Limited 1,000
-              </div>
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="text-sm font-bold text-white flex items-center gap-1.5">
-                    <span>{t('founders_lifetime_title', "Founder's Lifetime Pass")}</span>
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-start gap-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded-xl bg-gold-500/20 border border-gold-500/40 flex items-center justify-center text-gold-400 shrink-0 mt-0.5">
+                    <Flame className="w-4 h-4" />
                   </div>
-                  <p className="text-xs text-slate-400 mt-0.5">
-                    {t('founders_lifetime_desc', 'Pay once, yours forever. No recurring fees.')}
-                  </p>
+                  <div className="min-w-0">
+                    <h4 className="text-sm font-extrabold text-white flex items-center gap-1.5">
+                      <span>{t('founders_lifetime_title', "Founder's Limited Lifetime Pass")}</span>
+                    </h4>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      {t('founders_lifetime_desc', 'Pay once, yours forever. No recurring fees.')}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-end gap-1 shrink-0">
+                  <span className="px-2 py-0.5 rounded-md bg-gold-500 text-navy-950 text-[9px] font-extrabold uppercase tracking-wide">
+                    Best Value
+                  </span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-gold-500/20 text-gold-300 font-bold border border-gold-500/30 whitespace-nowrap">
+                    {seatsLeft} / {lifetimeSeatsTotal} {t('spots_remaining', 'spots left')}
+                  </span>
                 </div>
               </div>
-              <div className="mt-2.5 pt-2.5 border-t border-navy-800/80 flex items-baseline gap-2">
+
+              <div className="mt-3 pt-2.5 border-t border-navy-800/80 flex items-baseline gap-2">
                 <span className="text-2xl font-black text-gold-300 font-mono">$49.99</span>
                 <span className="text-xs text-slate-400">one-time payment</span>
               </div>
