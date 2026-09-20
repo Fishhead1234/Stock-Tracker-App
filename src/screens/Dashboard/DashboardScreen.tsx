@@ -7,14 +7,16 @@ import {
   Globe, 
   Compass, 
   Briefcase,
-  Layers,
   Search,
-  Loader2
+  Loader2,
+  Star,
+  X
 } from 'lucide-react';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { useMarketStore } from '../../store/marketStore';
 import { useSettingsStore } from '../../store/settingsStore';
 import { stockService } from '../../services/stockService';
+import { StockQuote } from '../../types/stock';
 import { PortfolioSummaryCard } from '../../components/Dashboard/PortfolioSummaryCard';
 import { PortfolioChart } from '../../components/Dashboard/PortfolioChart';
 import { StockCard } from '../../components/StockCard/StockCard';
@@ -22,27 +24,29 @@ import { DataStatusBadge } from '../../components/Common/DataStatusBadge';
 import { DisclaimerBanner } from '../../components/Common/DisclaimerBanner';
 import { AddStockModal } from '../AddStock/AddStockModal';
 import { EducationModal } from '../../components/EducationModal/EducationModal';
-import { generateTimingSignal } from '../../services/signalEngine';
-import { SignalBadge } from '../../components/StockCard/SignalBadge';
 
 export const DashboardScreen: React.FC = () => {
   const { positions, getSummary } = usePortfolioStore();
-  const { quotes, selectTicker, selectedCountry, setSelectedCountry } = useMarketStore();
+  const { quotes, selectTicker, watchlist, addToWatchlist, removeFromWatchlist } = useMarketStore();
   const { setActiveTab } = useSettingsStore();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [educationTerm, setEducationTerm] = useState<string | null>(null);
 
-  // Search state for Explorer
+  // Search state for Stocks to Watch
   const [searchExplorer, setSearchExplorer] = useState('');
   const [isSearchingOnline, setIsSearchingOnline] = useState(false);
   const [onlineResults, setOnlineResults] = useState<Array<{ ticker: string; name: string; exchange: string }>>([]);
   const [loadingTicker, setLoadingTicker] = useState<string | null>(null);
 
   const summary = getSummary(quotes);
-  const allQuotes = Object.values(quotes);
 
-  // Debounced live market search for Explorer
+  // Filtered watched stocks list
+  const watchedQuotes: StockQuote[] = watchlist
+    .map(ticker => quotes[ticker.toUpperCase()])
+    .filter((q): q is StockQuote => Boolean(q));
+
+  // Debounced live market search for Stocks to Watch
   useEffect(() => {
     const q = searchExplorer.trim();
     if (!q) {
@@ -66,18 +70,6 @@ export const DashboardScreen: React.FC = () => {
     return () => clearTimeout(timer);
   }, [searchExplorer]);
 
-  // Region filters
-  const regionFilters: { id: string; label: string; flag: string }[] = [
-    { id: 'ALL', label: 'All Global', flag: '🌐' },
-    { id: 'TW', label: 'Taiwan (TWSE)', flag: '🇹🇼' },
-    { id: 'KR', label: 'Korea (KRX)', flag: '🇰🇷' },
-    { id: 'US', label: 'United States', flag: '🇺🇸' },
-    { id: 'UK', label: 'United Kingdom', flag: '🇬🇧' },
-    { id: 'NZ', label: 'New Zealand', flag: '🇳🇿' },
-    { id: 'AU', label: 'Australia', flag: '🇦🇺' },
-    { id: 'JP', label: 'Japan (TSE)', flag: '🇯🇵' }
-  ];
-
   const filteredLocalStocks = searchExplorer.trim()
     ? stockService.searchStocks(searchExplorer)
     : [];
@@ -86,61 +78,45 @@ export const DashboardScreen: React.FC = () => {
     online => !filteredLocalStocks.some(loc => loc.ticker.toUpperCase() === online.ticker.toUpperCase())
   );
 
-  const filteredQuotes = allQuotes.filter(q => {
-    if (selectedCountry === 'ALL') return true;
-    return q.countryCode === selectedCountry;
-  });
-
-  const activeSignals = allQuotes
-    .map(q => generateTimingSignal(q))
-    .filter(s => s.action === 'STRONG_BUY' || s.action === 'BUY' || s.action === 'TRIM')
-    .slice(0, 4);
-
   const handleStockClick = (ticker: string) => {
     selectTicker(ticker);
     setActiveTab('stockDetail');
   };
 
-  const handleSelectOnlineExplorer = async (item: { ticker: string; name: string; exchange: string }) => {
+  const handleAddOnlineToWatch = async (item: { ticker: string; name: string; exchange: string }) => {
     const clean = item.ticker.toUpperCase();
-    if (quotes[clean]) {
-      handleStockClick(clean);
-      return;
-    }
-
-    setLoadingTicker(clean);
-    try {
-      const stock = await stockService.fetchAndIndexOnlineStock(item.ticker, item.name, item.exchange);
-      if (stock) {
-        handleStockClick(stock.ticker);
+    if (!quotes[clean]) {
+      setLoadingTicker(clean);
+      try {
+        await stockService.fetchAndIndexOnlineStock(item.ticker, item.name, item.exchange);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoadingTicker(null);
       }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoadingTicker(null);
     }
+    addToWatchlist(clean);
+    setSearchExplorer('');
+    setOnlineResults([]);
   };
 
-  const handleDirectLookup = async (symbolToLookup: string) => {
+  const handleDirectWatchLookup = async (symbolToLookup: string) => {
     const clean = symbolToLookup.trim().toUpperCase();
     if (!clean) return;
 
-    if (quotes[clean]) {
-      handleStockClick(clean);
-      return;
-    }
-
-    setLoadingTicker(clean);
-    try {
-      const stock = await stockService.fetchAndIndexOnlineStock(clean, clean, 'NYSE / NASDAQ');
-      if (stock) {
-        handleStockClick(stock.ticker);
+    if (!quotes[clean]) {
+      setLoadingTicker(clean);
+      try {
+        await stockService.fetchAndIndexOnlineStock(clean, clean, 'NYSE / NASDAQ');
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoadingTicker(null);
       }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoadingTicker(null);
     }
+    addToWatchlist(clean);
+    setSearchExplorer('');
+    setOnlineResults([]);
   };
 
   return (
@@ -228,51 +204,6 @@ export const DashboardScreen: React.FC = () => {
           </div>
         </div>
 
-        {/* Urgent Timing Alerts Strip */}
-        {activeSignals.length > 0 && (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <Zap className="w-4 h-4 text-gold-400" />
-                <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                  Active Global Timing Signals
-                </h3>
-              </div>
-              <button
-                onClick={() => setActiveTab('signals')}
-                className="text-xs text-growth-400 hover:text-growth-300 flex items-center gap-0.5 font-medium transition"
-              >
-                <span>View All ({activeSignals.length})</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {activeSignals.map(sig => (
-                <div
-                  key={sig.ticker}
-                  onClick={() => handleStockClick(sig.ticker)}
-                  className="bg-navy-900/80 border border-navy-800 hover:border-navy-700 p-3 rounded-xl cursor-pointer transition flex items-center justify-between shadow-sm"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-navy-800 flex items-center justify-center font-bold text-xs text-white font-mono">
-                      {sig.ticker.slice(0, 4)}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-bold text-white font-mono">{sig.ticker}</span>
-                        <span className="text-[10px] text-slate-400">${sig.currentPrice.toFixed(0)}</span>
-                      </div>
-                      <p className="text-[10px] text-slate-400 truncate max-w-[140px]">{sig.title}</p>
-                    </div>
-                  </div>
-                  <SignalBadge action={sig.action} size="sm" />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Your Holdings Section */}
         <div className="space-y-2.5 pt-2">
           <div className="flex items-center justify-between">
@@ -326,27 +257,30 @@ export const DashboardScreen: React.FC = () => {
           )}
         </div>
 
-        {/* Universal Market Discovery Section */}
-        <div className="space-y-2.5 pt-3">
+        {/* Stocks to Watch Section (User Monitored Watchlist) */}
+        <div className="space-y-2.5 pt-2">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-              Universal Market Explorer
-            </h3>
+            <div className="flex items-center gap-1.5">
+              <Star className="w-4 h-4 text-gold-400 fill-gold-400" />
+              <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                Stocks to Watch
+              </h3>
+            </div>
             <span className="text-[11px] text-slate-400 font-mono">
               {searchExplorer.trim() 
                 ? `${filteredLocalStocks.length + deduplicatedOnline.length} results`
-                : `${filteredQuotes.length} equities`}
+                : `${watchedQuotes.length} monitored`}
             </span>
           </div>
 
-          {/* Search All NYSE, NASDAQ & Global Equities Input */}
+          {/* Search to find & add any stock to watch */}
           <div className="relative">
             <Search className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
             <input
               type="text"
               value={searchExplorer}
               onChange={(e) => setSearchExplorer(e.target.value)}
-              placeholder="Search 6,000+ NYSE, NASDAQ & Global stocks (e.g. SOFI, PLUG)..."
+              placeholder="Search any stock to monitor (e.g. SOFI, TSLA, NVDA)..."
               className="w-full bg-navy-950 border border-navy-750 rounded-xl pl-9 pr-8 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-growth-500 transition"
             />
             {isSearchingOnline && (
@@ -368,7 +302,7 @@ export const DashboardScreen: React.FC = () => {
             <div className="p-3 rounded-xl bg-growth-950/40 border border-growth-600/40 flex items-center gap-2.5 text-xs text-growth-300 animate-pulse">
               <Loader2 className="w-4 h-4 animate-spin text-growth-400 shrink-0" />
               <span>
-                Syncing real-time market quote for <strong>{loadingTicker}</strong> from NYSE/NASDAQ...
+                Syncing real-time market quote for <strong>{loadingTicker}</strong>...
               </span>
             </div>
           )}
@@ -376,45 +310,65 @@ export const DashboardScreen: React.FC = () => {
           {/* Search Mode Active */}
           {searchExplorer.trim().length > 0 ? (
             <div className="space-y-3">
-              {/* Live NYSE / NASDAQ Results */}
+              {/* Live Market Results */}
               {deduplicatedOnline.length > 0 && (
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-1 text-[10px] font-mono uppercase font-bold text-growth-400">
                     <Zap className="w-3 h-3" />
-                    <span>Live NYSE / NASDAQ Market Matches ({deduplicatedOnline.length})</span>
+                    <span>Live Market Matches ({deduplicatedOnline.length})</span>
                   </div>
                   <div className="space-y-1.5">
-                    {deduplicatedOnline.slice(0, 8).map(item => (
-                      <div
-                        key={item.ticker}
-                        onClick={() => handleSelectOnlineExplorer(item)}
-                        className="p-3 rounded-2xl bg-navy-900/90 hover:bg-navy-850 border border-navy-800 hover:border-growth-500/50 flex items-center justify-between cursor-pointer transition group shadow-sm"
-                      >
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <div className="w-9 h-9 rounded-xl bg-growth-500/10 border border-growth-500/30 flex items-center justify-center font-bold text-growth-300 font-mono text-xs shrink-0">
-                            {item.ticker.slice(0, 4)}
-                          </div>
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2">
-                              <h4 className="text-xs font-bold text-white font-mono">{item.ticker}</h4>
-                              <span className="text-[9px] uppercase px-1.5 py-0.5 rounded bg-navy-800 text-slate-300 font-mono border border-navy-700">
-                                {item.exchange}
-                              </span>
+                    {deduplicatedOnline.slice(0, 8).map(item => {
+                      const isWatched = watchlist.includes(item.ticker.toUpperCase());
+                      return (
+                        <div
+                          key={item.ticker}
+                          className="p-3 rounded-2xl bg-navy-900/90 border border-navy-800 hover:border-growth-500/50 flex items-center justify-between transition shadow-sm"
+                        >
+                          <div 
+                            onClick={() => handleStockClick(item.ticker)}
+                            className="flex items-center gap-2.5 min-w-0 cursor-pointer group flex-1"
+                          >
+                            <div className="w-9 h-9 rounded-xl bg-growth-500/10 border border-growth-500/30 flex items-center justify-center font-bold text-growth-300 font-mono text-xs shrink-0">
+                              {item.ticker.slice(0, 4)}
                             </div>
-                            <p className="text-[11px] text-slate-400 truncate max-w-[200px] group-hover:text-slate-200">
-                              {item.name}
-                            </p>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2">
+                                <h4 className="text-xs font-bold text-white font-mono group-hover:text-growth-400">{item.ticker}</h4>
+                                <span className="text-[9px] uppercase px-1.5 py-0.5 rounded bg-navy-800 text-slate-300 font-mono border border-navy-700">
+                                  {item.exchange}
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-slate-400 truncate max-w-[170px] group-hover:text-slate-200">
+                                {item.name}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="shrink-0 pl-2">
+                            {isWatched ? (
+                              <button
+                                type="button"
+                                onClick={() => removeFromWatchlist(item.ticker)}
+                                className="px-2.5 py-1.5 rounded-xl bg-navy-800 hover:bg-loss-500/20 text-gold-400 hover:text-loss-400 border border-navy-700 text-xs font-semibold transition flex items-center gap-1"
+                              >
+                                <Star className="w-3 h-3 fill-gold-400" />
+                                <span>Watching (Remove)</span>
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => handleAddOnlineToWatch(item)}
+                                className="px-3 py-1.5 rounded-xl bg-growth-600 hover:bg-growth-500 text-white text-xs font-bold transition flex items-center gap-1 shadow-sm"
+                              >
+                                <Plus className="w-3 h-3" />
+                                <span>Add to Watch</span>
+                              </button>
+                            )}
                           </div>
                         </div>
-
-                        <div className="text-right shrink-0">
-                          <span className="px-2.5 py-1 rounded-lg bg-growth-600/20 text-growth-300 group-hover:bg-growth-600 group-hover:text-white font-semibold text-xs transition inline-flex items-center gap-1">
-                            <span>Inspect & Track</span>
-                            <ArrowRight className="w-3 h-3" />
-                          </span>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -423,16 +377,66 @@ export const DashboardScreen: React.FC = () => {
               {filteredLocalStocks.length > 0 && (
                 <div className="space-y-1.5 pt-1">
                   <span className="text-[10px] font-mono uppercase font-bold text-slate-400">
-                    Pre-Indexed Equities
+                    Indexed Equities
                   </span>
-                  <div className="space-y-2.5">
-                    {filteredLocalStocks.map(stk => (
-                      <StockCard
-                        key={stk.ticker}
-                        stock={stk}
-                        onClick={() => handleStockClick(stk.ticker)}
-                      />
-                    ))}
+                  <div className="space-y-1.5">
+                    {filteredLocalStocks.map(stk => {
+                      const isWatched = watchlist.includes(stk.ticker.toUpperCase());
+                      return (
+                        <div
+                          key={stk.ticker}
+                          className="p-3 rounded-2xl bg-navy-900/90 border border-navy-800 hover:border-growth-500/50 flex items-center justify-between transition shadow-sm"
+                        >
+                          <div 
+                            onClick={() => handleStockClick(stk.ticker)}
+                            className="flex items-center gap-2.5 min-w-0 cursor-pointer group flex-1"
+                          >
+                            <div className="w-9 h-9 rounded-xl bg-navy-800 border border-navy-700 flex items-center justify-center font-bold text-slate-200 font-mono text-xs shrink-0">
+                              {stk.ticker.slice(0, 4)}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2">
+                                <h4 className="text-xs font-bold text-white font-mono group-hover:text-growth-400">{stk.ticker}</h4>
+                                <span className="text-[9px] uppercase px-1.5 py-0.5 rounded bg-navy-800 text-slate-300 font-mono border border-navy-700">
+                                  {stk.exchange}
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-slate-400 truncate max-w-[170px] group-hover:text-slate-200">
+                                {stk.name}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="shrink-0 pl-2 flex items-center gap-2">
+                            <span className="text-xs font-mono font-bold text-white">
+                              ${stk.price.toFixed(2)}
+                            </span>
+                            {isWatched ? (
+                              <button
+                                type="button"
+                                onClick={() => removeFromWatchlist(stk.ticker)}
+                                className="px-2.5 py-1.5 rounded-xl bg-navy-800 hover:bg-loss-500/20 text-gold-400 hover:text-loss-400 border border-navy-700 text-xs font-semibold transition flex items-center gap-1"
+                              >
+                                <Star className="w-3 h-3 fill-gold-400" />
+                                <span>Watching (Remove)</span>
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  addToWatchlist(stk.ticker);
+                                  setSearchExplorer('');
+                                }}
+                                className="px-3 py-1.5 rounded-xl bg-growth-600 hover:bg-growth-500 text-white text-xs font-bold transition flex items-center gap-1 shadow-sm"
+                              >
+                                <Plus className="w-3 h-3" />
+                                <span>Add to Watch</span>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -440,12 +444,12 @@ export const DashboardScreen: React.FC = () => {
               {/* Instant Direct Ticker Fetch Button */}
               <button
                 type="button"
-                onClick={() => handleDirectLookup(searchExplorer)}
+                onClick={() => handleDirectWatchLookup(searchExplorer)}
                 disabled={loadingTicker !== null}
                 className="w-full p-3 rounded-2xl bg-growth-600/20 hover:bg-growth-600/30 border border-growth-500/40 text-growth-300 text-xs font-bold flex items-center justify-center gap-2 transition shadow-sm"
               >
                 <Zap className="w-4 h-4 text-growth-400" />
-                <span>Instant Fetch: Load "{searchExplorer.trim().toUpperCase()}" directly from NYSE / NASDAQ</span>
+                <span>⚡ Instant Add: Watch "{searchExplorer.trim().toUpperCase()}" directly from NYSE / NASDAQ</span>
               </button>
 
               {filteredLocalStocks.length === 0 && deduplicatedOnline.length === 0 && !isSearchingOnline && (
@@ -455,46 +459,38 @@ export const DashboardScreen: React.FC = () => {
                   </p>
                   <button
                     type="button"
-                    onClick={() => handleDirectLookup(searchExplorer)}
+                    onClick={() => handleDirectWatchLookup(searchExplorer)}
                     className="px-4 py-2 bg-growth-600 text-white rounded-xl text-xs font-bold hover:bg-growth-500 transition"
                   >
-                    Query NYSE / NASDAQ for "{searchExplorer.toUpperCase()}"
+                    Fetch & Watch "{searchExplorer.toUpperCase()}" from NYSE / NASDAQ
                   </button>
                 </div>
               )}
             </div>
           ) : (
-            /* Normal Browsing Mode with Region Filters */
-            <>
-              {/* Country / Exchange Filter Pills */}
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
-                {regionFilters.map(filter => (
-                  <button
-                    key={filter.id}
-                    onClick={() => setSelectedCountry(filter.id)}
-                    className={`px-3 py-1.5 rounded-xl whitespace-nowrap transition font-medium flex items-center gap-1.5 ${
-                      selectedCountry === filter.id
-                        ? 'bg-navy-700 text-white border border-navy-600 shadow-sm'
-                        : 'bg-navy-950 text-slate-400 hover:text-white border border-navy-850'
-                    }`}
-                  >
-                    <span>{filter.flag}</span>
-                    <span>{filter.label}</span>
-                  </button>
-                ))}
-              </div>
-
-              {/* Stock Cards Grid */}
-              <div className="space-y-2.5">
-                {filteredQuotes.map(stk => (
+            /* Normal User-Monitored Watchlist Cards */
+            <div className="space-y-2.5">
+              {watchedQuotes.length === 0 ? (
+                <div className="p-6 bg-navy-900/50 border border-navy-850 rounded-2xl text-center space-y-2">
+                  <div className="w-10 h-10 rounded-xl bg-navy-800 text-gold-400/60 flex items-center justify-center mx-auto">
+                    <Star className="w-5 h-5" />
+                  </div>
+                  <h4 className="text-xs font-bold text-white">Your watch list is empty</h4>
+                  <p className="text-[11px] text-slate-400 max-w-xs mx-auto">
+                    Type any ticker in the search bar above (e.g. SOFI, NVDA, AAPL) and tap <strong>"+ Add to Watch"</strong> to monitor its live price and timing signals here.
+                  </p>
+                </div>
+              ) : (
+                watchedQuotes.map(stk => (
                   <StockCard
                     key={stk.ticker}
                     stock={stk}
                     onClick={() => handleStockClick(stk.ticker)}
+                    onRemove={() => removeFromWatchlist(stk.ticker)}
                   />
-                ))}
-              </div>
-            </>
+                ))
+              )}
+            </div>
           )}
         </div>
       </div>

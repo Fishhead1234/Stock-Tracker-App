@@ -65,9 +65,9 @@ export const PortfolioSummaryCard: React.FC<Props> = ({ summary, onOpenAddStock 
         </div>
 
         <div className="bg-navy-950/50 p-2.5 rounded-xl border border-navy-800/60">
-          <span className="text-[10px] text-slate-400 block font-sans">Virtual Cash Balance</span>
+          <span className="text-[10px] text-slate-400 block font-sans">Total Cost Basis</span>
           <span className="font-bold text-slate-200">
-            ${summary.cashBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            ${summary.totalInvested.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
         </div>
       </div>

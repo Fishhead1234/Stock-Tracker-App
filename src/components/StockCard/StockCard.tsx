@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendingUp, TrendingDown, ChevronRight, Briefcase } from 'lucide-react';
+import { TrendingUp, TrendingDown, ChevronRight, Briefcase, X } from 'lucide-react';
 import { StockQuote } from '../../types/stock';
 import { Position } from '../../types/portfolio';
 import { SignalBadge } from './SignalBadge';
@@ -9,9 +9,10 @@ interface Props {
   stock: StockQuote;
   position?: Position;
   onClick: () => void;
+  onRemove?: () => void;
 }
 
-export const StockCard: React.FC<Props> = ({ stock, position, onClick }) => {
+export const StockCard: React.FC<Props> = ({ stock, position, onClick, onRemove }) => {
   const signal = generateTimingSignal(stock);
   const isPositive = stock.change >= 0;
 
@@ -69,7 +70,22 @@ export const StockCard: React.FC<Props> = ({ stock, position, onClick }) => {
           </div>
         </div>
 
-        <SignalBadge action={signal.action} size="sm" />
+        <div className="flex items-center gap-1.5 shrink-0">
+          <SignalBadge action={signal.action} size="sm" />
+          {onRemove && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemove();
+              }}
+              className="w-7 h-7 rounded-lg bg-navy-800/80 hover:bg-loss-500/20 text-slate-400 hover:text-loss-300 border border-navy-700/60 flex items-center justify-center transition"
+              title="Remove from Stocks to Watch"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Middle Row: Price in Local Currency & Day Change */}

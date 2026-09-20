@@ -14,18 +14,36 @@ interface MarketState {
   setSelectedCategory: (cat: string) => void;
   setSelectedCountry: (country: string) => void;
   toggleWatchlist: (ticker: string) => void;
+  addToWatchlist: (ticker: string) => void;
+  removeFromWatchlist: (ticker: string) => void;
 }
 
-const WATCHLIST_STORAGE_KEY = 'investlearn_watchlist_v2';
+const WATCHLIST_STORAGE_KEY = 'investlearn_watchlist_v3';
 
 export const useMarketStore = create<MarketState>((set, get) => {
-  let savedWatchlist: string[] = ['2330.TW', '005930.KS', 'NVDA', 'AZN.L', 'FPH.NZ', '7203.T'];
+  let savedWatchlist: string[] = ['NVDA', 'AAPL'];
   try {
     const raw = localStorage.getItem(WATCHLIST_STORAGE_KEY);
-    if (raw) savedWatchlist = JSON.parse(raw);
+    if (raw) {
+      savedWatchlist = JSON.parse(raw);
+    } else {
+      // Check for v2 migration
+      const legacy = localStorage.getItem('investlearn_watchlist_v2');
+      if (legacy) {
+        savedWatchlist = JSON.parse(legacy);
+      }
+    }
   } catch (e) {
     console.error('Failed to load watchlist', e);
   }
+
+  const persist = (list: string[]) => {
+    try {
+      localStorage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify(list));
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   return {
     quotes: {},
@@ -41,16 +59,34 @@ export const useMarketStore = create<MarketState>((set, get) => {
     setSelectedCategory: (selectedCategory) => set({ selectedCategory }),
     setSelectedCountry: (selectedCountry) => set({ selectedCountry }),
 
-    toggleWatchlist: (ticker) => {
+    addToWatchlist: (ticker) => {
+      const upper = ticker.trim().toUpperCase();
+      if (!upper) return;
       const cur = get().watchlist;
-      const upper = ticker.toUpperCase();
-      const next = cur.includes(upper) ? cur.filter(t => t !== upper) : [...cur, upper];
-      set({ watchlist: next });
-      try {
-        localStorage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify(next));
-      } catch (e) {
-        console.error(e);
+      if (!cur.includes(upper)) {
+        const next = [upper, ...cur];
+        set({ watchlist: next });
+        persist(next);
       }
+    },
+
+    removeFromWatchlist: (ticker) => {
+      const upper = ticker.trim().toUpperCase();
+      const next = get().watchlist.filter(t => t.toUpperCase() !== upper);
+      set({ watchlist: next });
+      persist(next);
+    },
+
+    toggleWatchlist: (ticker) => {
+      const upper = ticker.trim().toUpperCase();
+      if (!upper) return;
+      const cur = get().watchlist;
+      const next = cur.includes(upper) 
+        ? cur.filter(t => t.toUpperCase() !== upper) 
+        : [upper, ...cur];
+      set({ watchlist: next });
+      persist(next);
     }
   };
 });
+
