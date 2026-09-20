@@ -12,6 +12,8 @@ import { EducationScreen } from './screens/Education/EducationScreen';
 import { SettingsScreen } from './screens/Settings/SettingsScreen';
 import { generateTimingSignal } from './services/signalEngine';
 import { useSignalNotifier } from './hooks/useSignalNotifier';
+import { revenueCatService } from './services/revenueCatService';
+import { useSubscriptionStore } from './store/subscriptionStore';
 
 export const App: React.FC = () => {
   const { hasCompletedOnboarding, activeTab } = useSettingsStore();
@@ -19,6 +21,18 @@ export const App: React.FC = () => {
 
   // Watch for stock timing signals and dispatch alerts
   useSignalNotifier();
+
+  // Initialize RevenueCat SDK on startup & sync active entitlements
+  useEffect(() => {
+    revenueCatService.initialize().then(async (configured) => {
+      if (configured) {
+        const isPro = await revenueCatService.checkProEntitlement();
+        if (isPro) {
+          useSubscriptionStore.getState().setProStatus(true);
+        }
+      }
+    });
+  }, []);
 
   // Subscribe to real-time stock ticks
   useEffect(() => {

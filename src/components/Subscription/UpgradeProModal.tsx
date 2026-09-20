@@ -13,6 +13,7 @@ import {
   Gift
 } from 'lucide-react';
 import { useSubscriptionStore, SubscriptionPlan } from '../../store/subscriptionStore';
+import { revenueCatService } from '../../services/revenueCatService';
 
 interface UpgradeProModalProps {
   onClose: () => void;
@@ -37,11 +38,39 @@ export const UpgradeProModal: React.FC<UpgradeProModalProps> = ({ onClose }) => 
   const trialDays = getTrialDaysRemaining();
   const seatsLeft = Math.max(0, lifetimeSeatsTotal - lifetimeSeatsClaimed);
 
-  const handlePurchase = () => {
+  const handlePurchase = async () => {
     setIsProcessing(true);
     setRestoreStatus(null);
 
-    // Simulate Google Play In-App Billing handshake
+    // Check if running on native device with RevenueCat
+    const isNative = typeof window !== 'undefined' && 
+      (window as any).Capacitor && 
+      (window as any).Capacitor.isNativePlatform();
+
+    if (isNative) {
+      try {
+        const { packages } = await revenueCatService.getOfferings();
+        const packageIdentifier = 
+          selectedPlan === 'LIFETIME' ? '$rc_lifetime' : 
+          selectedPlan === 'ANNUAL' ? '$rc_annual' : '$rc_monthly';
+        
+        const targetPkg = packages.find(p => p.identifier === packageIdentifier) || packages[0];
+        if (targetPkg) {
+          const result = await revenueCatService.purchase(targetPkg);
+          if (result.success) {
+            subscribe(selectedPlan);
+            setIsProcessing(false);
+            setSuccessMessage('🎉 Pro unlocked successfully via Google Play!');
+            setTimeout(() => onClose(), 1600);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Native purchase error, falling back to simulator', err);
+      }
+    }
+
+    // Web simulation mode (for Vercel testing)
     setTimeout(() => {
       subscribe(selectedPlan);
       setIsProcessing(false);
@@ -56,8 +85,26 @@ export const UpgradeProModal: React.FC<UpgradeProModalProps> = ({ onClose }) => 
     }, 800);
   };
 
-  const handleRestore = () => {
+  const handleRestore = async () => {
     setRestoreStatus('Checking Google Play account for existing receipts...');
+
+    const isNative = typeof window !== 'undefined' && 
+      (window as any).Capacitor && 
+      (window as any).Capacitor.isNativePlatform();
+
+    if (isNative) {
+      try {
+        const result = await revenueCatService.restore();
+        if (result.success) {
+          subscribe('LIFETIME');
+          setRestoreStatus('Purchases restored successfully from Google Play!');
+          return;
+        }
+      } catch (err) {
+        console.warn('Native restore error', err);
+      }
+    }
+
     setTimeout(() => {
       const restored = restorePurchases();
       if (restored) {

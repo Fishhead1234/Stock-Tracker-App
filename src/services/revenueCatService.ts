@@ -1,8 +1,7 @@
 import { Purchases, PurchasesPackage, CustomerInfo } from '@revenuecat/purchases-capacitor';
 
 // Default public SDK keys (configured in RevenueCat dashboard)
-// In production, can also be provided via VITE_REVENUECAT_PUBLIC_KEY
-const REVENUECAT_PUBLIC_API_KEY_ANDROID = 'goog_placeholder_key';
+const REVENUECAT_PUBLIC_API_KEY_ANDROID = 'goog_ESpMnLuaScHAUdeSbDmbJLRPfdS';
 const REVENUECAT_PUBLIC_API_KEY_IOS = 'appl_placeholder_key';
 
 export const PRO_ENTITLEMENT_ID = 'pro';

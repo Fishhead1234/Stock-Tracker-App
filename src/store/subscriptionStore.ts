@@ -18,6 +18,7 @@ interface SubscriptionState {
   // Actions
   subscribe: (plan: 'MONTHLY' | 'ANNUAL' | 'LIFETIME') => void;
   restorePurchases: () => boolean;
+  setProStatus: (isPro: boolean, plan?: SubscriptionPlan) => void;
   resetSubscription: () => void;
 }
 
@@ -102,6 +103,14 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => {
         return true;
       }
       return false;
+    },
+
+    setProStatus: (isPro: boolean, plan?: SubscriptionPlan) => {
+      set(state => ({
+        isPro,
+        plan: plan || (isPro ? (state.plan === 'TRIAL' ? 'LIFETIME' : state.plan) : 'FREE')
+      }));
+      persist();
     },
 
     resetSubscription: () => {
