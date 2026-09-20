@@ -11,10 +11,14 @@ import { SignalsScreen } from './screens/Signals/SignalsScreen';
 import { EducationScreen } from './screens/Education/EducationScreen';
 import { SettingsScreen } from './screens/Settings/SettingsScreen';
 import { generateTimingSignal } from './services/signalEngine';
+import { useSignalNotifier } from './hooks/useSignalNotifier';
 
 export const App: React.FC = () => {
   const { hasCompletedOnboarding, activeTab } = useSettingsStore();
   const { quotes, setQuotes } = useMarketStore();
+
+  // Watch for stock timing signals and dispatch alerts
+  useSignalNotifier();
 
   // Subscribe to real-time stock ticks
   useEffect(() => {

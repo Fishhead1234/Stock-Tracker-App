@@ -16,11 +16,15 @@ import {
   ArrowDownCircle,
   MinusCircle,
   ChevronsUp,
-  AlertTriangle
+  AlertTriangle,
+  Bell,
+  Crown
 } from 'lucide-react';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { useMarketStore } from '../../store/marketStore';
 import { useSettingsStore } from '../../store/settingsStore';
+import { useNotificationStore } from '../../store/notificationStore';
+import { useSubscriptionStore } from '../../store/subscriptionStore';
 import { stockService } from '../../services/stockService';
 import { StockQuote } from '../../types/stock';
 import { generateTimingSignal } from '../../services/signalEngine';
@@ -32,6 +36,8 @@ import { DataStatusBadge } from '../../components/Common/DataStatusBadge';
 import { DisclaimerBanner } from '../../components/Common/DisclaimerBanner';
 import { AddStockModal } from '../AddStock/AddStockModal';
 import { EducationModal } from '../../components/EducationModal/EducationModal';
+import { NotificationCenterModal } from '../../components/Notifications/NotificationCenterModal';
+import { UpgradeProModal } from '../../components/Subscription/UpgradeProModal';
 
 type WatchFilterType = 'ALL' | 'TRIM' | 'STRONG_BUY' | 'BUY' | 'HOLD' | 'STRONG_SELL';
 
@@ -39,9 +45,16 @@ export const DashboardScreen: React.FC = () => {
   const { positions, getSummary } = usePortfolioStore();
   const { quotes, selectTicker, watchlist, addToWatchlist, removeFromWatchlist } = useMarketStore();
   const { setActiveTab } = useSettingsStore();
+  const { getUnreadCount } = useNotificationStore();
+  const { plan, getTrialDaysRemaining } = useSubscriptionStore();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [educationTerm, setEducationTerm] = useState<string | null>(null);
+  const [isNotificationCenterOpen, setIsNotificationCenterOpen] = useState(false);
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+
+  const unreadCount = getUnreadCount();
+  const trialDays = getTrialDaysRemaining();
 
   // Search state for Stocks to Watch
   const [searchExplorer, setSearchExplorer] = useState('');
@@ -222,7 +235,7 @@ export const DashboardScreen: React.FC = () => {
       <DisclaimerBanner />
 
       <div className="px-4 space-y-4">
-        {/* Header with Universal Exchange Badge */}
+        {/* Header with Universal Exchange Badge & Notifications / Pro Actions */}
         <div className="flex items-center justify-between pt-1">
           <div>
             <div className="flex items-center gap-1.5 text-[10px] font-bold text-gold-400 uppercase tracking-wider font-mono">
@@ -231,7 +244,36 @@ export const DashboardScreen: React.FC = () => {
             </div>
             <h2 className="text-xl font-extrabold text-white">Global Portfolio Hub</h2>
           </div>
-          <DataStatusBadge />
+
+          <div className="flex items-center gap-2">
+            {/* Pro / Trial Badge Button */}
+            <button
+              type="button"
+              onClick={() => setIsUpgradeModalOpen(true)}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-gradient-to-r from-gold-500/20 to-gold-600/20 text-gold-300 border border-gold-500/40 text-[10px] font-bold hover:scale-105 transition"
+              title="Membership Status"
+            >
+              <Crown className="w-3 h-3 fill-gold-400 text-gold-400" />
+              <span>{plan === 'LIFETIME' ? 'PRO' : `${trialDays}d Trial`}</span>
+            </button>
+
+            {/* Notification Bell Button */}
+            <button
+              type="button"
+              onClick={() => setIsNotificationCenterOpen(true)}
+              className="relative p-1.5 rounded-xl bg-navy-900 border border-navy-800 text-slate-300 hover:text-white hover:border-growth-500/50 transition"
+              title="Alert Notifications"
+            >
+              <Bell className="w-4 h-4" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-growth-500 text-navy-950 font-mono font-black text-[9px] flex items-center justify-center shadow">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </button>
+
+            <DataStatusBadge />
+          </div>
         </div>
 
         {/* Global Market Status Strip */}
@@ -647,6 +689,14 @@ export const DashboardScreen: React.FC = () => {
 
       {educationTerm && (
         <EducationModal termOrId={educationTerm} onClose={() => setEducationTerm(null)} />
+      )}
+
+      {isNotificationCenterOpen && (
+        <NotificationCenterModal onClose={() => setIsNotificationCenterOpen(false)} />
+      )}
+
+      {isUpgradeModalOpen && (
+        <UpgradeProModal onClose={() => setIsUpgradeModalOpen(false)} />
       )}
     </div>
   );
