@@ -14,12 +14,14 @@ import {
 } from 'lucide-react';
 import { useSubscriptionStore, SubscriptionPlan } from '../../store/subscriptionStore';
 import { revenueCatService } from '../../services/revenueCatService';
+import { useLanguageStore } from '../../store/languageStore';
 
 interface UpgradeProModalProps {
   onClose: () => void;
 }
 
 export const UpgradeProModal: React.FC<UpgradeProModalProps> = ({ onClose }) => {
+  const { t } = useLanguageStore();
   const { 
     isPro, 
     plan, 
@@ -167,14 +169,14 @@ export const UpgradeProModal: React.FC<UpgradeProModalProps> = ({ onClose }) => 
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-extrabold text-gold-300 uppercase tracking-wide">
-                  Founder's Limited Lifetime Pass
+                  {t('founders_lifetime_title', "Founder's Limited Lifetime Pass")}
                 </h4>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-gold-500/20 text-gold-300 font-bold border border-gold-500/30">
-                  {seatsLeft} of {lifetimeSeatsTotal} spots left
+                  {seatsLeft} / {lifetimeSeatsTotal} {t('spots_remaining', 'spots left')}
                 </span>
               </div>
               <p className="text-[11px] text-slate-300 mt-0.5 leading-snug">
-                One-time purchase during your 30-day trial. Never pay a monthly subscription.
+                {t('founders_lifetime_desc', 'Pay once, yours forever. No recurring fees.')}
               </p>
             </div>
           </div>
@@ -196,10 +198,10 @@ export const UpgradeProModal: React.FC<UpgradeProModalProps> = ({ onClose }) => 
               <div className="flex items-start justify-between">
                 <div>
                   <div className="text-sm font-bold text-white flex items-center gap-1.5">
-                    <span>Founder's Lifetime Pass</span>
+                    <span>{t('founders_lifetime_title', "Founder's Lifetime Pass")}</span>
                   </div>
                   <p className="text-xs text-slate-400 mt-0.5">
-                    Pay once, yours forever. No recurring fees.
+                    {t('founders_lifetime_desc', 'Pay once, yours forever. No recurring fees.')}
                   </p>
                 </div>
               </div>
@@ -219,11 +221,11 @@ export const UpgradeProModal: React.FC<UpgradeProModalProps> = ({ onClose }) => 
               }`}
             >
               <div className="absolute top-3 right-3 px-2 py-0.5 rounded-md bg-growth-500/20 text-growth-300 text-[10px] font-bold border border-growth-500/40">
-                Save 33%
+                {t('save_33_percent', 'Save 33%')}
               </div>
               <div className="flex items-start justify-between">
                 <div>
-                  <div className="text-sm font-bold text-white">Annual Membership</div>
+                  <div className="text-sm font-bold text-white">{t('annual_membership', 'Annual Membership')}</div>
                   <p className="text-xs text-slate-400 mt-0.5">
                     $3.33/mo billed annually
                   </p>
@@ -246,7 +248,7 @@ export const UpgradeProModal: React.FC<UpgradeProModalProps> = ({ onClose }) => 
             >
               <div className="flex items-start justify-between">
                 <div>
-                  <div className="text-sm font-bold text-white">Monthly Flex</div>
+                  <div className="text-sm font-bold text-white">{t('monthly_flex', 'Monthly Flex')}</div>
                   <p className="text-xs text-slate-400 mt-0.5">
                     Pause or cancel anytime
                   </p>
@@ -307,7 +309,7 @@ export const UpgradeProModal: React.FC<UpgradeProModalProps> = ({ onClose }) => 
               <>
                 <span>
                   {selectedPlan === 'LIFETIME'
-                    ? 'Claim Lifetime Pass for $49.99'
+                    ? t('claim_lifetime_pass', 'Claim Lifetime Pass for $49.99')
                     : selectedPlan === 'ANNUAL'
                     ? 'Subscribe Annual ($39.99/yr)'
                     : 'Subscribe Monthly ($4.99/mo)'}
@@ -326,7 +328,7 @@ export const UpgradeProModal: React.FC<UpgradeProModalProps> = ({ onClose }) => 
               onClick={handleRestore}
               className="text-slate-400 hover:text-white underline transition"
             >
-              Restore Purchases
+              {t('restore_purchases', 'Restore Purchases')}
             </button>
           </div>
 

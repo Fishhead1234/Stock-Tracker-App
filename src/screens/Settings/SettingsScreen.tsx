@@ -29,8 +29,11 @@ import { ComplianceModal } from '../../components/Common/ComplianceModal';
 import { UpgradeProModal } from '../../components/Subscription/UpgradeProModal';
 import { COMPLIANCE_NOTICES } from '../../constants/compliance';
 import { DisclaimerBanner } from '../../components/Common/DisclaimerBanner';
+import { useLanguageStore } from '../../store/languageStore';
+import { SUPPORTED_LANGUAGES } from '../../i18n/translations';
 
 export const SettingsScreen: React.FC = () => {
+  const { language, setLanguage, t } = useLanguageStore();
   const { 
     finnhubApiKey, 
     setFinnhubApiKey, 
@@ -124,14 +127,58 @@ export const SettingsScreen: React.FC = () => {
 
       <div className="px-4 space-y-4">
         {/* Header */}
+        {/* Header */}
         <div className="pt-1">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
             System & Preferences
           </span>
-          <h2 className="text-xl font-extrabold text-white">App Settings & Alerts</h2>
+          <h2 className="text-xl font-extrabold text-white">{t('settings_title', 'App Settings & Alerts')}</h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            Configure timing alert notifications, subscription status, and global market feeds.
+            {t('settings_subtitle', 'Configure timing alert notifications, subscription status, and global market feeds.')}
           </p>
+        </div>
+
+        {/* 🌐 LANGUAGE SELECTION CARD */}
+        <div className="bg-navy-900/90 border border-navy-800 rounded-2xl p-4 space-y-3 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Globe className="w-4 h-4 text-growth-400" />
+              <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                {t('language_section_title', 'Language / 語言 / 言語 / 언어')}
+              </h3>
+            </div>
+            <span className="text-[10px] bg-growth-500/20 text-growth-400 font-bold px-2 py-0.5 rounded-full font-mono">
+              8 Supported
+            </span>
+          </div>
+          <p className="text-xs text-slate-400">
+            {t('language_section_desc', 'Choose your preferred display language.')}
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+            {SUPPORTED_LANGUAGES.map(item => {
+              const isSelected = language === item.code;
+              return (
+                <button
+                  key={item.code}
+                  type="button"
+                  onClick={() => setLanguage(item.code)}
+                  className={`p-2.5 rounded-xl border text-xs text-left transition flex items-center gap-2 ${
+                    isSelected
+                      ? 'bg-growth-600/25 border-growth-500 text-white font-bold ring-1 ring-growth-500/40 shadow-sm'
+                      : 'bg-navy-950/60 border-navy-800 text-slate-400 hover:text-white hover:border-navy-700'
+                  }`}
+                >
+                  <span className="text-lg shrink-0">{item.flag}</span>
+                  <div className="min-w-0">
+                    <div className={`truncate font-semibold ${isSelected ? 'text-white' : 'text-slate-200'}`}>
+                      {item.nativeName}
+                    </div>
+                    <div className="text-[10px] text-slate-500 truncate">{item.name}</div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* 1. MEMBERSHIP & SUBSCRIPTION CARD (Google Play Billing / 30-Day Trial) */}
@@ -143,7 +190,7 @@ export const SettingsScreen: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                  Membership Status
+                  {t('membership_status', 'Membership Status')}
                 </h3>
                 <p className="text-[11px] text-slate-300 font-medium">
                   {plan === 'LIFETIME'
@@ -202,7 +249,7 @@ export const SettingsScreen: React.FC = () => {
             <div className="flex items-center gap-2">
               <BellRing className="w-4 h-4 text-growth-400" />
               <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                Timing Alert Notifications
+                {t('notifications_card_title', 'Timing Alert Notifications')}
               </h3>
             </div>
             <button
@@ -233,13 +280,13 @@ export const SettingsScreen: React.FC = () => {
             >
               <div className="space-y-0.5 max-w-[240px]">
                 <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                  <span>Personal Holdings Alerts</span>
+                  <span>{t('personal_holdings_alerts', 'Personal Holdings Alerts')}</span>
                   {notifyPersonalHoldings && (
                     <span className="w-1.5 h-1.5 rounded-full bg-growth-400 animate-ping" />
                   )}
                 </div>
                 <p className="text-[11px] text-slate-400">
-                  Notify when stocks you own enter Buy Window, Strong Buy, Trim Profit, or High Risk/Sell.
+                  {t('personal_holdings_desc', 'Notify when stocks you own enter Buy Window, Strong Buy, Trim Profit, or High Risk/Sell.')}
                 </p>
               </div>
               <div className={`w-10 h-6 rounded-full transition flex items-center px-1 ${
@@ -260,13 +307,13 @@ export const SettingsScreen: React.FC = () => {
             >
               <div className="space-y-0.5 max-w-[240px]">
                 <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                  <span>"Stocks to Watch" Alerts</span>
+                  <span>{t('watchlist_alerts', '"Stocks to Watch" Alerts')}</span>
                   {notifyWatchlist && (
                     <span className="w-1.5 h-1.5 rounded-full bg-gold-400" />
                   )}
                 </div>
                 <p className="text-[11px] text-slate-400">
-                  Notify when any monitored watchlist stock triggers Strong Buy or High Risk/Sell.
+                  {t('watchlist_desc', 'Notify when any monitored watchlist stock triggers Strong Buy or High Risk/Sell.')}
                 </p>
               </div>
               <div className={`w-10 h-6 rounded-full transition flex items-center px-1 ${
@@ -279,7 +326,7 @@ export const SettingsScreen: React.FC = () => {
             {/* Sensitivity Selection */}
             <div className="pt-1 space-y-1.5">
               <label className="text-[11px] font-semibold text-slate-400 block">
-                Signal Alert Filter Level
+                {t('signal_filter_level', 'Signal Alert Filter Level')}
               </label>
               <div className="grid grid-cols-2 gap-2">
                 <button
@@ -291,7 +338,7 @@ export const SettingsScreen: React.FC = () => {
                       : 'bg-navy-950/70 border-navy-800 text-slate-400'
                   }`}
                 >
-                  All Timing Changes
+                  {t('all_timing_changes', 'All Timing Changes')}
                   <span className="block text-[10px] font-normal text-slate-400 mt-0.5">
                     Buy, Trim, Sell, Wait
                   </span>
@@ -305,7 +352,7 @@ export const SettingsScreen: React.FC = () => {
                       : 'bg-navy-950/70 border-navy-800 text-slate-400'
                   }`}
                 >
-                  High Urgency Only
+                  {t('high_urgency_only', 'High Urgency Only')}
                   <span className="block text-[10px] font-normal text-slate-400 mt-0.5">
                     Strong Buy & High Risk
                   </span>
@@ -325,7 +372,7 @@ export const SettingsScreen: React.FC = () => {
                   className="flex-1 py-2 px-3 bg-navy-800 hover:bg-navy-750 text-white text-xs font-semibold rounded-xl border border-navy-700 flex items-center justify-center gap-1.5 transition"
                 >
                   <Send className="w-3.5 h-3.5 text-growth-400" />
-                  <span>Test Holding Alert (AAPL)</span>
+                  <span>{t('test_holding_alert_btn', 'Test Holding Alert (AAPL)')}</span>
                 </button>
                 <button
                   type="button"
@@ -333,7 +380,7 @@ export const SettingsScreen: React.FC = () => {
                   className="flex-1 py-2 px-3 bg-navy-800 hover:bg-navy-750 text-white text-xs font-semibold rounded-xl border border-navy-700 flex items-center justify-center gap-1.5 transition"
                 >
                   <Send className="w-3.5 h-3.5 text-gold-400" />
-                  <span>Test Watchlist Alert (NVDA)</span>
+                  <span>{t('test_watchlist_alert_btn', 'Test Watchlist Alert (NVDA)')}</span>
                 </button>
               </div>
 
@@ -351,10 +398,10 @@ export const SettingsScreen: React.FC = () => {
         <div className="bg-gold-950/20 border border-gold-500/40 rounded-2xl p-4 space-y-2 shadow-sm">
           <div className="flex items-center gap-2 text-gold-400 font-bold text-xs uppercase tracking-wider">
             <Lock className="w-4 h-4" />
-            <span>Strict Informational Disclosure</span>
+            <span>{t('strict_disclosure_title', 'Strict Informational Disclosure')}</span>
           </div>
           <p className="text-xs text-slate-200 leading-relaxed font-medium">
-            {COMPLIANCE_NOTICES.NO_IN_APP_TRADING.text}
+            {t('strict_disclosure_text', COMPLIANCE_NOTICES.NO_IN_APP_TRADING.text)}
           </p>
         </div>
 
@@ -390,7 +437,7 @@ export const SettingsScreen: React.FC = () => {
           <div className="flex items-center gap-2">
             <Coins className="w-4 h-4 text-growth-400" />
             <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-              Preferred Currency
+              {t('currency_section_title', 'Preferred Currency')}
             </h3>
           </div>
           <div className="grid grid-cols-2 gap-2">
@@ -476,7 +523,7 @@ export const SettingsScreen: React.FC = () => {
         {/* 8. Portfolio Data Management */}
         <div className="bg-navy-900/90 border border-navy-800 rounded-2xl p-4 space-y-2.5 shadow-sm">
           <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-1">
-            Data Management
+            {t('data_management', 'Data Management')}
           </h3>
 
           <div className="space-y-2">
@@ -485,7 +532,7 @@ export const SettingsScreen: React.FC = () => {
               className="w-full py-2.5 bg-navy-800 hover:bg-navy-750 text-loss-400 rounded-xl text-xs font-semibold border border-navy-700 flex items-center justify-center gap-1.5 transition"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              <span>Clear Tracked Portfolio Positions</span>
+              <span>{t('clear_positions', 'Clear Tracked Portfolio Positions')}</span>
             </button>
 
             <button
@@ -493,7 +540,7 @@ export const SettingsScreen: React.FC = () => {
               className="w-full py-2.5 bg-navy-800 hover:bg-navy-750 text-slate-300 rounded-xl text-xs font-semibold border border-navy-700 flex items-center justify-center gap-1.5 transition"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset & Re-Take Onboarding</span>
+              <span>{t('reset_onboarding', 'Reset & Re-Take Onboarding')}</span>
             </button>
           </div>
         </div>

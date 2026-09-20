@@ -38,6 +38,9 @@ import { AddStockModal } from '../AddStock/AddStockModal';
 import { EducationModal } from '../../components/EducationModal/EducationModal';
 import { NotificationCenterModal } from '../../components/Notifications/NotificationCenterModal';
 import { UpgradeProModal } from '../../components/Subscription/UpgradeProModal';
+import { LanguageSelectorModal } from '../../components/Common/LanguageSelectorModal';
+import { useLanguageStore } from '../../store/languageStore';
+import { SUPPORTED_LANGUAGES } from '../../i18n/translations';
 
 type WatchFilterType = 'ALL' | 'TRIM' | 'STRONG_BUY' | 'BUY' | 'HOLD' | 'STRONG_SELL';
 
@@ -47,12 +50,15 @@ export const DashboardScreen: React.FC = () => {
   const { setActiveTab } = useSettingsStore();
   const { getUnreadCount } = useNotificationStore();
   const { plan, getTrialDaysRemaining } = useSubscriptionStore();
+  const { language, t } = useLanguageStore();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [educationTerm, setEducationTerm] = useState<string | null>(null);
   const [isNotificationCenterOpen, setIsNotificationCenterOpen] = useState(false);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+  const [isLanguageModalOpen, setIsLanguageModalOpen] = useState(false);
 
+  const currentLang = SUPPORTED_LANGUAGES.find(l => l.code === language) || SUPPORTED_LANGUAGES[0];
   const unreadCount = getUnreadCount();
   const trialDays = getTrialDaysRemaining();
 
@@ -98,7 +104,7 @@ export const DashboardScreen: React.FC = () => {
   }> = [
     {
       id: 'ALL',
-      label: 'All',
+      label: t('filter_all', 'All'),
       count: counts.ALL,
       activeColor: 'text-white',
       activeBg: 'bg-navy-800',
@@ -107,7 +113,7 @@ export const DashboardScreen: React.FC = () => {
     },
     {
       id: 'TRIM',
-      label: 'Trim Profit',
+      label: t('filter_trim', 'Trim Profit'),
       count: counts.TRIM,
       activeColor: 'text-gold-300',
       activeBg: 'bg-gold-500/15',
@@ -116,7 +122,7 @@ export const DashboardScreen: React.FC = () => {
     },
     {
       id: 'STRONG_BUY',
-      label: 'Strong Buy',
+      label: t('filter_strong_buy', 'Strong Buy'),
       count: counts.STRONG_BUY,
       activeColor: 'text-growth-300',
       activeBg: 'bg-growth-500/15',
@@ -125,7 +131,7 @@ export const DashboardScreen: React.FC = () => {
     },
     {
       id: 'BUY',
-      label: 'Buy Window',
+      label: t('filter_buy', 'Buy Window'),
       count: counts.BUY,
       activeColor: 'text-growth-300',
       activeBg: 'bg-growth-500/15',
@@ -134,7 +140,7 @@ export const DashboardScreen: React.FC = () => {
     },
     {
       id: 'HOLD',
-      label: 'Hold / Wait',
+      label: t('filter_hold', 'Hold / Wait'),
       count: counts.HOLD,
       activeColor: 'text-slate-200',
       activeBg: 'bg-slate-700/30',
@@ -143,7 +149,7 @@ export const DashboardScreen: React.FC = () => {
     },
     {
       id: 'STRONG_SELL',
-      label: 'High Risk / Sell',
+      label: t('filter_strong_sell', 'High Risk / Sell'),
       count: counts.STRONG_SELL,
       activeColor: 'text-loss-300',
       activeBg: 'bg-loss-500/15',
@@ -240,21 +246,32 @@ export const DashboardScreen: React.FC = () => {
           <div>
             <div className="flex items-center gap-1.5 text-[10px] font-bold text-gold-400 uppercase tracking-wider font-mono">
               <Globe className="w-3.5 h-3.5" />
-              <span>Universal Exchange Tracker</span>
+              <span>{t('header_universal_tracker', 'Universal Exchange Tracker')}</span>
             </div>
-            <h2 className="text-xl font-extrabold text-white">Global Portfolio Hub</h2>
+            <h2 className="text-xl font-extrabold text-white">{t('header_hub', 'Global Portfolio Hub')}</h2>
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Quick Language Switcher Button */}
+            <button
+              type="button"
+              onClick={() => setIsLanguageModalOpen(true)}
+              className="flex items-center gap-1.5 px-2 py-1 rounded-xl bg-navy-900 border border-navy-800 hover:border-growth-500/50 text-slate-200 text-xs font-semibold transition"
+              title={t('language_section_title', 'Select Language')}
+            >
+              <span className="text-sm">{currentLang.flag}</span>
+              <span className="font-mono text-[10px] uppercase text-slate-300 font-bold">{currentLang.code.split('-')[0]}</span>
+            </button>
+
             {/* Pro / Trial Badge Button */}
             <button
               type="button"
               onClick={() => setIsUpgradeModalOpen(true)}
               className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-gradient-to-r from-gold-500/20 to-gold-600/20 text-gold-300 border border-gold-500/40 text-[10px] font-bold hover:scale-105 transition"
-              title="Membership Status"
+              title={t('membership_status', 'Membership Status')}
             >
               <Crown className="w-3 h-3 fill-gold-400 text-gold-400" />
-              <span>{plan === 'LIFETIME' ? 'PRO' : `${trialDays}d Trial`}</span>
+              <span>{plan === 'LIFETIME' ? t('pro_member', 'PRO') : `${trialDays}${t('trial_days_remaining', 'd Trial')}`}</span>
             </button>
 
             {/* Notification Bell Button */}
@@ -262,7 +279,7 @@ export const DashboardScreen: React.FC = () => {
               type="button"
               onClick={() => setIsNotificationCenterOpen(true)}
               className="relative p-1.5 rounded-xl bg-navy-900 border border-navy-800 text-slate-300 hover:text-white hover:border-growth-500/50 transition"
-              title="Alert Notifications"
+              title={t('alerts_title', 'Alert Notifications')}
             >
               <Bell className="w-4 h-4" />
               {unreadCount > 0 && (
@@ -278,7 +295,7 @@ export const DashboardScreen: React.FC = () => {
 
         {/* Global Market Status Strip */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 text-[11px] font-mono scrollbar-none">
-          <span className="text-slate-500 shrink-0 font-sans text-[10px] uppercase font-bold">Markets:</span>
+          <span className="text-slate-500 shrink-0 font-sans text-[10px] uppercase font-bold">{t('badge_markets', 'Markets:')}</span>
           <span className="px-2 py-0.5 rounded-md bg-navy-900 border border-navy-800 text-slate-300 flex items-center gap-1 shrink-0">
             <span>🇹🇼 TWSE</span>
             <span className="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
@@ -349,7 +366,7 @@ export const DashboardScreen: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <Briefcase className="w-4 h-4 text-growth-400" />
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider">Your Personal Holdings</h3>
+              <h3 className="text-xs font-bold text-white uppercase tracking-wider">{t('personal_holdings_alerts', 'Your Personal Holdings')}</h3>
             </div>
             {positions.length > 0 && (
               <span className="text-xs font-mono text-slate-400">
@@ -364,9 +381,9 @@ export const DashboardScreen: React.FC = () => {
                 <Compass className="w-6 h-6 text-growth-400" />
               </div>
               <div>
-                <h4 className="text-sm font-bold text-white">Your portfolio tracker is ready</h4>
+                <h4 className="text-sm font-bold text-white">{t('portfolio_ready', 'Your portfolio tracker is ready')}</h4>
                 <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
-                  Log the stocks you own across any global exchange to receive real-time updates and timing advice.
+                  {t('portfolio_ready_desc', 'Log the stocks you own across any global exchange to receive real-time updates and timing advice.')}
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-2 justify-center pt-1">
@@ -375,7 +392,7 @@ export const DashboardScreen: React.FC = () => {
                   className="px-5 py-2.5 bg-growth-600 hover:bg-growth-500 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center justify-center gap-1.5"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>Log Your Stocks</span>
+                  <span>{t('log_your_stocks', 'Log Your Stocks')}</span>
                 </button>
               </div>
             </div>
@@ -403,7 +420,7 @@ export const DashboardScreen: React.FC = () => {
             <div className="flex items-center gap-1.5">
               <Star className="w-4 h-4 text-gold-400 fill-gold-400" />
               <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                Stocks to Watch
+                {t('stocks_to_watch_title', 'Stocks to Watch')}
               </h3>
             </div>
             <span className="text-[11px] text-slate-400 font-mono">
@@ -411,7 +428,7 @@ export const DashboardScreen: React.FC = () => {
                 ? `${filteredLocalStocks.length + deduplicatedOnline.length} results`
                 : watchFilter !== 'ALL'
                   ? `${filteredWatched.length} of ${watchedQuotes.length} (${filterPills.find(p => p.id === watchFilter)?.label})`
-                  : `${watchedQuotes.length} monitored`}
+                  : `${watchedQuotes.length} ${t('monitored_stocks', 'monitored')}`}
             </span>
           </div>
 
@@ -422,7 +439,7 @@ export const DashboardScreen: React.FC = () => {
               type="text"
               value={searchExplorer}
               onChange={(e) => setSearchExplorer(e.target.value)}
-              placeholder="Search any stock to monitor (e.g. SOFI, TSLA, NVDA)..."
+              placeholder={t('search_placeholder', 'Search any stock to monitor (e.g. SOFI, TSLA, NVDA)...')}
               className="w-full bg-navy-950 border border-navy-750 rounded-xl pl-9 pr-8 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-growth-500 transition"
             />
             {isSearchingOnline && (
@@ -490,7 +507,7 @@ export const DashboardScreen: React.FC = () => {
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-1 text-[10px] font-mono uppercase font-bold text-growth-400">
                     <Zap className="w-3 h-3" />
-                    <span>Live Market Matches ({deduplicatedOnline.length})</span>
+                    <span>{t('live_matches', 'Live Market Matches')} ({deduplicatedOnline.length})</span>
                   </div>
                   <div className="space-y-1.5">
                     {deduplicatedOnline.slice(0, 8).map(item => {
@@ -528,7 +545,7 @@ export const DashboardScreen: React.FC = () => {
                                 className="px-2.5 py-1.5 rounded-xl bg-navy-800 hover:bg-loss-500/20 text-gold-400 hover:text-loss-400 border border-navy-700 text-xs font-semibold transition flex items-center gap-1"
                               >
                                 <Star className="w-3 h-3 fill-gold-400" />
-                                <span>Watching (Remove)</span>
+                                <span>{t('watching_remove', 'Watching (Remove)')}</span>
                               </button>
                             ) : (
                               <button
@@ -537,7 +554,7 @@ export const DashboardScreen: React.FC = () => {
                                 className="px-3 py-1.5 rounded-xl bg-growth-600 hover:bg-growth-500 text-white text-xs font-bold transition flex items-center gap-1 shadow-sm"
                               >
                                 <Plus className="w-3 h-3" />
-                                <span>Add to Watch</span>
+                                <span>{t('add_to_watch', 'Add to Watch')}</span>
                               </button>
                             )}
                           </div>
@@ -552,7 +569,7 @@ export const DashboardScreen: React.FC = () => {
               {filteredLocalStocks.length > 0 && (
                 <div className="space-y-1.5 pt-1">
                   <span className="text-[10px] font-mono uppercase font-bold text-slate-400">
-                    Indexed Equities
+                    {t('indexed_equities', 'Indexed Equities')}
                   </span>
                   <div className="space-y-1.5">
                     {filteredLocalStocks.map(stk => {
@@ -593,7 +610,7 @@ export const DashboardScreen: React.FC = () => {
                                 className="px-2.5 py-1.5 rounded-xl bg-navy-800 hover:bg-loss-500/20 text-gold-400 hover:text-loss-400 border border-navy-700 text-xs font-semibold transition flex items-center gap-1"
                               >
                                 <Star className="w-3 h-3 fill-gold-400" />
-                                <span>Watching (Remove)</span>
+                                <span>{t('watching_remove', 'Watching (Remove)')}</span>
                               </button>
                             ) : (
                               <button
@@ -605,7 +622,7 @@ export const DashboardScreen: React.FC = () => {
                                 className="px-3 py-1.5 rounded-xl bg-growth-600 hover:bg-growth-500 text-white text-xs font-bold transition flex items-center gap-1 shadow-sm"
                               >
                                 <Plus className="w-3 h-3" />
-                                <span>Add to Watch</span>
+                                <span>{t('add_to_watch', 'Add to Watch')}</span>
                               </button>
                             )}
                           </div>
@@ -650,22 +667,22 @@ export const DashboardScreen: React.FC = () => {
                   <div className="w-10 h-10 rounded-xl bg-navy-800 text-gold-400/60 flex items-center justify-center mx-auto">
                     <Star className="w-5 h-5" />
                   </div>
-                  <h4 className="text-xs font-bold text-white">Your watch list is empty</h4>
+                  <h4 className="text-xs font-bold text-white">{t('watch_empty_title', 'Your watch list is empty')}</h4>
                   <p className="text-[11px] text-slate-400 max-w-xs mx-auto">
-                    Type any ticker in the search bar above (e.g. SOFI, NVDA, AAPL) and tap <strong>"+ Add to Watch"</strong> to monitor its live price and timing signals here.
+                    {t('watch_empty_desc', 'Type any ticker in the search bar above and tap "+ Add to Watch" to monitor its live price and timing signals.')}
                   </p>
                 </div>
               ) : filteredWatched.length === 0 ? (
                 <div className="p-5 bg-navy-900/50 border border-navy-850 rounded-2xl text-center space-y-2">
                   <p className="text-xs text-slate-400">
-                    No watched stocks currently have a <strong className="text-white">"{filterPills.find(p => p.id === watchFilter)?.label}"</strong> signal.
+                    {t('no_filter_match', 'No watched stocks currently have a')} <strong className="text-white">"{filterPills.find(p => p.id === watchFilter)?.label}"</strong>.
                   </p>
                   <button
                     type="button"
                     onClick={() => setWatchFilter('ALL')}
                     className="px-3 py-1.5 rounded-xl bg-navy-800 hover:bg-navy-700 text-growth-400 text-xs font-semibold border border-navy-700 transition"
                   >
-                    Show All Watched Stocks ({watchedQuotes.length})
+                    {t('show_all_watched', 'Show All Watched Stocks')} ({watchedQuotes.length})
                   </button>
                 </div>
               ) : (
@@ -697,6 +714,10 @@ export const DashboardScreen: React.FC = () => {
 
       {isUpgradeModalOpen && (
         <UpgradeProModal onClose={() => setIsUpgradeModalOpen(false)} />
+      )}
+
+      {isLanguageModalOpen && (
+        <LanguageSelectorModal onClose={() => setIsLanguageModalOpen(false)} />
       )}
     </div>
   );

@@ -1,6 +1,7 @@
 import React from 'react';
 import { TrendingUp, TrendingDown, Plus, Wallet, Shield } from 'lucide-react';
 import { PortfolioSummary } from '../../types/portfolio';
+import { useLanguageStore } from '../../store/languageStore';
 
 interface Props {
   summary: PortfolioSummary;
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export const PortfolioSummaryCard: React.FC<Props> = ({ summary, onOpenAddStock }) => {
+  const { t } = useLanguageStore();
   const isTotalGain = summary.totalProfitLoss >= 0;
   const isDayGain = summary.dayChange >= 0;
   const totalNetWorth = summary.currentValue + summary.cashBalance;
@@ -21,10 +23,10 @@ export const PortfolioSummaryCard: React.FC<Props> = ({ summary, onOpenAddStock 
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-1.5 text-slate-400 text-xs">
           <Wallet className="w-3.5 h-3.5 text-growth-400" />
-          <span className="font-semibold uppercase tracking-wider text-[11px]">Total Portfolio Value</span>
+          <span className="font-semibold uppercase tracking-wider text-[11px]">{t('portfolio_summary_title', 'Total Portfolio Value')}</span>
         </div>
         <span className="text-[11px] font-mono text-slate-400">
-          {summary.holdingsCount} {summary.holdingsCount === 1 ? 'Holding' : 'Holdings'}
+          {summary.holdingsCount} {t('holdings_count_label', 'Holdings')}
         </span>
       </div>
 
@@ -41,31 +43,31 @@ export const PortfolioSummaryCard: React.FC<Props> = ({ summary, onOpenAddStock 
               {isTotalGain ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
               {isTotalGain ? '+' : ''}${Math.abs(summary.totalProfitLoss).toFixed(2)} ({isTotalGain ? '+' : ''}{summary.totalProfitLossPercent.toFixed(1)}%)
             </span>
-            <span className="text-[11px] text-slate-500">All-time</span>
+            <span className="text-[11px] text-slate-500">{t('all_time', 'All-time')}</span>
           </div>
         </div>
 
         <button
           onClick={onOpenAddStock}
           className="bg-growth-600 hover:bg-growth-500 text-white font-bold p-3 rounded-2xl shadow-lg shadow-growth-600/30 active:scale-95 transition flex items-center gap-1.5"
-          title="Add Stock Position"
+          title={t('add_stock', 'Add Stock')}
         >
           <Plus className="w-5 h-5" />
-          <span className="text-xs pr-1">Add Stock</span>
+          <span className="text-xs pr-1">{t('add_stock', 'Add Stock')}</span>
         </button>
       </div>
 
       {/* Bottom Metrics Bar */}
       <div className="grid grid-cols-2 gap-2 pt-3 border-t border-navy-800/80 text-xs font-mono">
         <div className="bg-navy-950/50 p-2.5 rounded-xl border border-navy-800/60">
-          <span className="text-[10px] text-slate-400 block font-sans">Today's Return</span>
+          <span className="text-[10px] text-slate-400 block font-sans">{t('todays_return', "Today's Return")}</span>
           <span className={`font-bold ${isDayGain ? 'text-growth-400' : 'text-loss-500'}`}>
             {isDayGain ? '+' : ''}${summary.dayChange.toFixed(2)} ({isDayGain ? '+' : ''}{summary.dayChangePercent.toFixed(2)}%)
           </span>
         </div>
 
         <div className="bg-navy-950/50 p-2.5 rounded-xl border border-navy-800/60">
-          <span className="text-[10px] text-slate-400 block font-sans">Total Cost Basis</span>
+          <span className="text-[10px] text-slate-400 block font-sans">{t('total_cost_basis', 'Total Cost Basis')}</span>
           <span className="font-bold text-slate-200">
             ${summary.totalInvested.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>

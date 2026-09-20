@@ -1,6 +1,7 @@
 import React from 'react';
 import { LayoutDashboard, Zap, GraduationCap, Settings } from 'lucide-react';
 import { useSettingsStore, AppTab } from '../../store/settingsStore';
+import { useLanguageStore } from '../../store/languageStore';
 
 interface Props {
   signalsCount?: number;
@@ -8,12 +9,13 @@ interface Props {
 
 export const BottomNav: React.FC<Props> = ({ signalsCount = 0 }) => {
   const { activeTab, setActiveTab } = useSettingsStore();
+  const { t } = useLanguageStore();
 
   const tabs: { id: AppTab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-    { id: 'dashboard', label: 'Portfolio', icon: LayoutDashboard },
-    { id: 'signals', label: 'Signals', icon: Zap },
-    { id: 'education', label: 'Learn', icon: GraduationCap },
-    { id: 'settings', label: 'Settings', icon: Settings },
+    { id: 'dashboard', label: t('nav_dashboard', 'Portfolio'), icon: LayoutDashboard },
+    { id: 'signals', label: t('nav_signals', 'Signals'), icon: Zap },
+    { id: 'education', label: t('nav_education', 'Learn'), icon: GraduationCap },
+    { id: 'settings', label: t('nav_settings', 'Settings'), icon: Settings },
   ];
 
   return (

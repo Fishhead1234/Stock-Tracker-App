@@ -15,6 +15,7 @@ import {
 import { useNotificationStore, AppNotification } from '../../store/notificationStore';
 import { useMarketStore } from '../../store/marketStore';
 import { useSettingsStore } from '../../store/settingsStore';
+import { useLanguageStore } from '../../store/languageStore';
 
 interface NotificationCenterModalProps {
   onClose: () => void;
@@ -24,6 +25,7 @@ export const NotificationCenterModal: React.FC<NotificationCenterModalProps> = (
   const { alerts, markAlertAsRead, markAllAsRead, clearAlerts } = useNotificationStore();
   const { selectTicker } = useMarketStore();
   const { setActiveTab } = useSettingsStore();
+  const { t } = useLanguageStore();
 
   const handleStockClick = (ticker: string, id: string) => {
     markAlertAsRead(id);
@@ -70,9 +72,9 @@ export const NotificationCenterModal: React.FC<NotificationCenterModalProps> = (
               <Bell className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white">Alerts & Notifications</h3>
+              <h3 className="text-sm font-bold text-white">{t('alerts_title', 'Alerts & Notifications')}</h3>
               <p className="text-[11px] text-slate-400">
-                Timing signals for holdings & watched stocks
+                {t('alerts_subtitle', 'Timing signals for holdings & watched stocks')}
               </p>
             </div>
           </div>
@@ -88,7 +90,7 @@ export const NotificationCenterModal: React.FC<NotificationCenterModalProps> = (
         {alerts.length > 0 && (
           <div className="px-4 py-2 bg-navy-950/40 border-b border-navy-850 flex items-center justify-between text-xs">
             <span className="text-slate-400 text-[11px]">
-              {alerts.filter(a => !a.isRead).length} unread alerts
+              {alerts.filter(a => !a.isRead).length} {t('unread_alerts', 'unread alerts')}
             </span>
             <div className="flex items-center gap-3">
               <button
@@ -96,14 +98,14 @@ export const NotificationCenterModal: React.FC<NotificationCenterModalProps> = (
                 className="text-[11px] text-growth-400 hover:text-growth-300 flex items-center gap-1 font-medium transition"
               >
                 <CheckCheck className="w-3.5 h-3.5" />
-                <span>Mark all read</span>
+                <span>{t('mark_all_read', 'Mark all read')}</span>
               </button>
               <button
                 onClick={clearAlerts}
                 className="text-[11px] text-slate-400 hover:text-loss-400 flex items-center gap-1 transition"
               >
                 <Trash2 className="w-3.5 h-3.5" />
-                <span>Clear</span>
+                <span>{t('clear_all', 'Clear')}</span>
               </button>
             </div>
           </div>
@@ -116,9 +118,9 @@ export const NotificationCenterModal: React.FC<NotificationCenterModalProps> = (
               <div className="w-12 h-12 rounded-2xl bg-navy-800/80 text-slate-400 flex items-center justify-center mx-auto">
                 <Bell className="w-6 h-6 text-slate-500" />
               </div>
-              <h4 className="text-sm font-bold text-white">No alerts yet</h4>
+              <h4 className="text-sm font-bold text-white">{t('no_alerts_title', 'No alerts yet')}</h4>
               <p className="text-xs text-slate-400 max-w-xs mx-auto">
-                When your personal holdings or watched stocks trigger a timing signal change (Buy Window, Strong Buy, Trim Profit, or Sell), notifications will appear here.
+                {t('no_alerts_desc', 'When your personal holdings or watched stocks trigger a timing signal change (Buy Window, Strong Buy, Trim Profit, or Sell), notifications will appear here.')}
               </p>
             </div>
           ) : (
@@ -149,12 +151,12 @@ export const NotificationCenterModal: React.FC<NotificationCenterModalProps> = (
                       {isHolding ? (
                         <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-300 border border-blue-500/30 flex items-center gap-0.5">
                           <Briefcase className="w-2.5 h-2.5" />
-                          <span>Holding</span>
+                          <span>{t('holding_alert_label', 'Holding')}</span>
                         </span>
                       ) : (
                         <span className="text-[9px] px-1.5 py-0.5 rounded bg-gold-500/15 text-gold-300 border border-gold-500/30 flex items-center gap-0.5">
                           <Star className="w-2.5 h-2.5" />
-                          <span>Watchlist</span>
+                          <span>{t('watchlist_alert_label', 'Watchlist')}</span>
                         </span>
                       )}
                     </div>
@@ -170,10 +172,10 @@ export const NotificationCenterModal: React.FC<NotificationCenterModalProps> = (
 
                   <div className="mt-2 flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-navy-800/50">
                     <span className="font-mono">
-                      Price at alert: <strong className="text-slate-200">${alert.price.toFixed(2)}</strong>
+                      {t('price_at_alert', 'Price at alert')}: <strong className="text-slate-200">${alert.price.toFixed(2)}</strong>
                     </span>
                     <span className="text-growth-400 group-hover:underline flex items-center gap-0.5 text-[10px] font-semibold">
-                      <span>View analysis</span>
+                      <span>{t('view_analysis', 'View analysis')}</span>
                       <ExternalLink className="w-3 h-3" />
                     </span>
                   </div>
@@ -185,7 +187,7 @@ export const NotificationCenterModal: React.FC<NotificationCenterModalProps> = (
 
         {/* Footer info */}
         <div className="p-3 bg-navy-950 border-t border-navy-850 text-center text-[10px] text-slate-500">
-          Alert preferences can be customized in App Settings.
+          {t('settings_subtitle', 'Alert preferences can be customized in App Settings.')}
         </div>
       </div>
     </div>
