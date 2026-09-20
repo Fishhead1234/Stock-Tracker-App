@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, Search, PlusCircle, HelpCircle, Check, Plus, Globe, Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Search, PlusCircle, HelpCircle, Check, Plus, Globe, Sparkles, Loader2, Zap } from 'lucide-react';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { stockService } from '../../services/stockService';
 import { StockQuote } from '../../types/stock';
@@ -27,6 +27,11 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
   const [isSuccess, setIsSuccess] = useState(false);
   const [showSymbolGuide, setShowSymbolGuide] = useState(false);
 
+  // Live online search states
+  const [isSearchingOnline, setIsSearchingOnline] = useState(false);
+  const [onlineResults, setOnlineResults] = useState<Array<{ ticker: string; name: string; exchange: string; quoteType?: string }>>([]);
+  const [loadingTicker, setLoadingTicker] = useState<string | null>(null);
+
   // Custom stock creator mode
   const [isCreatingCustom, setIsCreatingCustom] = useState(false);
   const [customTicker, setCustomTicker] = useState('');
@@ -44,15 +49,88 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
     JP: { exchange: 'TSE', country: 'Japan', currency: 'JPY', symbol: '¥', flag: '🇯🇵' }
   };
 
-  const filteredStocks = search.trim()
+  // Debounced live market search
+  useEffect(() => {
+    const q = search.trim();
+    if (!q || q.length < 1) {
+      setOnlineResults([]);
+      setIsSearchingOnline(false);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsSearchingOnline(true);
+      try {
+        const results = await stockService.searchLiveOnline(q);
+        setOnlineResults(results);
+      } catch (err) {
+        console.warn('Live search error', err);
+      } finally {
+        setIsSearchingOnline(false);
+      }
+    }, 250);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const filteredLocalStocks = search.trim()
     ? stockService.searchStocks(search)
     : allStocks.slice(0, 8);
+
+  const deduplicatedOnline = onlineResults.filter(
+    online => !filteredLocalStocks.some(loc => loc.ticker.toUpperCase() === online.ticker.toUpperCase())
+  );
 
   const handleSelectStock = (stk: StockQuote) => {
     setSelectedStock(stk);
     setBuyPrice(stk.price.toString());
     setSearch('');
+    setOnlineResults([]);
     setIsCreatingCustom(false);
+  };
+
+  const handleSelectOnlineItem = async (item: { ticker: string; name: string; exchange: string }) => {
+    const clean = item.ticker.toUpperCase();
+    const existing = stockService.getStock(clean);
+    if (existing) {
+      handleSelectStock(existing);
+      return;
+    }
+
+    setLoadingTicker(clean);
+    try {
+      const stock = await stockService.fetchAndIndexOnlineStock(item.ticker, item.name, item.exchange);
+      if (stock) {
+        handleSelectStock(stock);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingTicker(null);
+    }
+  };
+
+  const handleDirectLookup = async (symbolToLookup: string) => {
+    const clean = symbolToLookup.trim().toUpperCase();
+    if (!clean) return;
+
+    const existing = stockService.getStock(clean);
+    if (existing) {
+      handleSelectStock(existing);
+      return;
+    }
+
+    setLoadingTicker(clean);
+    try {
+      const stock = await stockService.fetchAndIndexOnlineStock(clean, clean, 'NYSE / NASDAQ');
+      if (stock) {
+        handleSelectStock(stock);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingTicker(null);
+    }
   };
 
   const handleCreateCustomStock = (e: React.FormEvent) => {
@@ -75,6 +153,7 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
     setBuyPrice(newStock.price.toString());
     setIsCreatingCustom(false);
     setSearch('');
+    setOnlineResults([]);
   };
 
   const numShares = parseFloat(shares) || 0;
@@ -117,7 +196,7 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
               <span className="text-[10px] uppercase font-bold text-growth-400 tracking-wider font-mono">
                 Universal Stock Tracker
               </span>
-              <h3 className="text-base font-bold text-white">Log Position or Unlisted Stock</h3>
+              <h3 className="text-base font-bold text-white">Log Position (All NYSE & NASDAQ)</h3>
             </div>
             <button
               onClick={onClose}
@@ -134,7 +213,7 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="text-xs font-semibold text-slate-300">
-                    Search Any Global Stock
+                    Search All NYSE, NASDAQ & Global Stocks
                   </label>
                   <button
                     type="button"
@@ -152,52 +231,144 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search e.g. 2330, Samsung, NVDA, AZN, FPH..."
-                    className="w-full bg-navy-950 border border-navy-750 rounded-xl pl-9 pr-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-growth-500 transition"
+                    placeholder="Type ticker or name (e.g. SOFI, PLUG, NVDA, TSMC)..."
+                    className="w-full bg-navy-950 border border-navy-750 rounded-xl pl-9 pr-8 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-growth-500 transition"
                   />
-                </div>
-
-                {/* Stock Chips or No Match Prompt */}
-                {filteredStocks.length > 0 ? (
-                  <div className="flex flex-wrap gap-1.5 mt-2">
-                    {filteredStocks.map(stk => (
-                      <button
-                        key={stk.ticker}
-                        type="button"
-                        onClick={() => handleSelectStock(stk)}
-                        className={`px-2 py-1 rounded-lg text-xs font-mono font-medium transition flex items-center gap-1 ${
-                          selectedStock.ticker === stk.ticker
-                            ? 'bg-growth-600 text-white shadow-sm'
-                            : 'bg-navy-800 text-slate-300 hover:bg-navy-750'
-                        }`}
-                      >
-                        <span>{stk.ticker}</span>
-                        <span className="text-[10px] text-slate-400">({stk.currencySymbol}{stk.price.toFixed(0)})</span>
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="p-3 bg-navy-950/70 border border-navy-800 rounded-xl mt-2 text-center space-y-2">
-                    <p className="text-xs text-slate-400">
-                      Can't find <strong className="text-white font-mono">"{search}"</strong>?
-                    </p>
+                  {isSearchingOnline && (
+                    <Loader2 className="w-4 h-4 text-growth-400 absolute right-3 top-3 animate-spin" />
+                  )}
+                  {!isSearchingOnline && search.trim() && (
                     <button
                       type="button"
-                      onClick={() => {
-                        setCustomTicker(search.toUpperCase());
-                        setIsCreatingCustom(true);
-                      }}
-                      className="px-3 py-1.5 bg-growth-600 hover:bg-growth-500 text-white text-xs font-bold rounded-lg transition inline-flex items-center gap-1.5 shadow"
+                      onClick={() => setSearch('')}
+                      className="absolute right-3 top-3 text-slate-500 hover:text-slate-300 text-xs"
                     >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Add "{search.toUpperCase()}" as Custom Stock</span>
+                      ✕
                     </button>
+                  )}
+                </div>
+
+                {/* Loading indicator when fetching live stock */}
+                {loadingTicker && (
+                  <div className="p-3 mt-2 rounded-xl bg-growth-950/40 border border-growth-600/40 flex items-center gap-2.5 text-xs text-growth-300 animate-pulse">
+                    <Loader2 className="w-4 h-4 animate-spin text-growth-400 shrink-0" />
+                    <span>
+                      Syncing live market quote & indicators for <strong>{loadingTicker}</strong> from NYSE/NASDAQ...
+                    </span>
                   </div>
                 )}
 
-                {/* Always-Visible Add Custom Stock Link */}
-                <div className="pt-2 flex justify-between items-center text-[11px]">
-                  <span className="text-slate-500">Trading app ticker listed differently?</span>
+                {/* Search Results Area */}
+                {search.trim().length > 0 && (
+                  <div className="mt-2 space-y-2 max-h-48 overflow-y-auto pr-1">
+                    {/* Live Online Results from NYSE / NASDAQ */}
+                    {deduplicatedOnline.length > 0 && (
+                      <div className="space-y-1">
+                        <span className="text-[10px] uppercase font-bold text-growth-400 tracking-wider font-mono flex items-center gap-1">
+                          <Zap className="w-3 h-3" />
+                          <span>Live Market Matches ({deduplicatedOnline.length})</span>
+                        </span>
+                        <div className="space-y-1">
+                          {deduplicatedOnline.slice(0, 6).map(item => (
+                            <button
+                              key={item.ticker}
+                              type="button"
+                              onClick={() => handleSelectOnlineItem(item)}
+                              disabled={loadingTicker !== null}
+                              className="w-full p-2 rounded-xl bg-navy-950 hover:bg-navy-850 border border-navy-800 hover:border-growth-500/50 flex items-center justify-between text-left transition group"
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className="px-1.5 py-0.5 rounded bg-growth-500/20 text-growth-300 font-mono font-bold text-xs">
+                                  {item.ticker}
+                                </span>
+                                <span className="text-[11px] text-slate-300 truncate group-hover:text-white max-w-[190px]">
+                                  {item.name}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                <span className="text-[9px] uppercase px-1.5 py-0.5 rounded bg-navy-800 text-slate-400 font-mono border border-navy-700">
+                                  {item.exchange}
+                                </span>
+                                <span className="text-[10px] text-growth-400 font-semibold group-hover:underline">
+                                  + Select
+                                </span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Local / Pre-indexed Matches */}
+                    {filteredLocalStocks.length > 0 && (
+                      <div className="space-y-1 pt-1">
+                        <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider font-mono">
+                          Indexed Equities
+                        </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {filteredLocalStocks.map(stk => (
+                            <button
+                              key={stk.ticker}
+                              type="button"
+                              onClick={() => handleSelectStock(stk)}
+                              className={`px-2 py-1 rounded-lg text-xs font-mono font-medium transition flex items-center gap-1 ${
+                                selectedStock.ticker === stk.ticker
+                                  ? 'bg-growth-600 text-white shadow-sm'
+                                  : 'bg-navy-800 text-slate-300 hover:bg-navy-750'
+                              }`}
+                            >
+                              <span>{stk.ticker}</span>
+                              <span className="text-[10px] text-slate-400">({stk.currencySymbol}{stk.price.toFixed(0)})</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Direct One-Click Ticker Lookup */}
+                    {search.trim().length >= 1 && (
+                      <button
+                        type="button"
+                        onClick={() => handleDirectLookup(search)}
+                        disabled={loadingTicker !== null}
+                        className="w-full p-2.5 rounded-xl bg-growth-600/20 hover:bg-growth-600/30 border border-growth-500/40 text-growth-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition mt-1"
+                      >
+                        <Zap className="w-3.5 h-3.5 text-growth-400" />
+                        <span>Instant Fetch: Load "{search.trim().toUpperCase()}" directly from NYSE / NASDAQ</span>
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Default chips when search is empty */}
+                {search.trim().length === 0 && (
+                  <div className="mt-2">
+                    <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider font-mono block mb-1">
+                      Quick Suggestions:
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {filteredLocalStocks.map(stk => (
+                        <button
+                          key={stk.ticker}
+                          type="button"
+                          onClick={() => handleSelectStock(stk)}
+                          className={`px-2 py-1 rounded-lg text-xs font-mono font-medium transition flex items-center gap-1 ${
+                            selectedStock.ticker === stk.ticker
+                              ? 'bg-growth-600 text-white shadow-sm'
+                              : 'bg-navy-800 text-slate-300 hover:bg-navy-750'
+                          }`}
+                        >
+                          <span>{stk.ticker}</span>
+                          <span className="text-[10px] text-slate-400">({stk.currencySymbol}{stk.price.toFixed(0)})</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Add Custom / Unlisted Stock Link */}
+                <div className="pt-2.5 flex justify-between items-center text-[11px]">
+                  <span className="text-slate-500">Unlisted, OTC, or private equity?</span>
                   <button
                     type="button"
                     onClick={() => setIsCreatingCustom(true)}
