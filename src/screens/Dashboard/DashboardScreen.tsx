@@ -10,13 +10,21 @@ import {
   Search,
   Loader2,
   Star,
-  X
+  X,
+  Layers,
+  ArrowUpCircle,
+  ArrowDownCircle,
+  MinusCircle,
+  ChevronsUp,
+  AlertTriangle
 } from 'lucide-react';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { useMarketStore } from '../../store/marketStore';
 import { useSettingsStore } from '../../store/settingsStore';
 import { stockService } from '../../services/stockService';
 import { StockQuote } from '../../types/stock';
+import { generateTimingSignal } from '../../services/signalEngine';
+import { SignalAction } from '../../types/signal';
 import { PortfolioSummaryCard } from '../../components/Dashboard/PortfolioSummaryCard';
 import { PortfolioChart } from '../../components/Dashboard/PortfolioChart';
 import { StockCard } from '../../components/StockCard/StockCard';
@@ -24,6 +32,8 @@ import { DataStatusBadge } from '../../components/Common/DataStatusBadge';
 import { DisclaimerBanner } from '../../components/Common/DisclaimerBanner';
 import { AddStockModal } from '../AddStock/AddStockModal';
 import { EducationModal } from '../../components/EducationModal/EducationModal';
+
+type WatchFilterType = 'ALL' | 'TRIM' | 'STRONG_BUY' | 'BUY' | 'HOLD' | 'STRONG_SELL';
 
 export const DashboardScreen: React.FC = () => {
   const { positions, getSummary } = usePortfolioStore();
@@ -39,12 +49,100 @@ export const DashboardScreen: React.FC = () => {
   const [onlineResults, setOnlineResults] = useState<Array<{ ticker: string; name: string; exchange: string }>>([]);
   const [loadingTicker, setLoadingTicker] = useState<string | null>(null);
 
+  // Timing signal filter toggle for Stocks to Watch
+  const [watchFilter, setWatchFilter] = useState<WatchFilterType>('ALL');
+
   const summary = getSummary(quotes);
 
   // Filtered watched stocks list
   const watchedQuotes: StockQuote[] = watchlist
     .map(ticker => quotes[ticker.toUpperCase()])
     .filter((q): q is StockQuote => Boolean(q));
+
+  // Pre-calculate timing signals and counts for watched stocks
+  const watchedWithSignals = watchedQuotes.map(stock => ({
+    stock,
+    signal: generateTimingSignal(stock)
+  }));
+
+  const counts = {
+    ALL: watchedQuotes.length,
+    TRIM: watchedWithSignals.filter(w => w.signal.action === 'TRIM').length,
+    STRONG_BUY: watchedWithSignals.filter(w => w.signal.action === 'STRONG_BUY').length,
+    BUY: watchedWithSignals.filter(w => w.signal.action === 'BUY').length,
+    HOLD: watchedWithSignals.filter(w => w.signal.action === 'HOLD').length,
+    STRONG_SELL: watchedWithSignals.filter(w => w.signal.action === 'STRONG_SELL').length,
+  };
+
+  const filterPills: Array<{
+    id: WatchFilterType;
+    label: string;
+    count: number;
+    activeColor: string;
+    activeBg: string;
+    activeBorder: string;
+    icon: React.ReactNode;
+  }> = [
+    {
+      id: 'ALL',
+      label: 'All',
+      count: counts.ALL,
+      activeColor: 'text-white',
+      activeBg: 'bg-navy-800',
+      activeBorder: 'border-slate-500',
+      icon: <Layers className="w-3 h-3" />
+    },
+    {
+      id: 'TRIM',
+      label: 'Trim Profit',
+      count: counts.TRIM,
+      activeColor: 'text-gold-300',
+      activeBg: 'bg-gold-500/15',
+      activeBorder: 'border-gold-500/50',
+      icon: <ArrowDownCircle className="w-3 h-3 text-gold-400" />
+    },
+    {
+      id: 'STRONG_BUY',
+      label: 'Strong Buy',
+      count: counts.STRONG_BUY,
+      activeColor: 'text-growth-300',
+      activeBg: 'bg-growth-500/15',
+      activeBorder: 'border-growth-500/50',
+      icon: <ChevronsUp className="w-3 h-3 text-growth-400" />
+    },
+    {
+      id: 'BUY',
+      label: 'Buy Window',
+      count: counts.BUY,
+      activeColor: 'text-growth-300',
+      activeBg: 'bg-growth-500/15',
+      activeBorder: 'border-growth-500/50',
+      icon: <ArrowUpCircle className="w-3 h-3 text-growth-400" />
+    },
+    {
+      id: 'HOLD',
+      label: 'Hold / Wait',
+      count: counts.HOLD,
+      activeColor: 'text-slate-200',
+      activeBg: 'bg-slate-700/30',
+      activeBorder: 'border-slate-500/50',
+      icon: <MinusCircle className="w-3 h-3 text-slate-400" />
+    },
+    {
+      id: 'STRONG_SELL',
+      label: 'High Risk / Sell',
+      count: counts.STRONG_SELL,
+      activeColor: 'text-loss-300',
+      activeBg: 'bg-loss-500/15',
+      activeBorder: 'border-loss-500/50',
+      icon: <AlertTriangle className="w-3 h-3 text-loss-400" />
+    },
+  ];
+
+  const filteredWatched = watchedWithSignals.filter(({ signal }) => {
+    if (watchFilter === 'ALL') return true;
+    return signal.action === watchFilter;
+  }).map(w => w.stock);
 
   // Debounced live market search for Stocks to Watch
   useEffect(() => {
@@ -269,7 +367,9 @@ export const DashboardScreen: React.FC = () => {
             <span className="text-[11px] text-slate-400 font-mono">
               {searchExplorer.trim() 
                 ? `${filteredLocalStocks.length + deduplicatedOnline.length} results`
-                : `${watchedQuotes.length} monitored`}
+                : watchFilter !== 'ALL'
+                  ? `${filteredWatched.length} of ${watchedQuotes.length} (${filterPills.find(p => p.id === watchFilter)?.label})`
+                  : `${watchedQuotes.length} monitored`}
             </span>
           </div>
 
@@ -296,6 +396,39 @@ export const DashboardScreen: React.FC = () => {
               </button>
             )}
           </div>
+
+          {/* Timing Signal Filter Toggle Pills (Visible when not searching) */}
+          {watchedQuotes.length > 0 && searchExplorer.trim().length === 0 && (
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-0.5 no-scrollbar">
+              {filterPills.map(pill => {
+                const isSelected = watchFilter === pill.id;
+                return (
+                  <button
+                    key={pill.id}
+                    type="button"
+                    onClick={() => setWatchFilter(pill.id)}
+                    className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                      isSelected
+                        ? `${pill.activeBg} ${pill.activeBorder} ${pill.activeColor} shadow-sm font-bold ring-1 ring-white/10`
+                        : 'bg-navy-900/80 border-navy-800 text-slate-400 hover:text-slate-200 hover:border-navy-700'
+                    }`}
+                  >
+                    {pill.icon}
+                    <span>{pill.label}</span>
+                    <span
+                      className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                        isSelected
+                          ? 'bg-white/15 text-white'
+                          : 'bg-navy-950 text-slate-400'
+                      }`}
+                    >
+                      {pill.count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           {/* Loading feedback banner */}
           {loadingTicker && (
@@ -480,8 +613,21 @@ export const DashboardScreen: React.FC = () => {
                     Type any ticker in the search bar above (e.g. SOFI, NVDA, AAPL) and tap <strong>"+ Add to Watch"</strong> to monitor its live price and timing signals here.
                   </p>
                 </div>
+              ) : filteredWatched.length === 0 ? (
+                <div className="p-5 bg-navy-900/50 border border-navy-850 rounded-2xl text-center space-y-2">
+                  <p className="text-xs text-slate-400">
+                    No watched stocks currently have a <strong className="text-white">"{filterPills.find(p => p.id === watchFilter)?.label}"</strong> signal.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setWatchFilter('ALL')}
+                    className="px-3 py-1.5 rounded-xl bg-navy-800 hover:bg-navy-700 text-growth-400 text-xs font-semibold border border-navy-700 transition"
+                  >
+                    Show All Watched Stocks ({watchedQuotes.length})
+                  </button>
+                </div>
               ) : (
-                watchedQuotes.map(stk => (
+                filteredWatched.map(stk => (
                   <StockCard
                     key={stk.ticker}
                     stock={stk}
