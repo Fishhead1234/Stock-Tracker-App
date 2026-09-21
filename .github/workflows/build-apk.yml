@@ -31,9 +31,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+          cache: 'gradle'
 
       - name: Sync Capacitor Android
         run: npx cap sync android
@@ -45,14 +43,9 @@ jobs:
         working-directory: android
         run: ./gradlew assembleDebug --stacktrace
 
-      - name: Rename APK
-        run: |
-          mkdir -p release-apk
-          cp android/app/build/outputs/apk/debug/app-debug.apk release-apk/InvestLearn-v1.2.0.apk
-
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: InvestLearn-Android-APK
-          path: release-apk/InvestLearn-v1.2.0.apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
