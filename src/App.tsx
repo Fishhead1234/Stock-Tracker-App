@@ -39,6 +39,11 @@ export const App: React.FC = () => {
     const unsubscribe = stockService.subscribe((updatedDb) => {
       setQuotes(updatedDb);
     });
+
+    // Auto-refresh real market quotes for watchlist stocks on app launch
+    const currentWatchlist = useMarketStore.getState().watchlist;
+    stockService.refreshWatchlistQuotes(currentWatchlist);
+
     return () => unsubscribe();
   }, [setQuotes]);
 

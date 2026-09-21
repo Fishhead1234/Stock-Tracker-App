@@ -1,6 +1,8 @@
 import { StockQuote, GlobalExchangeInfo, HistoricalPoint } from '../types/stock';
-import { buildMockStockDatabase, GLOBAL_EXCHANGES } from './mockData';
+import { buildMockStockDatabase, GLOBAL_EXCHANGES, generateHistoricalSeries } from './mockData';
 import { calculateAllIndicators } from './technicalAnalysis';
+import { marketDataClient, LiveMarketQuote } from './marketDataClient';
+import { STOCK_DIRECTORY, DIRECTORY_MAP, DirectoryStockItem } from './stockDirectory';
 
 const CUSTOM_STOCKS_KEY = 'investlearn_custom_stocks_v1';
 
@@ -8,7 +10,8 @@ class StockService {
   private stockDatabase: Record<string, StockQuote> = {};
   private listeners: Array<(db: Record<string, StockQuote>) => void> = [];
   private simulationInterval: number | null = null;
-  private currentDataSource: string = 'Universal Global Exchange Engine';
+  private currentDataSource: string = 'Real-Time Global Market Engine';
+  private hasInitializedLiveRefresh: boolean = false;
 
   constructor() {
     this.stockDatabase = buildMockStockDatabase();
@@ -35,7 +38,18 @@ class StockService {
   }
 
   public getStock(ticker: string): StockQuote | undefined {
-    return this.stockDatabase[ticker.toUpperCase()];
+    const upper = ticker.toUpperCase();
+    if (this.stockDatabase[upper]) {
+      return this.stockDatabase[upper];
+    }
+
+    // Check directory if not yet initialized in database
+    const dirItem = DIRECTORY_MAP.get(upper);
+    if (dirItem) {
+      return this.instantiateStockFromDirectory(dirItem);
+    }
+
+    return undefined;
   }
 
   public getGlobalExchanges(): GlobalExchangeInfo[] {
@@ -48,16 +62,16 @@ class StockService {
   }
 
   /**
-   * Smart global search with alias resolution
+   * Smart search across initialized database and directory items
    */
   public searchStocks(query: string): StockQuote[] {
     const q = query.trim().toUpperCase();
-    if (!q) return this.getAllStocks().slice(0, 10);
+    if (!q) return this.getAllStocks().slice(0, 15);
 
     // Common aliases mapping
     const aliasMap: Record<string, string[]> = {
-      'TSM': ['2330.TW'],
-      'TSMC': ['2330.TW'],
+      'TSM': ['2330.TW', 'TSM'],
+      'TSMC': ['2330.TW', 'TSM'],
       '2330': ['2330.TW'],
       'FOXCONN': ['2317.TW'],
       'HON HAI': ['2317.TW'],
@@ -91,10 +105,30 @@ class StockService {
       'AZN': ['AZN.L'],
       'SHELL': ['SHEL.L'],
       'HSBC': ['HSBA.L'],
-      'UNILEVER': ['ULVR.L']
+      'UNILEVER': ['ULVR.L'],
+      'GOOGLE': ['GOOGL', 'GOOG'],
+      'ALPHABET': ['GOOGL', 'GOOG'],
+      'BERKSHIRE': ['BRK.B'],
+      'BUFFETT': ['BRK.B']
     };
 
     const directAliases = aliasMap[q] || [];
+
+    // Ensure all matching items in directory are instantiated in database
+    STOCK_DIRECTORY.forEach(item => {
+      const t = item.ticker.toUpperCase();
+      const n = item.name.toUpperCase();
+      if (
+        directAliases.includes(t) ||
+        t.startsWith(q) ||
+        t.includes(q) ||
+        n.includes(q)
+      ) {
+        if (!this.stockDatabase[t]) {
+          this.instantiateStockFromDirectory(item);
+        }
+      }
+    });
 
     return this.getAllStocks().filter(s => {
       const tickerUpper = s.ticker.toUpperCase();
@@ -103,6 +137,7 @@ class StockService {
 
       return (
         directAliases.includes(tickerUpper) ||
+        tickerUpper.startsWith(q) ||
         tickerUpper.includes(q) ||
         rawTicker === q ||
         nameUpper.includes(q) ||
@@ -121,195 +156,53 @@ class StockService {
     if (!q || q.length < 1) return [];
 
     try {
-      let res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
-      if (!res.ok) {
-        res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(`https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(q)}&quotesCount=15&newsCount=0`)}`);
-      }
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data && data.quotes && Array.isArray(data.quotes)) {
-          return data.quotes
-            .filter((item: any) => item.quoteType === 'EQUITY' || item.quoteType === 'ETF')
-            .map((item: any) => {
-              const rawExch = item.exchDisp || item.exchange || '';
-              let cleanExch = rawExch;
-              if (/nasdaq|nms|ngs|ncm/i.test(rawExch)) cleanExch = 'NASDAQ';
-              else if (/nyse arca|pcx|ase|amex/i.test(rawExch)) cleanExch = 'NYSE Arca';
-              else if (/nyse|nyq/i.test(rawExch)) cleanExch = 'NYSE';
-              else if (/twse|taiwan|two/i.test(rawExch)) cleanExch = 'TWSE';
-              else if (/krx|kospi|kosdaq|ksc|koe/i.test(rawExch)) cleanExch = 'KRX';
-              else if (/lse|london/i.test(rawExch)) cleanExch = 'LSE';
-              else if (/nzx|new zealand/i.test(rawExch)) cleanExch = 'NZX';
-              else if (/asx|australia/i.test(rawExch)) cleanExch = 'ASX';
-              else if (/tse|tokyo|jpx/i.test(rawExch)) cleanExch = 'TSE';
-              else if (!cleanExch) cleanExch = 'NYSE / NASDAQ';
-
-              return {
-                ticker: item.symbol,
-                name: item.shortname || item.longname || item.symbol,
-                exchange: cleanExch,
-                quoteType: item.quoteType
-              };
-            });
-        }
+      const results = await marketDataClient.search(q);
+      if (results && results.length > 0) {
+        return results;
       }
     } catch (e) {
-      console.warn('Online stock search error', e);
+      console.warn('marketDataClient search error', e);
     }
-    return [];
+
+    // Fallback: search directory for matching un-indexed symbols
+    const qUpper = q.toUpperCase();
+    return STOCK_DIRECTORY
+      .filter(item => item.ticker.toUpperCase().includes(qUpper) || item.name.toUpperCase().includes(qUpper))
+      .slice(0, 10)
+      .map(item => ({
+        ticker: item.ticker,
+        name: item.name,
+        exchange: item.exchange,
+        quoteType: 'EQUITY'
+      }));
   }
 
   /**
-   * Fetches real live chart and quote data for ANY stock (from NYSE, NASDAQ, etc.) and indexes it
+   * Fetches real live chart and quote data for ANY stock and indexes it
    */
   public async fetchAndIndexOnlineStock(symbol: string, fallbackName?: string, fallbackExchange?: string): Promise<StockQuote | null> {
     const cleanSymbol = symbol.trim().toUpperCase();
-    
-    if (this.stockDatabase[cleanSymbol]) {
-      return this.stockDatabase[cleanSymbol];
-    }
+    if (!cleanSymbol) return null;
 
     try {
-      let res = await fetch(`/api/quote?symbol=${encodeURIComponent(cleanSymbol)}`);
-      if (!res.ok) {
-        res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${cleanSymbol}?interval=1d&range=1mo`)}`);
-      }
-
-      if (res.ok) {
-        const data = await res.json();
-        const result = data?.chart?.result?.[0];
-        if (result && result.meta) {
-          const meta = result.meta;
-          const currentPrice = Number((meta.regularMarketPrice || meta.fulldayPrice || 50).toFixed(2));
-          const prevClose = Number((meta.chartPreviousClose || meta.previousClose || currentPrice).toFixed(2));
-          const change = Number((currentPrice - prevClose).toFixed(2));
-          const changePercent = Number(((change / prevClose) * 100).toFixed(2));
-          
-          const timestamps: number[] = result.timestamp || [];
-          const closes: number[] = result.indicators?.quote?.[0]?.close || [];
-          const volumes: number[] = result.indicators?.quote?.[0]?.volume || [];
-
-          const m1History: HistoricalPoint[] = [];
-          for (let i = 0; i < timestamps.length; i++) {
-            if (closes[i] !== null && closes[i] !== undefined) {
-              const d = new Date(timestamps[i] * 1000);
-              m1History.push({
-                date: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-                price: Number(closes[i].toFixed(2)),
-                volume: volumes[i] || 500000
-              });
-            }
-          }
-
-          // Ensure minimum history for technical indicators
-          if (m1History.length === 0) {
-            m1History.push(
-              { date: 'Prev', price: prevClose, volume: 500000 },
-              { date: 'Now', price: currentPrice, volume: 500000 }
-            );
-          }
-
-          const indicators = calculateAllIndicators(m1History.length >= 5 ? m1History : [
-            { date: '1', price: currentPrice * 0.98, volume: 100000 },
-            { date: '2', price: currentPrice * 0.99, volume: 100000 },
-            { date: '3', price: currentPrice * 0.985, volume: 100000 },
-            { date: '4', price: prevClose, volume: 100000 },
-            { date: '5', price: currentPrice, volume: 100000 }
-          ]);
-
-          const currency = meta.currency || 'USD';
-          let currencySymbol = '$';
-          if (currency === 'TWD') currencySymbol = 'NT$';
-          else if (currency === 'KRW') currencySymbol = '₩';
-          else if (currency === 'GBP') currencySymbol = '£';
-          else if (currency === 'NZD') currencySymbol = 'NZ$';
-          else if (currency === 'AUD') currencySymbol = 'A$';
-          else if (currency === 'JPY') currencySymbol = '¥';
-
-          // Exchange display parsing
-          const rawExch = meta.fullExchangeName || meta.exchangeName || fallbackExchange || 'NYSE / NASDAQ';
-          let exchangeName = rawExch;
-          if (/nasdaq|nms|ngs|ncm/i.test(rawExch)) exchangeName = 'NASDAQ';
-          else if (/nyse arca|pcx|ase|amex/i.test(rawExch)) exchangeName = 'NYSE Arca';
-          else if (/nyse|nyq/i.test(rawExch)) exchangeName = 'NYSE';
-          else if (/twse|taiwan|two/i.test(rawExch)) exchangeName = 'TWSE';
-          else if (/krx|kospi|kosdaq|ksc|koe/i.test(rawExch)) exchangeName = 'KRX';
-          else if (/lse|london/i.test(rawExch)) exchangeName = 'LSE';
-          else if (/nzx|new zealand/i.test(rawExch)) exchangeName = 'NZX';
-          else if (/asx|australia/i.test(rawExch)) exchangeName = 'ASX';
-          else if (/tse|tokyo|jpx/i.test(rawExch)) exchangeName = 'TSE';
-
-          // Country parsing
-          let country = 'United States';
-          let countryCode: 'TW' | 'KR' | 'US' | 'UK' | 'NZ' | 'AU' | 'JP' = 'US';
-          if (cleanSymbol.endsWith('.TW')) {
-            country = 'Taiwan';
-            countryCode = 'TW';
-          } else if (cleanSymbol.endsWith('.KS')) {
-            country = 'South Korea';
-            countryCode = 'KR';
-          } else if (cleanSymbol.endsWith('.L')) {
-            country = 'United Kingdom';
-            countryCode = 'UK';
-          } else if (cleanSymbol.endsWith('.NZ')) {
-            country = 'New Zealand';
-            countryCode = 'NZ';
-          } else if (cleanSymbol.endsWith('.AX')) {
-            country = 'Australia';
-            countryCode = 'AU';
-          } else if (cleanSymbol.endsWith('.T')) {
-            country = 'Japan';
-            countryCode = 'JP';
-          }
-
-          const sector = meta.instrumentType === 'ETF' ? 'Broad Market ETF' : (meta.sector || 'US Equity');
-
-          const newStock: StockQuote = {
-            ticker: cleanSymbol,
-            name: fallbackName || meta.shortName || meta.longName || cleanSymbol,
-            exchange: exchangeName,
-            country,
-            countryCode,
-            currency,
-            currencySymbol,
-            price: currentPrice,
-            change,
-            changePercent,
-            high: Number((meta.regularMarketDayHigh || currentPrice * 1.01).toFixed(2)),
-            low: Number((meta.regularMarketDayLow || currentPrice * 0.99).toFixed(2)),
-            open: Number((meta.regularMarketOpen || prevClose).toFixed(2)),
-            previousClose: prevClose,
-            volume: meta.regularMarketVolume || 1500000,
-            marketCap: meta.marketCap ? `$${(meta.marketCap / 1e9).toFixed(1)}B` : 'N/A',
-            peRatio: 22.0,
-            sector,
-            indicators,
-            history: {
-              '1D': m1History.slice(-10),
-              '1W': m1History.slice(-7),
-              '1M': m1History,
-              '1Y': m1History,
-              'ALL': m1History
-            },
-            lastUpdated: new Date().toLocaleTimeString()
-          };
-
-          this.stockDatabase[cleanSymbol] = newStock;
-          
-          try {
-            const raw = localStorage.getItem(CUSTOM_STOCKS_KEY);
-            const list: StockQuote[] = raw ? JSON.parse(raw) : [];
-            localStorage.setItem(CUSTOM_STOCKS_KEY, JSON.stringify([newStock, ...list.filter(s => s.ticker !== cleanSymbol)]));
-          } catch (e) {}
-
-          this.notify();
-          return newStock;
-        }
+      const liveQuote = await marketDataClient.fetchQuote(cleanSymbol);
+      if (liveQuote && liveQuote.currentPrice > 0) {
+        const stock = this.applyLiveQuote(liveQuote, fallbackName, fallbackExchange);
+        return stock;
       }
     } catch (e) {
-      console.warn('Failed to fetch real chart online', e);
+      console.warn(`Failed to fetch live quote for ${cleanSymbol}`, e);
     }
+
+    // If live fetch is offline, check directory for realistic baseline
+    const dirItem = DIRECTORY_MAP.get(cleanSymbol);
+    if (dirItem) {
+      return this.instantiateStockFromDirectory(dirItem);
+    }
+
+    // Fallback for custom / unlisted stock (uses realistic baseline, never $100 flat)
+    const existing = this.stockDatabase[cleanSymbol];
+    if (existing) return existing;
 
     return this.addCustomStock({
       ticker: cleanSymbol,
@@ -319,12 +212,189 @@ class StockService {
       countryCode: 'US',
       currency: 'USD',
       currencySymbol: '$',
-      price: 100
+      price: 50.00 // realistic default baseline instead of 100
     });
   }
 
   /**
-   * Adds any unlisted/custom stock that a user cannot find
+   * Refreshes a single stock with real live market quote
+   */
+  public async refreshStockQuote(ticker: string): Promise<StockQuote | null> {
+    const clean = ticker.trim().toUpperCase();
+    try {
+      const live = await marketDataClient.fetchQuote(clean);
+      if (live && live.currentPrice > 0) {
+        return this.applyLiveQuote(live);
+      }
+    } catch (e) {
+      console.warn(`refreshStockQuote error for ${clean}`, e);
+    }
+    return this.stockDatabase[clean] || null;
+  }
+
+  /**
+   * Automatically refreshes watchlist stocks with fresh live market prices
+   */
+  public async refreshWatchlistQuotes(watchlist: string[]): Promise<void> {
+    const targets = Array.from(new Set([...watchlist, 'NVDA', 'AAPL', 'MSFT', 'TSLA', 'PLTR']));
+    
+    for (const ticker of targets) {
+      try {
+        const live = await marketDataClient.fetchQuote(ticker);
+        if (live && live.currentPrice > 0) {
+          this.applyLiveQuote(live);
+        }
+      } catch (e) {
+        // silent fail to avoid interrupting UI
+      }
+    }
+  }
+
+  private applyLiveQuote(live: LiveMarketQuote, fallbackName?: string, fallbackExchange?: string): StockQuote {
+    const cleanSymbol = live.ticker.toUpperCase();
+    const currentPrice = live.currentPrice;
+    const prevClose = live.previousClose;
+    const change = live.change;
+    const changePercent = live.changePercent;
+
+    // Convert historical timestamps & closes into HistoricalPoint array
+    const m1History: HistoricalPoint[] = [];
+    if (live.timestamps && live.closes) {
+      for (let i = 0; i < live.timestamps.length; i++) {
+        if (live.closes[i] !== null && live.closes[i] !== undefined) {
+          const d = new Date(live.timestamps[i] * 1000);
+          m1History.push({
+            date: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            price: live.closes[i],
+            volume: live.volumes[i] || 500000
+          });
+        }
+      }
+    }
+
+    if (m1History.length === 0) {
+      m1History.push(
+        { date: 'Prev', price: prevClose, volume: 500000 },
+        { date: 'Now', price: currentPrice, volume: 500000 }
+      );
+    }
+
+    const indicators = calculateAllIndicators(m1History.length >= 5 ? m1History : [
+      { date: '1', price: currentPrice * 0.98, volume: 100000 },
+      { date: '2', price: currentPrice * 0.99, volume: 100000 },
+      { date: '3', price: currentPrice * 0.985, volume: 100000 },
+      { date: '4', price: prevClose, volume: 100000 },
+      { date: '5', price: currentPrice, volume: 100000 }
+    ]);
+
+    // Country parsing
+    let country = 'United States';
+    let countryCode: 'TW' | 'KR' | 'US' | 'UK' | 'NZ' | 'AU' | 'JP' = 'US';
+    if (cleanSymbol.endsWith('.TW')) {
+      country = 'Taiwan';
+      countryCode = 'TW';
+    } else if (cleanSymbol.endsWith('.KS')) {
+      country = 'South Korea';
+      countryCode = 'KR';
+    } else if (cleanSymbol.endsWith('.L')) {
+      country = 'United Kingdom';
+      countryCode = 'UK';
+    } else if (cleanSymbol.endsWith('.NZ')) {
+      country = 'New Zealand';
+      countryCode = 'NZ';
+    } else if (cleanSymbol.endsWith('.AX')) {
+      country = 'Australia';
+      countryCode = 'AU';
+    } else if (cleanSymbol.endsWith('.T')) {
+      country = 'Japan';
+      countryCode = 'JP';
+    }
+
+    const dirItem = DIRECTORY_MAP.get(cleanSymbol);
+    const sector = dirItem?.sector || 'US Equity';
+    const exchangeName = live.exchange || fallbackExchange || dirItem?.exchange || 'NYSE / NASDAQ';
+
+    const stockQuote: StockQuote = {
+      ticker: cleanSymbol,
+      name: live.name || fallbackName || dirItem?.name || cleanSymbol,
+      exchange: exchangeName,
+      country,
+      countryCode,
+      currency: live.currency,
+      currencySymbol: live.currencySymbol,
+      price: currentPrice,
+      change,
+      changePercent,
+      high: live.high,
+      low: live.low,
+      open: live.open,
+      previousClose: prevClose,
+      volume: live.volume,
+      marketCap: live.marketCap || dirItem?.marketCap || 'N/A',
+      peRatio: dirItem?.peRatio || 22.0,
+      sector,
+      indicators,
+      history: {
+        '1D': m1History.slice(-10),
+        '1W': m1History.slice(-7),
+        '1M': m1History,
+        '1Y': m1History,
+        'ALL': m1History
+      },
+      lastUpdated: new Date().toLocaleTimeString()
+    };
+
+    this.stockDatabase[cleanSymbol] = stockQuote;
+
+    // Persist to custom stocks cache
+    try {
+      const raw = localStorage.getItem(CUSTOM_STOCKS_KEY);
+      const list: StockQuote[] = raw ? JSON.parse(raw) : [];
+      localStorage.setItem(CUSTOM_STOCKS_KEY, JSON.stringify([stockQuote, ...list.filter(s => s.ticker !== cleanSymbol)]));
+    } catch (e) {}
+
+    this.notify();
+    return stockQuote;
+  }
+
+  private instantiateStockFromDirectory(item: DirectoryStockItem): StockQuote {
+    const history = generateHistoricalSeries(item.basePrice);
+    const indicators = calculateAllIndicators(history['1M']);
+    const prevClose = Number((item.basePrice * 0.995).toFixed(2));
+    const change = Number((item.basePrice - prevClose).toFixed(2));
+    const changePercent = Number(((change / prevClose) * 100).toFixed(2));
+
+    const newStock: StockQuote = {
+      ticker: item.ticker.toUpperCase(),
+      name: item.name,
+      exchange: item.exchange,
+      country: item.country,
+      countryCode: item.countryCode,
+      currency: item.currency,
+      currencySymbol: item.currencySymbol,
+      price: item.basePrice,
+      change,
+      changePercent,
+      high: Number((item.basePrice * 1.012).toFixed(2)),
+      low: Number((item.basePrice * 0.988).toFixed(2)),
+      open: prevClose,
+      previousClose: prevClose,
+      volume: Math.floor(Math.random() * 15000000 + 5000000),
+      marketCap: item.marketCap || 'N/A',
+      peRatio: item.peRatio || 25.0,
+      sector: item.sector,
+      indicators,
+      history,
+      lastUpdated: new Date().toLocaleTimeString()
+    };
+
+    this.stockDatabase[item.ticker.toUpperCase()] = newStock;
+    this.notify();
+    return newStock;
+  }
+
+  /**
+   * Adds any unlisted/custom stock that a user adds manually
    */
   public addCustomStock(params: {
     ticker: string;
@@ -340,33 +410,9 @@ class StockService {
     const upperTicker = params.ticker.trim().toUpperCase();
     const basePrice = Math.max(0.01, params.price);
 
-    // Generate historical candle series for this new stock
-    const d1: HistoricalPoint[] = [];
-    const times = ['09:30', '10:30', '11:30', '12:30', '13:30', '14:30', '15:30', '16:00'];
-    let curPrice = basePrice * 0.99;
-    times.forEach(t => {
-      curPrice = curPrice + (Math.random() - 0.48) * (basePrice * 0.01);
-      d1.push({ date: t, price: Number(curPrice.toFixed(2)), volume: 150000 });
-    });
-
-    const m1: HistoricalPoint[] = [];
-    const now = new Date();
-    let monthPrice = basePrice * 0.95;
-    for (let i = 30; i >= 0; i--) {
-      const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-      monthPrice = monthPrice + (Math.random() - 0.48) * (basePrice * 0.02);
-      m1.push({
-        date: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        price: Number(monthPrice.toFixed(2)),
-        volume: 2500000
-      });
-    }
-
-    if (d1.length > 0) d1[d1.length - 1].price = basePrice;
-    if (m1.length > 0) m1[m1.length - 1].price = basePrice;
-
-    const indicators = calculateAllIndicators(m1);
-    const prevClose = Number((basePrice * 0.99).toFixed(2));
+    const history = generateHistoricalSeries(basePrice);
+    const indicators = calculateAllIndicators(history['1M']);
+    const prevClose = Number((basePrice * 0.995).toFixed(2));
     const change = Number((basePrice - prevClose).toFixed(2));
     const changePercent = Number(((change / prevClose) * 100).toFixed(2));
 
@@ -390,13 +436,7 @@ class StockService {
       peRatio: 20.0,
       sector: params.sector || 'Custom Holding',
       indicators,
-      history: {
-        '1D': d1,
-        '1W': m1.slice(-7),
-        '1M': m1,
-        '1Y': m1,
-        'ALL': m1
-      },
+      history,
       lastUpdated: new Date().toLocaleTimeString()
     };
 
@@ -483,18 +523,22 @@ class StockService {
     this.listeners.forEach(fn => fn({ ...this.stockDatabase }));
   }
 
+  /**
+   * Micro-tick simulation that gently animates live prices without distorting reality
+   */
   public startSimulation() {
     if (this.simulationInterval) return;
 
     this.simulationInterval = window.setInterval(() => {
       const tickers = Object.keys(this.stockDatabase);
-      const count = Math.floor(Math.random() * 4) + 2;
+      const count = Math.floor(Math.random() * 3) + 1;
       for (let i = 0; i < count; i++) {
         const randomTicker = tickers[Math.floor(Math.random() * tickers.length)];
         const stock = this.stockDatabase[randomTicker];
         if (!stock) continue;
 
-        const tickPercent = (Math.random() - 0.49) * 0.003;
+        // Extremely small realistic micro-tick (0.02% max)
+        const tickPercent = (Math.random() - 0.5) * 0.0004;
         const newPrice = Number((stock.price * (1 + tickPercent)).toFixed(2));
         const newChange = Number((newPrice - stock.previousClose).toFixed(2));
         const newChangePercent = Number(((newChange / stock.previousClose) * 100).toFixed(2));
@@ -509,8 +553,6 @@ class StockService {
           };
         }
 
-        const updatedIndicators = calculateAllIndicators(stock.history['1M']);
-
         this.stockDatabase[randomTicker] = {
           ...stock,
           price: newPrice,
@@ -518,7 +560,6 @@ class StockService {
           changePercent: newChangePercent,
           high: newHigh,
           low: newLow,
-          indicators: updatedIndicators,
           history: {
             ...stock.history,
             '1D': history1D

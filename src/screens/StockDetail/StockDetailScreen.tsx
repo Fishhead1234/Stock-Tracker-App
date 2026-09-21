@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ArrowLeft, 
   Star, 
@@ -31,6 +31,12 @@ export const StockDetailScreen: React.FC = () => {
   const [editPriceInput, setEditPriceInput] = useState('');
 
   const stock = selectedTicker ? quotes[selectedTicker.toUpperCase()] : Object.values(quotes)[0];
+
+  useEffect(() => {
+    if (stock?.ticker) {
+      stockService.refreshStockQuote(stock.ticker);
+    }
+  }, [stock?.ticker]);
 
   if (!stock) {
     return (
