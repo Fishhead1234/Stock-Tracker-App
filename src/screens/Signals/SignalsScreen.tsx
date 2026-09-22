@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Zap, Filter, Compass, AlertCircle, TrendingUp, Info } from 'lucide-react';
+import { Zap, Filter, Compass, AlertCircle, TrendingUp, Info, PlusCircle } from 'lucide-react';
 import { useMarketStore } from '../../store/marketStore';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { useSettingsStore } from '../../store/settingsStore';
@@ -8,25 +8,34 @@ import { SignalCard } from '../../components/SignalAlert/SignalCard';
 import { DisclaimerBanner } from '../../components/Common/DisclaimerBanner';
 
 export const SignalsScreen: React.FC = () => {
-  const { quotes, selectTicker } = useMarketStore();
+  const { quotes, selectTicker, watchlist } = useMarketStore();
   const { positions } = usePortfolioStore();
   const { setActiveTab } = useSettingsStore();
 
-  const [activeFilter, setActiveFilter] = useState<'ALL' | 'BUY' | 'SELL' | 'PORTFOLIO'>('ALL');
+  const [activeFilter, setActiveFilter] = useState<'ALL' | 'PORTFOLIO' | 'WATCHLIST' | 'BUY' | 'SELL'>('ALL');
 
-  const allStocks = Object.values(quotes);
-  const signals = allStocks.map(stock => generateTimingSignal(stock));
+  const portfolioTickers = new Set(positions.map(p => p.ticker.toUpperCase()));
+  const watchlistTickers = new Set(watchlist.map(t => t.toUpperCase()));
+  const allTrackedTickers = new Set([...portfolioTickers, ...watchlistTickers]);
+
+  // Strictly filter signals to stocks in user's portfolio and monitored watchlist
+  const trackedQuotes = Object.values(quotes).filter(s => allTrackedTickers.has(s.ticker.toUpperCase()));
+  const signals = trackedQuotes.map(stock => generateTimingSignal(stock));
 
   // Filter signals
   const filteredSignals = signals.filter(sig => {
+    const t = sig.ticker.toUpperCase();
+    if (activeFilter === 'PORTFOLIO') {
+      return portfolioTickers.has(t);
+    }
+    if (activeFilter === 'WATCHLIST') {
+      return watchlistTickers.has(t);
+    }
     if (activeFilter === 'BUY') {
       return sig.action === 'STRONG_BUY' || sig.action === 'BUY';
     }
     if (activeFilter === 'SELL') {
       return sig.action === 'TRIM' || sig.action === 'STRONG_SELL';
-    }
-    if (activeFilter === 'PORTFOLIO') {
-      return positions.some(p => p.ticker.toUpperCase() === sig.ticker.toUpperCase());
     }
     return true;
   });
@@ -43,12 +52,19 @@ export const SignalsScreen: React.FC = () => {
       <div className="px-4 space-y-4">
         {/* Top Header */}
         <div className="pt-1">
-          <span className="text-[10px] font-bold text-gold-400 uppercase tracking-wider font-mono">
-            Timing Engine
-          </span>
-          <h2 className="text-xl font-extrabold text-white">Intelligent Timing Signals</h2>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Technical indicator setups translated into clear, actionable beginner guidance.
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-[10px] font-bold text-gold-400 uppercase tracking-wider font-mono">
+                Timing Engine
+              </span>
+              <h2 className="text-xl font-extrabold text-white">My Stocks & Monitored Signals</h2>
+            </div>
+            <span className="text-xs bg-navy-800 border border-navy-700 text-growth-400 font-mono px-2 py-0.5 rounded-lg">
+              {allTrackedTickers.size} Tracked
+            </span>
+          </div>
+          <p className="text-xs text-slate-400 mt-1">
+            Real-time timing setups tailored specifically to your portfolio and monitored stocks.
           </p>
         </div>
 
@@ -63,7 +79,7 @@ export const SignalsScreen: React.FC = () => {
               <span className="text-xs font-semibold text-slate-200">Moderate Greed</span>
             </div>
             <p className="text-[11px] text-slate-400 mt-1">
-              Market momentum is positive. Focus on disciplined dip buying.
+              Market momentum is positive. Focus on disciplined dip buying on your tracked watchlist.
             </p>
           </div>
           <div className="w-12 h-12 rounded-full bg-growth-500/15 border border-growth-500/40 flex items-center justify-center text-growth-400">
@@ -74,10 +90,11 @@ export const SignalsScreen: React.FC = () => {
         {/* Filter Pills */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
           {[
-            { id: 'ALL', label: `All Signals (${signals.length})` },
+            { id: 'ALL', label: `All Tracked (${signals.length})` },
+            { id: 'PORTFOLIO', label: `My Portfolio (${positions.length})` },
+            { id: 'WATCHLIST', label: `Watchlist (${watchlist.length})` },
             { id: 'BUY', label: 'Buy Windows' },
-            { id: 'SELL', label: 'Take Profit / Caution' },
-            { id: 'PORTFOLIO', label: `My Stocks (${positions.length})` }
+            { id: 'SELL', label: 'Take Profit / Caution' }
           ].map(f => (
             <button
               key={f.id}
@@ -93,11 +110,30 @@ export const SignalsScreen: React.FC = () => {
           ))}
         </div>
 
-        {/* Signals List Feed */}
-        {filteredSignals.length === 0 ? (
+        {/* Empty State when no stocks are tracked */}
+        {allTrackedTickers.size === 0 ? (
+          <div className="bg-navy-900/60 border border-navy-800 rounded-2xl p-6 text-center text-slate-400 space-y-3">
+            <div className="w-12 h-12 mx-auto rounded-full bg-navy-800 border border-navy-700 flex items-center justify-center text-gold-400">
+              <Zap className="w-6 h-6" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-sm font-bold text-white">No Monitored Stocks Yet</h3>
+              <p className="text-xs text-slate-400 max-w-xs mx-auto">
+                Add stocks to your Watchlist or log your Portfolio holdings on the Dashboard to see personalized timing signals here.
+              </p>
+            </div>
+            <button
+              onClick={() => setActiveTab('dashboard')}
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-growth-500 hover:bg-growth-600 text-navy-950 font-bold text-xs rounded-xl shadow transition"
+            >
+              <PlusCircle className="w-4 h-4" />
+              Go to Dashboard & Add Stocks
+            </button>
+          </div>
+        ) : filteredSignals.length === 0 ? (
           <div className="bg-navy-900/50 border border-navy-850 rounded-2xl p-6 text-center text-slate-400 space-y-2">
             <Compass className="w-8 h-8 mx-auto text-slate-500" />
-            <p className="text-xs">No active signals match the selected filter right now.</p>
+            <p className="text-xs">No active signals match the selected filter in your monitored list.</p>
           </div>
         ) : (
           <div className="space-y-3">

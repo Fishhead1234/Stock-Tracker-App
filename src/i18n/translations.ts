@@ -23,6 +23,7 @@ export const translations: Record<SupportedLanguage, Record<string, string>> = {
     // Navigation
     nav_dashboard: 'Dashboard',
     nav_signals: 'Signals',
+    nav_news: 'News',
     nav_education: 'Education',
     nav_settings: 'Settings',
 
@@ -126,6 +127,7 @@ export const translations: Record<SupportedLanguage, Record<string, string>> = {
     // Navigation
     nav_dashboard: 'ダッシュボード',
     nav_signals: 'シグナル',
+    nav_news: 'ニュース',
     nav_education: '学習ガイド',
     nav_settings: '設定',
 
@@ -229,6 +231,7 @@ export const translations: Record<SupportedLanguage, Record<string, string>> = {
     // Navigation
     nav_dashboard: '대시보드',
     nav_signals: '타이밍 신호',
+    nav_news: '뉴스',
     nav_education: '학습 가이드',
     nav_settings: '설정',
 
@@ -332,6 +335,7 @@ export const translations: Record<SupportedLanguage, Record<string, string>> = {
     // Navigation
     nav_dashboard: '儀表板',
     nav_signals: '時機信號',
+    nav_news: '新聞資訊',
     nav_education: '投資教學',
     nav_settings: '設定',
 
@@ -435,6 +439,7 @@ export const translations: Record<SupportedLanguage, Record<string, string>> = {
     // Navigation
     nav_dashboard: '仪表板',
     nav_signals: '时机信号',
+    nav_news: '新闻资讯',
     nav_education: '投资教学',
     nav_settings: '设置',
 
@@ -538,6 +543,7 @@ export const translations: Record<SupportedLanguage, Record<string, string>> = {
     // Navigation
     nav_dashboard: 'Panel',
     nav_signals: 'Señales',
+    nav_news: 'Noticias',
     nav_education: 'Educación',
     nav_settings: 'Ajustes',
 
@@ -641,6 +647,7 @@ export const translations: Record<SupportedLanguage, Record<string, string>> = {
     // Navigation
     nav_dashboard: 'Übersicht',
     nav_signals: 'Signale',
+    nav_news: 'Nachrichten',
     nav_education: 'Lernbereich',
     nav_settings: 'Einstellungen',
 
@@ -744,6 +751,7 @@ export const translations: Record<SupportedLanguage, Record<string, string>> = {
     // Navigation
     nav_dashboard: 'Tableau de bord',
     nav_signals: 'Signaux',
+    nav_news: 'Actualités',
     nav_education: 'Éducation',
     nav_settings: 'Paramètres',
 

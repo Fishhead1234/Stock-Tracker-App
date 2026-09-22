@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type AppTab = 'dashboard' | 'signals' | 'education' | 'settings' | 'stockDetail';
+export type AppTab = 'dashboard' | 'signals' | 'news' | 'education' | 'settings' | 'stockDetail';
 
 interface SettingsState {
   hasCompletedOnboarding: boolean;

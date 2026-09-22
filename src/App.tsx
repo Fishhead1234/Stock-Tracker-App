@@ -8,6 +8,7 @@ import { OnboardingScreen } from './screens/Onboarding/OnboardingScreen';
 import { DashboardScreen } from './screens/Dashboard/DashboardScreen';
 import { StockDetailScreen } from './screens/StockDetail/StockDetailScreen';
 import { SignalsScreen } from './screens/Signals/SignalsScreen';
+import { NewsScreen } from './screens/News/NewsScreen';
 import { EducationScreen } from './screens/Education/EducationScreen';
 import { SettingsScreen } from './screens/Settings/SettingsScreen';
 import { generateTimingSignal } from './services/signalEngine';
@@ -68,6 +69,7 @@ export const App: React.FC = () => {
         {activeTab === 'dashboard' && <DashboardScreen />}
         {activeTab === 'stockDetail' && <StockDetailScreen />}
         {activeTab === 'signals' && <SignalsScreen />}
+        {activeTab === 'news' && <NewsScreen />}
         {activeTab === 'education' && <EducationScreen />}
         {activeTab === 'settings' && <SettingsScreen />}
 
