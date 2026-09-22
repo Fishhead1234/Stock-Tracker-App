@@ -11,6 +11,9 @@ const config: CapacitorConfig = {
     CapacitorHttp: {
       enabled: true
     },
+    LocalNotifications: {
+      iconColor: "#10B981"
+    },
     SplashScreen: {
       launchShowDuration: 2000,
       backgroundColor: "#0A1128",

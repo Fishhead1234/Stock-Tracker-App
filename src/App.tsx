@@ -15,6 +15,9 @@ import { generateTimingSignal } from './services/signalEngine';
 import { useSignalNotifier } from './hooks/useSignalNotifier';
 import { revenueCatService } from './services/revenueCatService';
 import { useSubscriptionStore } from './store/subscriptionStore';
+import { notificationService } from './services/notificationService';
+import { LocalNotifications } from '@capacitor/local-notifications';
+import { Capacitor } from '@capacitor/core';
 
 export const App: React.FC = () => {
   const { hasCompletedOnboarding, activeTab } = useSettingsStore();
@@ -22,6 +25,25 @@ export const App: React.FC = () => {
 
   // Watch for stock timing signals and dispatch alerts
   useSignalNotifier();
+
+  // Initialize notifications and listen for notification click actions
+  useEffect(() => {
+    notificationService.initialize();
+
+    if (Capacitor.isNativePlatform()) {
+      const listenerPromise = LocalNotifications.addListener('localNotificationActionPerformed', (action) => {
+        const ticker = action.notification?.extra?.ticker;
+        if (ticker) {
+          useMarketStore.getState().selectTicker(ticker);
+          useSettingsStore.getState().setActiveTab('stockDetail');
+        }
+      });
+
+      return () => {
+        listenerPromise.then(handler => handler.remove());
+      };
+    }
+  }, []);
 
   // Initialize RevenueCat SDK on startup & sync active entitlements
   useEffect(() => {

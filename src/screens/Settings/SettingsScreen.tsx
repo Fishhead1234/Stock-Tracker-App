@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ShieldAlert, 
   RotateCcw, 
@@ -73,6 +73,13 @@ export const SettingsScreen: React.FC = () => {
   const [showComplianceModal, setShowComplianceModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [testNotificationResult, setTestNotificationResult] = useState<string | null>(null);
+  const [hasSystemPermission, setHasSystemPermission] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    notificationService.getPermissionStatus().then(status => {
+      setHasSystemPermission(status);
+    });
+  }, []);
 
   const trialDays = getTrialDaysRemaining();
   const seatsRemaining = Math.max(0, lifetimeSeatsTotal - lifetimeSeatsClaimed);
@@ -96,18 +103,32 @@ export const SettingsScreen: React.FC = () => {
     }
   };
 
+  const handleRequestSystemPermission = async () => {
+    setTestNotificationResult(null);
+    const res = await notificationService.requestPermission();
+    const isGranted = res === 'granted';
+    setHasSystemPermission(isGranted);
+    if (isGranted) {
+      setTestNotificationResult('✓ System notifications enabled! Native status bar and lock screen alerts are active.');
+    } else {
+      setTestNotificationResult('Notification permission not granted. You can enable them anytime in phone Settings -> Apps -> InvestLearn.');
+    }
+  };
+
   const handleTriggerTestAlert = async (type: 'HOLDING' | 'WATCHLIST') => {
     setTestNotificationResult(null);
-    const granted = await notificationService.sendTestNotification(type);
-    if (granted) {
+    const success = await notificationService.sendTestNotification(type);
+    const permStatus = await notificationService.getPermissionStatus();
+    setHasSystemPermission(permStatus);
+    if (success) {
       setTestNotificationResult(
         type === 'HOLDING'
-          ? '✓ Dispatched Personal Holding alert! Check your OS system notifications and in-app bell.'
-          : '✓ Dispatched Watchlist alert! Check your OS system notifications and in-app bell.'
+          ? '✓ Dispatched live holding alert to your Android status bar & in-app bell!'
+          : '✓ Dispatched live watchlist alert to your Android status bar & in-app bell!'
       );
     } else {
       setTestNotificationResult(
-        '✓ In-app alert logged! (To see OS system banner popups, allow notifications in your browser/device permissions).'
+        '✓ Recorded in in-app notification center. Tap "Enable System Notifications" above to allow Android status bar popups.'
       );
     }
   };
@@ -358,6 +379,38 @@ export const SettingsScreen: React.FC = () => {
                   </span>
                 </button>
               </div>
+            </div>
+
+            {/* System Notification Permission Status Banner */}
+            <div className="pt-2 border-t border-navy-800 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-semibold text-slate-400 block">
+                  Android OS System Alerts:
+                </span>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                  hasSystemPermission
+                    ? 'bg-growth-500/20 text-growth-400 border border-growth-500/40'
+                    : 'bg-gold-500/20 text-gold-400 border border-gold-500/40'
+                }`}>
+                  {hasSystemPermission ? 'Active (Status Bar Enabled)' : 'Permission Needed'}
+                </span>
+              </div>
+
+              {!hasSystemPermission && (
+                <div className="p-3 bg-navy-950/80 border border-gold-500/40 rounded-xl space-y-2">
+                  <p className="text-xs text-slate-300">
+                    To receive pop-up banners in your phone's notification bar when a buy or sell signal triggers, grant system notification permission.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleRequestSystemPermission}
+                    className="w-full py-2 px-3 bg-growth-500 hover:bg-growth-600 text-navy-950 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 shadow transition"
+                  >
+                    <BellRing className="w-3.5 h-3.5" />
+                    <span>Enable System Notifications</span>
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Test Notification Triggers */}
