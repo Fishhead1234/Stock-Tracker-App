@@ -17,7 +17,8 @@ import {
   Volume2,
   VolumeX,
   Send,
-  AlertCircle
+  AlertCircle,
+  Bot
 } from 'lucide-react';
 import { useSettingsStore } from '../../store/settingsStore';
 import { usePortfolioStore } from '../../store/portfolioStore';
@@ -25,6 +26,7 @@ import { useNotificationStore } from '../../store/notificationStore';
 import { useSubscriptionStore } from '../../store/subscriptionStore';
 import { notificationService } from '../../services/notificationService';
 import { stockService } from '../../services/stockService';
+import { aiTutorService } from '../../services/aiTutorService';
 import { ComplianceModal } from '../../components/Common/ComplianceModal';
 import { UpgradeProModal } from '../../components/Subscription/UpgradeProModal';
 import { COMPLIANCE_NOTICES } from '../../constants/compliance';
@@ -37,6 +39,10 @@ export const SettingsScreen: React.FC = () => {
   const { 
     finnhubApiKey, 
     setFinnhubApiKey, 
+    geminiApiKey,
+    setGeminiApiKey,
+    geminiModel,
+    setGeminiModel,
     resetOnboarding,
     isPhoneFrameView,
     setPhoneFrameView,
@@ -70,10 +76,30 @@ export const SettingsScreen: React.FC = () => {
   const [inputKey, setInputKey] = useState(finnhubApiKey);
   const [testResult, setTestResult] = useState<string | null>(null);
   const [isTesting, setIsTesting] = useState(false);
+
+  const [inputGeminiKey, setInputGeminiKey] = useState(geminiApiKey);
+  const [geminiTestResult, setGeminiTestResult] = useState<string | null>(null);
+  const [isTestingGemini, setIsTestingGemini] = useState(false);
+
   const [showComplianceModal, setShowComplianceModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [testNotificationResult, setTestNotificationResult] = useState<string | null>(null);
   const [hasSystemPermission, setHasSystemPermission] = useState<boolean | null>(null);
+
+  const handleSaveGeminiKey = async () => {
+    const trimmed = inputGeminiKey.trim();
+    setGeminiApiKey(trimmed);
+    if (!trimmed) {
+      setGeminiTestResult('Using default InvestLearn serverless AI proxy.');
+      return;
+    }
+
+    setIsTestingGemini(true);
+    setGeminiTestResult(null);
+    const result = await aiTutorService.testConnection(trimmed, geminiModel || 'gemini-2.5-flash');
+    setIsTestingGemini(false);
+    setGeminiTestResult(result.message);
+  };
 
   useEffect(() => {
     notificationService.getPermissionStatus().then(status => {
@@ -552,7 +578,77 @@ export const SettingsScreen: React.FC = () => {
           </div>
         </div>
 
-        {/* 7. Display & Viewport Mode */}
+        {/* 7. Gemini AI Market Tutor Setup */}
+        <div className="bg-navy-900/90 border border-purple-500/30 rounded-2xl p-4 space-y-3.5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-purple-500/20 border border-purple-400/40 flex items-center justify-center text-purple-300">
+                <Bot className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <span>Gemini AI Market Tutor</span>
+                  <Sparkles className="w-3 h-3 text-gold-400" />
+                </h3>
+                <span className="text-[11px] text-slate-400">Powered by Google Gemini 2.5</span>
+              </div>
+            </div>
+
+            <span className="text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-full font-mono font-bold">
+              {geminiModel || 'gemini-2.5-flash'}
+            </span>
+          </div>
+
+          <p className="text-xs text-slate-300 leading-relaxed">
+            The AI Market Tutor analyzes stock charts, RSI, MACD crossovers, and financial news in plain English. Works out-of-the-box, or connect your own free Google Gemini API key for private, unlimited queries.
+          </p>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-[11px] font-semibold text-slate-400">
+                Custom Gemini API Key (Optional)
+              </label>
+              <a
+                href="https://aistudio.google.com/app/apikey"
+                target="_blank"
+                rel="noreferrer"
+                className="text-[10px] text-purple-400 hover:text-purple-300 underline font-sans"
+              >
+                Get free key at Google AI Studio ↗
+              </a>
+            </div>
+
+            <div className="flex gap-2">
+              <input
+                type="password"
+                value={inputGeminiKey}
+                onChange={(e) => setInputGeminiKey(e.target.value)}
+                placeholder="Paste Gemini API key (AIzaSy...)"
+                className="flex-1 bg-navy-950 border border-navy-750 focus:border-purple-500 rounded-xl px-3 py-2 text-xs text-white font-mono placeholder-slate-600 focus:outline-none transition"
+              />
+              <button
+                type="button"
+                onClick={handleSaveGeminiKey}
+                disabled={isTestingGemini}
+                className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold rounded-xl shadow transition disabled:opacity-50"
+              >
+                {isTestingGemini ? 'Testing...' : 'Save & Test'}
+              </button>
+            </div>
+
+            {geminiTestResult && (
+              <div className={`p-2.5 rounded-xl border text-xs animate-fade-in ${
+                geminiTestResult.startsWith('✓')
+                  ? 'bg-growth-950/50 border-growth-500/40 text-growth-300'
+                  : 'bg-navy-950/90 border-navy-750 text-slate-300'
+              }`}>
+                {geminiTestResult}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* 8. Display & Viewport Mode */}
         <div className="bg-navy-900/90 border border-navy-800 rounded-2xl p-4 space-y-3 shadow-sm">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">

@@ -18,6 +18,8 @@ import { TechnicalGauges } from '../../components/StockDetail/TechnicalGauges';
 import { SignalExplanation } from '../../components/StockDetail/SignalExplanation';
 import { PositionStats } from '../../components/StockDetail/PositionStats';
 import { AddStockModal } from '../AddStock/AddStockModal';
+import { AITutorCard } from '../../components/AI/AITutorCard';
+import { AITutorModal } from '../../components/AI/AITutorModal';
 import { generateTimingSignal } from '../../services/signalEngine';
 import { DisclaimerBanner } from '../../components/Common/DisclaimerBanner';
 
@@ -29,6 +31,8 @@ export const StockDetailScreen: React.FC = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditingPrice, setIsEditingPrice] = useState(false);
   const [editPriceInput, setEditPriceInput] = useState('');
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [initialAiPrompt, setInitialAiPrompt] = useState<string | undefined>(undefined);
 
   const stock = selectedTicker ? quotes[selectedTicker.toUpperCase()] : Object.values(quotes)[0];
 
@@ -193,6 +197,15 @@ export const StockDetailScreen: React.FC = () => {
         {/* Interactive Price Chart with Timeframes */}
         <PriceChart history={stock.history} currentPrice={stock.price} />
 
+        {/* Gemini AI Market Tutor Card & 1-Tap Prompts */}
+        <AITutorCard
+          stock={stock}
+          onOpenChat={(prompt) => {
+            setInitialAiPrompt(prompt);
+            setIsAiModalOpen(true);
+          }}
+        />
+
         {/* Intelligent Timing Advice & Beginner Breakdown */}
         <SignalExplanation signal={signal} />
 
@@ -211,6 +224,17 @@ export const StockDetailScreen: React.FC = () => {
         <AddStockModal
           preselectedTicker={stock.ticker}
           onClose={() => setIsAddModalOpen(false)}
+        />
+      )}
+
+      {isAiModalOpen && (
+        <AITutorModal
+          stock={stock}
+          initialPrompt={initialAiPrompt}
+          onClose={() => {
+            setIsAiModalOpen(false);
+            setInitialAiPrompt(undefined);
+          }}
         />
       )}
     </div>

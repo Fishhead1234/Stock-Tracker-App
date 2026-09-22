@@ -11,6 +11,8 @@ interface SettingsState {
   interestedCompanies: string[];
   currency: 'USD' | 'EUR' | 'GBP';
   finnhubApiKey: string;
+  geminiApiKey: string;
+  geminiModel: string;
   isPhoneFrameView: boolean;
   activeTab: AppTab;
   setAgeConfirmed: (val: boolean) => void;
@@ -22,6 +24,8 @@ interface SettingsState {
   resetOnboarding: () => void;
   setCurrency: (c: 'USD' | 'EUR' | 'GBP') => void;
   setFinnhubApiKey: (key: string) => void;
+  setGeminiApiKey: (key: string) => void;
+  setGeminiModel: (model: string) => void;
   setPhoneFrameView: (val: boolean) => void;
   setActiveTab: (tab: AppTab) => void;
 }
@@ -44,6 +48,8 @@ const loadSavedSettings = () => {
     interestedCompanies: [],
     currency: 'USD',
     finnhubApiKey: '',
+    geminiApiKey: '',
+    geminiModel: 'gemini-2.5-flash',
     isPhoneFrameView: true,
     activeTab: 'dashboard'
   };
@@ -64,6 +70,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
         interestedCompanies: state.interestedCompanies,
         currency: state.currency,
         finnhubApiKey: state.finnhubApiKey,
+        geminiApiKey: state.geminiApiKey,
+        geminiModel: state.geminiModel,
         isPhoneFrameView: state.isPhoneFrameView
       }));
     } catch (e) {
@@ -123,6 +131,16 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
 
     setFinnhubApiKey: (finnhubApiKey) => {
       set({ finnhubApiKey });
+      persist();
+    },
+
+    setGeminiApiKey: (geminiApiKey) => {
+      set({ geminiApiKey });
+      persist();
+    },
+
+    setGeminiModel: (geminiModel) => {
+      set({ geminiModel });
       persist();
     },
 

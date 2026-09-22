@@ -14,7 +14,8 @@ import {
   Compass, 
   ExternalLink,
   Flame,
-  CheckCircle2
+  CheckCircle2,
+  Bot
 } from 'lucide-react';
 import { newsService } from '../../services/newsService';
 import { NewsArticle, NewsCategory } from '../../types/news';
@@ -22,6 +23,7 @@ import { useMarketStore } from '../../store/marketStore';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { useSettingsStore } from '../../store/settingsStore';
 import { DisclaimerBanner } from '../../components/Common/DisclaimerBanner';
+import { AITutorModal } from '../../components/AI/AITutorModal';
 
 export const NewsScreen: React.FC = () => {
   const { quotes, selectTicker, watchlist } = useMarketStore();
@@ -30,6 +32,8 @@ export const NewsScreen: React.FC = () => {
 
   const [activeCategory, setActiveCategory] = useState<'ALL' | 'MY_STOCKS' | 'EARNINGS' | 'MACRO' | 'TECH' | 'REGULATION'>('ALL');
   const [showPrimarySourcesGuide, setShowPrimarySourcesGuide] = useState(false);
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [aiInitialPrompt, setAiInitialPrompt] = useState<string | undefined>(undefined);
 
   const portfolioTickers = positions.map(p => p.ticker.toUpperCase());
   const userTrackedTickers = Array.from(new Set([...portfolioTickers, ...watchlist.map(t => t.toUpperCase())]));
@@ -112,6 +116,31 @@ export const NewsScreen: React.FC = () => {
               ))}
             </div>
           </div>
+        </div>
+
+        {/* Gemini AI Market Tutor Banner */}
+        <div className="bg-gradient-to-r from-purple-950/50 via-navy-900 to-navy-950 border border-purple-500/30 rounded-2xl p-3.5 flex items-center justify-between shadow-sm">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-purple-500/20 border border-purple-400/40 flex items-center justify-center text-purple-300 shrink-0">
+              <Bot className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <h4 className="text-xs font-bold text-white">Ask Gemini Market Tutor</h4>
+                <span className="text-[10px] bg-purple-500/20 text-purple-300 px-1.5 rounded font-mono">2.5 Flash</span>
+              </div>
+              <p className="text-[11px] text-slate-400">Ask about inflation, Fed rate moves, or why stocks are reacting</p>
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              setAiInitialPrompt('Can you explain what today\'s macro headlines and Fed monetary policy signals mean for beginner stock investors?');
+              setIsAiModalOpen(true);
+            }}
+            className="shrink-0 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 text-white rounded-xl text-xs font-semibold shadow transition transform active:scale-95"
+          >
+            Ask AI
+          </button>
         </div>
 
         {/* Educational Mini-Guide: Where Smart Money Gets Info */}
@@ -285,6 +314,17 @@ export const NewsScreen: React.FC = () => {
           </div>
         )}
       </div>
+
+      {isAiModalOpen && (
+        <AITutorModal
+          stock={null}
+          initialPrompt={aiInitialPrompt}
+          onClose={() => {
+            setIsAiModalOpen(false);
+            setAiInitialPrompt(undefined);
+          }}
+        />
+      )}
     </div>
   );
 };
