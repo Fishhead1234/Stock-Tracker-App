@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Briefcase, Calculator, Plus, Trash2 } from 'lucide-react';
+import { Briefcase, Calculator, Plus, Trash2, Edit3 } from 'lucide-react';
 import { Position } from '../../types/portfolio';
 import { StockQuote } from '../../types/stock';
 import { usePortfolioStore } from '../../store/portfolioStore';
+import { EditHoldingModal } from './EditHoldingModal';
 
 interface Props {
   stock: StockQuote;
@@ -13,6 +14,7 @@ interface Props {
 export const PositionStats: React.FC<Props> = ({ stock, position, onOpenAddModal }) => {
   const { deletePosition } = usePortfolioStore();
   const [whatIfShares, setWhatIfShares] = useState<number>(10);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const curr = stock.currencySymbol || '$';
   const costBasis = position ? position.shares * position.averageBuyPrice : 0;
@@ -36,13 +38,22 @@ export const PositionStats: React.FC<Props> = ({ stock, position, onOpenAddModal
           <h4 className="text-xs font-bold text-white uppercase tracking-wider">Your Personal Holding</h4>
         </div>
         {position ? (
-          <button
-            onClick={() => deletePosition(position.id)}
-            className="text-[11px] text-loss-500 hover:text-loss-400 flex items-center gap-1 transition"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-            <span>Remove</span>
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setIsEditModalOpen(true)}
+              className="text-xs font-semibold text-growth-400 hover:text-growth-300 bg-growth-500/15 border border-growth-500/30 px-2.5 py-1 rounded-lg flex items-center gap-1 transition shadow-sm active:scale-95"
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+              <span>Edit</span>
+            </button>
+            <button
+              onClick={() => deletePosition(position.id)}
+              className="p-1 rounded-lg text-slate-400 hover:text-loss-400 hover:bg-loss-500/10 transition"
+              title="Remove Position"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
         ) : (
           <button
             onClick={onOpenAddModal}
@@ -132,6 +143,14 @@ export const PositionStats: React.FC<Props> = ({ stock, position, onOpenAddModal
           </div>
         </div>
       </div>
+
+      {isEditModalOpen && position && (
+        <EditHoldingModal
+          stock={stock}
+          position={position}
+          onClose={() => setIsEditModalOpen(false)}
+        />
+      )}
     </div>
   );
 };
