@@ -71,8 +71,8 @@
      ========================================================================== */
   --touch-target-min: 48px;    /* Minimum interactive touch target bounding box */
   --bottom-nav-height: 56px;   /* Standard mobile bottom navigation bar */
-  --safe-area-top: 47px;       /* iOS Dynamic Island / notch safe area */
-  --safe-area-bottom: 34px;    /* iOS Home indicator safe area */
+  --safe-area-top: env(safe-area-inset-top, 0px);       /* Dynamic safe area inset */
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);    /* Dynamic safe area inset */
   --border-radius-card: 12px;
   --border-radius-button: 8px;
   --border-radius-pill: 9999px;

@@ -18,16 +18,24 @@ import { useSubscriptionStore } from './store/subscriptionStore';
 import { notificationService } from './services/notificationService';
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { Capacitor } from '@capacitor/core';
+import { StatusBar, Style } from '@capacitor/status-bar';
 
 export const App: React.FC = () => {
   const { hasCompletedOnboarding, activeTab, themeMode } = useSettingsStore();
   const { quotes, setQuotes } = useMarketStore();
 
-  // Sync theme mode to documentElement
+  // Sync theme mode to documentElement and native StatusBar
   useEffect(() => {
     const isDark = themeMode === 'dark';
     document.documentElement.classList.toggle('dark', isDark);
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    document.body.style.backgroundColor = isDark ? '#070D1E' : '#F2F2F7';
+
+    if (Capacitor.isNativePlatform()) {
+      StatusBar.setOverlaysWebView({ overlay: false }).catch(() => {});
+      StatusBar.setStyle({ style: isDark ? Style.Dark : Style.Light }).catch(() => {});
+      StatusBar.setBackgroundColor({ color: isDark ? '#070D1E' : '#F2F2F7' }).catch(() => {});
+    }
   }, [themeMode]);
 
   // Watch for stock timing signals and dispatch alerts

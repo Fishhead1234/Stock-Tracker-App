@@ -93,7 +93,7 @@ export const OnboardingScreen: React.FC = () => {
 
   return (
     <div 
-      className={`min-h-full flex-1 flex flex-col justify-between p-5 transition-colors duration-200 ${
+      className={`min-h-full flex-1 flex flex-col justify-between p-5 transition-colors duration-200 safe-top ${
         isLight ? 'bg-[#F2F2F7] text-[#000000]' : 'bg-[#070D1E] text-white'
       }`}
     >

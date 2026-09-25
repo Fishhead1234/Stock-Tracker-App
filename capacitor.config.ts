@@ -14,6 +14,11 @@ const config: CapacitorConfig = {
     LocalNotifications: {
       iconColor: "#10B981"
     },
+    StatusBar: {
+      overlaysWebView: false,
+      style: "DARK",
+      backgroundColor: "#070D1E"
+    },
     SplashScreen: {
       launchShowDuration: 2000,
       backgroundColor: "#0A1128",

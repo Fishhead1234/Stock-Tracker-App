@@ -12,17 +12,17 @@ export const PhoneFrame: React.FC<Props> = ({ children }) => {
   return (
     <div 
       data-theme={isLight ? 'light' : 'dark'}
-      className={`min-h-screen w-full flex justify-center items-stretch transition-colors duration-200 ${
+      className={`min-h-screen w-full flex justify-center items-stretch transition-colors duration-200 overflow-x-hidden ${
         isLight ? 'bg-[#F2F2F7] text-[#000000]' : 'bg-[#070D1E] text-slate-100'
       }`}
     >
-      {/* Native App Shell: fits screen on mobile, max-w-md centered on desktop without fake status bars */}
+      {/* Native App Shell: fits 100% of screen on mobile devices, centered max-w-md on desktop */}
       <div 
-        className={`w-full max-w-md min-h-screen flex-1 flex flex-col relative transition-colors ${
+        className={`w-full sm:max-w-md min-h-screen flex-1 flex flex-col relative transition-colors overflow-x-hidden ${
           isLight ? 'bg-[#F2F2F7]' : 'bg-[#070D1E]'
         }`}
       >
-        <div className="flex-1 flex flex-col min-h-full">
+        <div className="flex-1 flex flex-col min-h-full w-full overflow-x-hidden">
           {children}
         </div>
       </div>

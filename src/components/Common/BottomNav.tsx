@@ -28,7 +28,7 @@ export const BottomNav: React.FC<Props> = ({ signalsCount = 0 }) => {
   return (
     <nav
       aria-label="Main Navigation"
-      className={`fixed bottom-0 left-0 right-0 z-40 backdrop-blur-lg safe-bottom max-w-md mx-auto transition-colors border-t ${
+      className={`fixed bottom-0 left-0 right-0 z-40 backdrop-blur-lg safe-bottom w-full sm:max-w-md mx-auto transition-colors border-t ${
         isLight 
           ? 'bg-white/95 border-[rgba(0,0,0,0.1)] shadow-[0_-2px_8px_rgba(0,0,0,0.04)]' 
           : 'bg-navy-950/95 border-navy-800/80 shadow-[0_-2px_10px_rgba(0,0,0,0.3)]'

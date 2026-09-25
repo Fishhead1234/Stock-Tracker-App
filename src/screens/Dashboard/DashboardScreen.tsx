@@ -246,26 +246,26 @@ export const DashboardScreen: React.FC = () => {
 
       <div className="px-4 space-y-4">
         {/* Header with Universal Exchange Badge & Notifications / Pro Actions */}
-        <div className="flex items-center justify-between pt-1 flex-wrap gap-2">
-          <div>
-            <div className={`flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider font-mono ${
+        <div className="flex items-center justify-between pt-1 gap-2">
+          <div className="min-w-0">
+            <div className={`flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider font-mono ${
               isLight ? 'text-[#FF9500]' : 'text-gold-400'
             }`}>
-              <Globe className="w-3.5 h-3.5" />
-              <span>{t('header_universal_tracker', 'Universal Exchange Tracker')}</span>
+              <Globe className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">{t('header_universal_tracker', 'Universal Exchange Tracker')}</span>
             </div>
-            <h2 className={`text-xl font-extrabold tracking-tight ${isLight ? 'text-[#000000]' : 'text-white'}`}>
+            <h2 className={`text-xl font-extrabold tracking-tight truncate ${isLight ? 'text-[#000000]' : 'text-white'}`}>
               {t('header_hub', 'Global Portfolio Hub')}
             </h2>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 shrink-0">
             {/* Quick Language Switcher Button */}
             <button
               type="button"
               onClick={() => setIsLanguageModalOpen(true)}
               data-touch-target="true"
-              className={`min-h-[48px] min-w-[48px] flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-semibold transition active:scale-95 cursor-pointer shadow-xs ${
+              className={`flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-xl border text-xs font-semibold transition active:scale-95 cursor-pointer shadow-xs ${
                 isLight 
                   ? 'bg-white border-[rgba(0,0,0,0.1)] text-[#000000] hover:bg-[#F2F2F7]' 
                   : 'bg-navy-900 border-navy-800 text-slate-200 hover:border-growth-500/50'
@@ -281,15 +281,15 @@ export const DashboardScreen: React.FC = () => {
               type="button"
               onClick={() => setIsUpgradeModalOpen(true)}
               data-touch-target="true"
-              className={`min-h-[48px] flex items-center gap-1.5 px-3.5 py-2 rounded-full border text-xs font-bold hover:scale-105 active:scale-95 transition cursor-pointer shadow-xs ${
+              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs font-bold hover:scale-105 active:scale-95 transition cursor-pointer shadow-xs ${
                 isLight
                   ? 'bg-[#FF9500]/15 text-[#FF9500] border-[#FF9500]/30'
                   : 'bg-gradient-to-r from-gold-500/20 to-gold-600/20 text-gold-300 border-gold-500/40'
               }`}
               title={t('membership_status', 'Membership Status')}
             >
-              <Crown className={`w-3.5 h-3.5 fill-current ${isLight ? 'text-[#FF9500]' : 'text-gold-400'}`} />
-              <span>{plan === 'LIFETIME' ? t('pro_member', 'PRO') : `${trialDays}${t('trial_days_remaining', 'd Trial')}`}</span>
+              <Crown className={`w-3 h-3 fill-current ${isLight ? 'text-[#FF9500]' : 'text-gold-400'}`} />
+              <span className="text-[11px]">{plan === 'LIFETIME' ? t('pro_member', 'PRO') : `${trialDays}${t('trial_days_remaining', 'd Trial')}`}</span>
             </button>
 
             {/* Notification Bell Button */}
@@ -297,7 +297,7 @@ export const DashboardScreen: React.FC = () => {
               type="button"
               onClick={() => setIsNotificationCenterOpen(true)}
               data-touch-target="true"
-              className={`min-h-[48px] min-w-[48px] relative flex items-center justify-center p-2.5 rounded-xl border transition active:scale-95 cursor-pointer shadow-xs ${
+              className={`relative flex items-center justify-center p-2 rounded-xl border transition active:scale-95 cursor-pointer shadow-xs ${
                 isLight 
                   ? 'bg-white border-[rgba(0,0,0,0.1)] text-[#000000] hover:bg-[#F2F2F7]' 
                   : 'bg-navy-900 border-navy-800 text-slate-300 hover:text-white'
@@ -306,21 +306,20 @@ export const DashboardScreen: React.FC = () => {
             >
               <Bell className="w-4 h-4" />
               {unreadCount > 0 && (
-                <span className={`absolute top-1.5 right-1.5 w-4 h-4 rounded-full font-mono font-black text-[9px] flex items-center justify-center shadow ${
+                <span className={`absolute -top-1 -right-1 w-4 h-4 rounded-full font-mono font-black text-[9px] flex items-center justify-center shadow ${
                   isLight ? 'bg-[#34C759] text-white' : 'bg-growth-500 text-navy-950'
                 }`}>
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
             </button>
-
-            <DataStatusBadge />
           </div>
         </div>
 
         {/* Global Market Status Strip */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 text-[11px] font-mono scrollbar-none">
-          <span className={`shrink-0 font-sans text-[11px] uppercase font-bold ${isLight ? 'text-[#666666]' : 'text-slate-500'}`}>
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 text-[11px] font-mono scrollbar-none w-full">
+          <DataStatusBadge />
+          <span className={`shrink-0 font-sans text-[11px] uppercase font-bold ml-1 ${isLight ? 'text-[#666666]' : 'text-slate-500'}`}>
             {t('badge_markets', 'Markets:')}
           </span>
           <span className={`px-2.5 py-1 rounded-md border flex items-center gap-1.5 shrink-0 ${

@@ -13,12 +13,12 @@ export const DisclaimerBanner: React.FC = () => {
 
   return (
     <>
-      <div className={`px-3 py-2 text-xs flex items-center justify-between backdrop-blur-md sticky top-0 z-30 shadow-xs border-b transition-colors ${
+      <div className={`px-3 py-2 text-xs flex items-center justify-between backdrop-blur-md sticky top-0 z-30 shadow-xs border-b transition-colors safe-top ${
         isLight 
           ? 'bg-white/95 border-[rgba(0,0,0,0.08)] text-[#666666]' 
           : 'bg-navy-950/95 border-navy-800/80 text-slate-300'
       }`}>
-        <div className="flex items-center gap-2 overflow-hidden mr-2">
+        <div className="flex items-center gap-2 overflow-hidden min-w-0 flex-1 mr-2">
           <span className={`w-2 h-2 rounded-full shrink-0 ${
             isLight ? 'bg-[#FF9500]' : 'bg-gold-400'
           }`} />
