@@ -93,7 +93,7 @@ export const OnboardingScreen: React.FC = () => {
 
   return (
     <div 
-      className={`min-h-screen flex flex-col justify-between p-5 transition-colors duration-200 ${
+      className={`min-h-full flex-1 flex flex-col justify-between p-5 transition-colors duration-200 ${
         isLight ? 'bg-[#F2F2F7] text-[#000000]' : 'bg-[#070D1E] text-white'
       }`}
     >
@@ -610,6 +610,10 @@ export const OnboardingScreen: React.FC = () => {
           }}
         />
       )}
+      {/* Bottom gesture indicator */}
+      <div className="flex justify-center pt-2 pb-1 select-none">
+        <div className={`w-32 h-1 rounded-full ${isLight ? 'bg-black/20' : 'bg-white/20'}`} />
+      </div>
     </div>
   );
 };
