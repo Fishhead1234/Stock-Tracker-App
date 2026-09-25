@@ -54,41 +54,43 @@ export const SignalsScreen: React.FC = () => {
         <div className="pt-1">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-[10px] font-bold text-gold-400 uppercase tracking-wider font-mono">
+              <span className="text-[11px] font-bold text-[#FF9500] uppercase tracking-wider font-mono">
                 Timing Engine
               </span>
-              <h2 className="text-xl font-extrabold text-white">My Stocks & Monitored Signals</h2>
+              <h2 className="text-xl font-extrabold text-[#000000] dark:text-white tracking-tight">
+                My Stocks & Monitored Signals
+              </h2>
             </div>
-            <span className="text-xs bg-navy-800 border border-navy-700 text-growth-400 font-mono px-2 py-0.5 rounded-lg">
+            <span className="text-xs bg-[#F2F2F7] dark:bg-navy-800 border border-black/10 dark:border-navy-700 text-[#34C759] font-mono px-2.5 py-1 rounded-lg">
               {allTrackedTickers.size} Tracked
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-[13px] text-[#666666] dark:text-slate-400 mt-1 leading-[1.6]">
             Real-time timing setups tailored specifically to your portfolio and monitored stocks.
           </p>
         </div>
 
         {/* Market Sentiment Overview Card */}
-        <div className="bg-navy-900/90 border border-navy-800 rounded-2xl p-4 flex items-center justify-between shadow-sm">
+        <div className="bg-white dark:bg-navy-900/90 border border-black/10 dark:border-navy-800 rounded-2xl p-4 flex items-center justify-between shadow-xs">
           <div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
+            <span className="text-[11px] font-bold text-[#8E8E93] dark:text-slate-400 uppercase tracking-wider block mb-0.5">
               Market Sentiment Index
             </span>
             <div className="flex items-center gap-2">
-              <span className="text-base font-bold text-growth-400 font-mono">62 / 100</span>
-              <span className="text-xs font-semibold text-slate-200">Moderate Greed</span>
+              <span className="text-lg font-bold text-[#34C759] font-mono">62 / 100</span>
+              <span className="text-[13px] font-semibold text-[#000000] dark:text-slate-200">Moderate Greed</span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-1">
+            <p className="text-xs text-[#666666] dark:text-slate-400 mt-1 leading-[1.5]">
               Market momentum is positive. Focus on disciplined dip buying on your tracked watchlist.
             </p>
           </div>
-          <div className="w-12 h-12 rounded-full bg-growth-500/15 border border-growth-500/40 flex items-center justify-center text-growth-400">
+          <div className="w-12 h-12 rounded-full bg-[#34C759]/10 border border-[#34C759]/30 flex items-center justify-center text-[#34C759] shrink-0">
             <TrendingUp className="w-6 h-6" />
           </div>
         </div>
 
         {/* Filter Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
           {[
             { id: 'ALL', label: `All Tracked (${signals.length})` },
             { id: 'PORTFOLIO', label: `My Portfolio (${positions.length})` },
@@ -99,10 +101,10 @@ export const SignalsScreen: React.FC = () => {
             <button
               key={f.id}
               onClick={() => setActiveFilter(f.id as any)}
-              className={`px-3 py-1.5 rounded-xl font-medium whitespace-nowrap transition ${
+              className={`min-h-[38px] px-3.5 py-1.5 rounded-xl font-medium whitespace-nowrap transition-all ${
                 activeFilter === f.id
-                  ? 'bg-navy-700 text-white border border-navy-600 shadow-sm'
-                  : 'bg-navy-950 text-slate-400 hover:text-white border border-navy-850'
+                  ? 'bg-[#007AFF] text-white shadow-xs font-semibold'
+                  : 'bg-white dark:bg-navy-950 text-[#666666] dark:text-slate-400 hover:text-black dark:hover:text-white border border-black/10 dark:border-navy-850'
               }`}
             >
               {f.label}
@@ -112,28 +114,28 @@ export const SignalsScreen: React.FC = () => {
 
         {/* Empty State when no stocks are tracked */}
         {allTrackedTickers.size === 0 ? (
-          <div className="bg-navy-900/60 border border-navy-800 rounded-2xl p-6 text-center text-slate-400 space-y-3">
-            <div className="w-12 h-12 mx-auto rounded-full bg-navy-800 border border-navy-700 flex items-center justify-center text-gold-400">
+          <div className="bg-white dark:bg-navy-900/60 border border-black/10 dark:border-navy-800 rounded-2xl p-6 text-center text-[#666666] dark:text-slate-400 space-y-3 shadow-xs">
+            <div className="w-12 h-12 mx-auto rounded-full bg-[#F2F2F7] dark:bg-navy-800 border border-black/10 dark:border-navy-700 flex items-center justify-center text-[#FF9500]">
               <Zap className="w-6 h-6" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-sm font-bold text-white">No Monitored Stocks Yet</h3>
-              <p className="text-xs text-slate-400 max-w-xs mx-auto">
+              <h3 className="text-base font-bold text-[#000000] dark:text-white">No Monitored Stocks Yet</h3>
+              <p className="text-[13px] text-[#666666] dark:text-slate-400 max-w-xs mx-auto leading-[1.6]">
                 Add stocks to your Watchlist or log your Portfolio holdings on the Dashboard to see personalized timing signals here.
               </p>
             </div>
             <button
               onClick={() => setActiveTab('dashboard')}
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-growth-500 hover:bg-growth-600 text-navy-950 font-bold text-xs rounded-xl shadow transition"
+              className="inline-flex items-center justify-center gap-1.5 min-h-[48px] px-6 py-3 bg-[#007AFF] hover:bg-[#0062CC] text-white font-semibold text-[15px] rounded-lg shadow-xs transition"
             >
               <PlusCircle className="w-4 h-4" />
               Go to Dashboard & Add Stocks
             </button>
           </div>
         ) : filteredSignals.length === 0 ? (
-          <div className="bg-navy-900/50 border border-navy-850 rounded-2xl p-6 text-center text-slate-400 space-y-2">
-            <Compass className="w-8 h-8 mx-auto text-slate-500" />
-            <p className="text-xs">No active signals match the selected filter in your monitored list.</p>
+          <div className="bg-white dark:bg-navy-900/50 border border-black/10 dark:border-navy-850 rounded-2xl p-6 text-center text-[#666666] dark:text-slate-400 space-y-2 shadow-xs">
+            <Compass className="w-8 h-8 mx-auto text-[#8E8E93]" />
+            <p className="text-[13px] leading-[1.6]">No active signals match the selected filter in your monitored list.</p>
           </div>
         ) : (
           <div className="space-y-3">

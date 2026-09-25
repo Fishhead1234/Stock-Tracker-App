@@ -1,0 +1,96 @@
+/**
+ * InvestLearn Design Tokens System
+ * Mobile-First Design Specifications (antigravity_handoff.md)
+ */
+
+:root {
+  /* ==========================================================================
+     1. COLOR PALETTE
+     ========================================================================== */
+  
+  /* Backgrounds */
+  --bg-primary: #FFFFFF;       /* Pure white background for cards & main containers */
+  --bg-secondary: #F2F2F7;     /* iOS System Gray 6 - screen canvas & app background */
+  --bg-tertiary: #E8E8ED;      /* Subtle grouped backgrounds & dividers */
+
+  /* Text Colors */
+  --text-primary: #000000;     /* System black for main titles & critical numbers */
+  --text-secondary: #666666;   /* Labels, subtitles, and secondary descriptions */
+  --text-tertiary: #8E8E93;    /* Hints, placeholders, and inactive states */
+
+  /* Status Colors */
+  --status-green: #34C759;     /* Gains, Buy Window, Positive trends */
+  --status-red: #FF3B30;       /* Losses, High Risk/Sell, Danger alerts */
+  --status-orange: #FF9500;    /* Alerts, Trim Profit, Watch warnings */
+  
+  /* Brand & Actions */
+  --primary-action: #007AFF;   /* iOS System Blue - primary buttons & active tabs */
+  --primary-action-hover: #0062CC;
+  --primary-action-active: #004FB3;
+
+  /* Borders & Dividers */
+  --border-light: rgba(0, 0, 0, 0.10);        /* Standard card & section border */
+  --border-subtle: rgba(0, 0, 0, 0.06);       /* Inner list row dividers */
+  --border-focus: rgba(0, 122, 255, 0.50);
+
+  /* Shadows */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-float: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  /* ==========================================================================
+     2. TYPOGRAPHY SYSTEM
+     ========================================================================== */
+  --font-family-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', -apple-system, sans-serif;
+  --font-family-heading: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', -apple-system, sans-serif;
+  --font-family-mono: 'SF Mono', 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Type Scale */
+  --font-size-display: 32px;   /* Large portfolio headlines */
+  --font-size-title: 20px;     /* Section headers */
+  --font-size-body: 16px;      /* +14% increase from 14px for optimal readability */
+  --font-size-label: 13px;     /* Increased from 12px for clear secondary labels */
+  --font-size-caption: 12px;   /* Small badges & timestamp metadata */
+
+  /* Reading Dynamics */
+  --line-height-body: 1.6;     /* Generous line height for reduced eye fatigue */
+  --line-height-heading: 1.25;
+  --letter-spacing-body: -0.02em; /* Prevents crowding on mobile viewports */
+  --letter-spacing-tight: -0.03em;
+
+  /* ==========================================================================
+     3. SPACING SYSTEM (4px Base Grid)
+     ========================================================================== */
+  --spacing-xs: 4px;           /* Icon padding & tight badges */
+  --spacing-sm: 8px;           /* Touch target gaps & element offsets */
+  --spacing-md: 16px;          /* Card padding & screen margins */
+  --spacing-lg: 24px;          /* Section vertical spacing */
+  --spacing-xl: 32px;          /* Large screen section separation */
+
+  /* ==========================================================================
+     4. TOUCH TARGETS & DEVICE DIMENSIONS
+     ========================================================================== */
+  --touch-target-min: 48px;    /* Minimum interactive touch target bounding box */
+  --bottom-nav-height: 56px;   /* Standard mobile bottom navigation bar */
+  --safe-area-top: 47px;       /* iOS Dynamic Island / notch safe area */
+  --safe-area-bottom: 34px;    /* iOS Home indicator safe area */
+  --border-radius-card: 12px;
+  --border-radius-button: 8px;
+  --border-radius-pill: 9999px;
+}
+
+/* Dark Theme Overrides (Maintains 100% Backward Compatibility) */
+[data-theme="dark"] {
+  --bg-primary: #0A1128;
+  --bg-secondary: #070D1E;
+  --bg-tertiary: #0F1E46;
+
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-tertiary: #64748B;
+
+  --border-light: rgba(255, 255, 255, 0.12);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+
+  --shadow-card: 0 1px 4px rgba(0, 0, 0, 0.4);
+  --shadow-float: 0 6px 16px rgba(0, 0, 0, 0.6);
+}

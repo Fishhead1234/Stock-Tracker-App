@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowUpCircle, ArrowDownCircle, MinusCircle, ChevronsUp, AlertTriangle } from 'lucide-react';
 import { SignalAction } from '../../types/signal';
 import { useLanguageStore } from '../../store/languageStore';
+import { useSettingsStore } from '../../store/settingsStore';
 
 interface Props {
   action: SignalAction;
@@ -11,8 +12,43 @@ interface Props {
 
 export const SignalBadge: React.FC<Props> = ({ action, size = 'sm', showIcon = true }) => {
   const { t } = useLanguageStore();
+  const { themeMode } = useSettingsStore();
+  const isLight = themeMode === 'neutral-light';
 
-  const configs: Record<SignalAction, { bg: string; text: string; border: string; icon: React.ReactNode }> = {
+  const lightConfigs: Record<SignalAction, { bg: string; text: string; border: string; icon: React.ReactNode }> = {
+    STRONG_BUY: {
+      bg: 'bg-[#34C759]/15',
+      text: 'text-[#34C759]',
+      border: 'border-[#34C759]/40',
+      icon: <ChevronsUp className="w-3.5 h-3.5" />
+    },
+    BUY: {
+      bg: 'bg-[#34C759]/12',
+      text: 'text-[#34C759]',
+      border: 'border-[#34C759]/30',
+      icon: <ArrowUpCircle className="w-3.5 h-3.5" />
+    },
+    HOLD: {
+      bg: 'bg-[#E5E5EA]',
+      text: 'text-[#666666]',
+      border: 'border-[rgba(0,0,0,0.12)]',
+      icon: <MinusCircle className="w-3.5 h-3.5" />
+    },
+    TRIM: {
+      bg: 'bg-[#FF9500]/15',
+      text: 'text-[#FF9500]',
+      border: 'border-[#FF9500]/40',
+      icon: <ArrowDownCircle className="w-3.5 h-3.5" />
+    },
+    STRONG_SELL: {
+      bg: 'bg-[#FF3B30]/15',
+      text: 'text-[#FF3B30]',
+      border: 'border-[#FF3B30]/40',
+      icon: <AlertTriangle className="w-3.5 h-3.5" />
+    }
+  };
+
+  const darkConfigs: Record<SignalAction, { bg: string; text: string; border: string; icon: React.ReactNode }> = {
     STRONG_BUY: {
       bg: 'bg-growth-500/15',
       text: 'text-growth-400',
@@ -45,6 +81,8 @@ export const SignalBadge: React.FC<Props> = ({ action, size = 'sm', showIcon = t
     }
   };
 
+  const configs = isLight ? lightConfigs : darkConfigs;
+
   const getLabel = (act: SignalAction) => {
     switch (act) {
       case 'STRONG_BUY': return t('signal_strong_buy', 'STRONG BUY');
@@ -59,9 +97,9 @@ export const SignalBadge: React.FC<Props> = ({ action, size = 'sm', showIcon = t
   const c = configs[action] || configs.HOLD;
 
   const sizeClasses = {
-    sm: 'text-[10px] px-2 py-0.5 gap-1',
-    md: 'text-xs px-2.5 py-1 gap-1.5',
-    lg: 'text-sm px-3.5 py-1.5 gap-2 font-bold'
+    sm: 'text-[11px] px-2 py-0.5 gap-1',
+    md: 'text-[12px] px-2.5 py-1 gap-1.5',
+    lg: 'text-[13px] px-3.5 py-1.5 gap-2 font-bold'
   };
 
   return (

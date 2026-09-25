@@ -185,22 +185,22 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
         <div 
-          className="bg-navy-900 border border-navy-700/80 rounded-3xl w-full max-w-md max-h-[90vh] flex flex-col shadow-2xl overflow-hidden"
+          className="bg-white dark:bg-navy-900 border border-black/10 dark:border-navy-700/80 rounded-3xl w-full max-w-md max-h-[90vh] flex flex-col shadow-2xl overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="p-4 border-b border-navy-800 flex items-center justify-between bg-navy-950/80">
+          <div className="p-4 border-b border-black/10 dark:border-navy-800 flex items-center justify-between bg-[#F2F2F7] dark:bg-navy-950/80">
             <div>
-              <span className="text-[10px] uppercase font-bold text-growth-400 tracking-wider font-mono">
+              <span className="text-[11px] uppercase font-bold text-[#007AFF] tracking-wider font-mono">
                 Universal Stock Tracker
               </span>
-              <h3 className="text-base font-bold text-white">Log Position (All NYSE & NASDAQ)</h3>
+              <h3 className="text-base font-bold text-[#000000] dark:text-white tracking-tight">Log Position (All NYSE & NASDAQ)</h3>
             </div>
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-navy-800 hover:bg-navy-700 text-slate-300 flex items-center justify-center transition"
+              className="w-8 h-8 rounded-full bg-black/5 dark:bg-navy-800 hover:bg-black/10 dark:hover:bg-navy-700 text-[#666666] dark:text-slate-300 flex items-center justify-center transition"
             >
               <X className="w-4 h-4" />
             </button>
@@ -556,19 +556,19 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
               </div>
 
               {/* Total Cost Basis */}
-              <div className="p-3 bg-navy-950/90 rounded-xl border border-navy-800 flex items-center justify-between text-xs font-mono">
-                <span className="text-slate-400 font-sans">Total Cost Basis:</span>
-                <strong className="text-white text-sm">{curr}{totalCost.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong>
+              <div className="p-3.5 bg-[#F2F2F7] dark:bg-navy-950/90 rounded-xl border border-black/5 dark:border-navy-800 flex items-center justify-between text-xs font-mono">
+                <span className="text-[#666666] dark:text-slate-400 font-sans">Total Cost Basis:</span>
+                <strong className="text-[#000000] dark:text-white text-sm">{curr}{totalCost.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong>
               </div>
 
-              {/* Submit Button */}
+              {/* Submit Button (48px touch target, 12px 24px padding, 8px radius) */}
               <button
                 type="submit"
                 disabled={isSuccess || numShares <= 0 || numPrice <= 0}
-                className={`w-full py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition shadow-lg ${
+                className={`w-full min-h-[48px] px-6 py-3.5 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition shadow-xs ${
                   isSuccess
-                    ? 'bg-growth-500 text-white'
-                    : 'bg-growth-600 hover:bg-growth-500 text-white shadow-growth-600/30 active:scale-98'
+                    ? 'bg-[#34C759] text-white'
+                    : 'bg-[#007AFF] hover:bg-[#0062CC] text-white'
                 }`}
               >
                 {isSuccess ? (

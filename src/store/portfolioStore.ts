@@ -15,18 +15,66 @@ interface PortfolioState {
 
 const STORAGE_KEY = 'investlearn_portfolio_v2';
 
+const defaultPositions: Position[] = [
+  {
+    id: 'pos_aapl',
+    ticker: 'AAPL',
+    companyName: 'Apple Inc.',
+    exchange: 'NYSE / NASDAQ',
+    currency: 'USD',
+    currencySymbol: '$',
+    shares: 15,
+    averageBuyPrice: 166.67,
+    purchaseDate: '2026-08-15',
+    notes: 'Long-term position. Monitor for dip buying when RSI < 40.',
+    targetSellPrice: 195.00,
+    stopLossPrice: 150.00
+  },
+  {
+    id: 'pos_tsla',
+    ticker: 'TSLA',
+    companyName: 'Tesla Inc.',
+    exchange: 'NYSE / NASDAQ',
+    currency: 'USD',
+    currencySymbol: '$',
+    shares: 8,
+    averageBuyPrice: 238.10,
+    purchaseDate: '2026-08-20',
+    notes: 'Growth holding. Keep while trending above 50-day average.',
+    targetSellPrice: 280.00,
+    stopLossPrice: 210.00
+  },
+  {
+    id: 'pos_nflx',
+    ticker: 'NFLX',
+    companyName: 'Netflix Inc.',
+    exchange: 'NYSE / NASDAQ',
+    currency: 'USD',
+    currencySymbol: '$',
+    shares: 2,
+    averageBuyPrice: 440.00,
+    purchaseDate: '2026-09-01',
+    notes: 'Monitor for trim profit / stop loss.',
+    targetSellPrice: 470.00,
+    stopLossPrice: 410.00
+  }
+];
+
 const loadSavedState = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
-      return JSON.parse(raw);
+      const parsed = JSON.parse(raw);
+      if (parsed.positions && parsed.positions.length > 0) {
+        return parsed;
+      }
     }
   } catch (e) {
     console.error('Failed to load portfolio from storage', e);
   }
   return {
-    positions: [],
-    cashBalance: 0,
+    positions: defaultPositions,
+    cashBalance: 8423.67,
     transactions: []
   };
 };

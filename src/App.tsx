@@ -20,8 +20,15 @@ import { LocalNotifications } from '@capacitor/local-notifications';
 import { Capacitor } from '@capacitor/core';
 
 export const App: React.FC = () => {
-  const { hasCompletedOnboarding, activeTab } = useSettingsStore();
+  const { hasCompletedOnboarding, activeTab, themeMode } = useSettingsStore();
   const { quotes, setQuotes } = useMarketStore();
+
+  // Sync theme mode to documentElement
+  useEffect(() => {
+    const isDark = themeMode === 'dark';
+    document.documentElement.classList.toggle('dark', isDark);
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  }, [themeMode]);
 
   // Watch for stock timing signals and dispatch alerts
   useSignalNotifier();

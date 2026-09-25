@@ -126,31 +126,31 @@ export const UpgradeProModal: React.FC<UpgradeProModalProps> = ({ onClose }) => 
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-      <div className="w-full max-w-lg bg-navy-900 border border-navy-800 rounded-t-3xl sm:rounded-3xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-md animate-fade-in">
+      <div className="w-full max-w-lg bg-white dark:bg-navy-900 border border-black/10 dark:border-navy-800 rounded-t-3xl sm:rounded-3xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl">
         {/* Top Header Banner */}
-        <div className="relative p-5 pb-4 bg-gradient-to-b from-growth-950/60 via-navy-900 to-navy-900 border-b border-navy-800">
+        <div className="relative p-5 pb-4 bg-[#F2F2F7] dark:bg-gradient-to-b dark:from-growth-950/60 dark:via-navy-900 dark:to-navy-900 border-b border-black/10 dark:border-navy-800">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-navy-800 transition"
+            className="absolute top-4 right-4 p-2 rounded-xl text-[#8E8E93] hover:text-[#000000] dark:hover:text-white hover:bg-black/5 dark:hover:bg-navy-800 transition min-h-[44px] min-w-[44px] flex items-center justify-center"
           >
             <X className="w-5 h-5" />
           </button>
 
-          <div className="flex items-center gap-2 text-growth-400 text-xs font-bold uppercase tracking-wider">
-            <Crown className="w-4 h-4 fill-growth-400" />
+          <div className="flex items-center gap-2 text-[#34C759] text-xs font-bold uppercase tracking-wider">
+            <Crown className="w-4 h-4 fill-[#34C759]" />
             <span>InvestLearn Pro Membership</span>
           </div>
 
-          <h2 className="text-xl font-extrabold text-white mt-1">
+          <h2 className="text-xl font-extrabold text-[#000000] dark:text-white mt-1 tracking-tight">
             Master the Markets with Timing Confidence
           </h2>
 
           {/* 30-Day Trial Status Badge */}
           {plan === 'TRIAL' && (
-            <div className="mt-3 p-2.5 rounded-xl bg-growth-500/10 border border-growth-500/30 flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs text-growth-300">
-                <Gift className="w-4 h-4 text-growth-400 shrink-0" />
+            <div className="mt-3 p-3 rounded-xl bg-[#34C759]/10 border border-[#34C759]/30 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-[13px] text-[#34C759]">
+                <Gift className="w-4 h-4 text-[#34C759] shrink-0" />
                 <span>
                   <strong>30-Day Free Trial Active:</strong> You have <strong>{trialDays} days</strong> remaining.
                 </span>
@@ -162,107 +162,107 @@ export const UpgradeProModal: React.FC<UpgradeProModalProps> = ({ onClose }) => 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
           {/* Pricing Options Cards */}
-          <div className="space-y-2.5">
+          <div className="space-y-3">
             {/* 1. Merged Founder's Lifetime Card */}
             <div
               onClick={() => setSelectedPlan('LIFETIME')}
               className={`p-4 rounded-2xl border cursor-pointer transition relative ${
                 selectedPlan === 'LIFETIME'
-                  ? 'bg-gradient-to-br from-navy-850 via-gold-950/20 to-navy-900 border-gold-500/80 shadow-md ring-1 ring-gold-500/40'
-                  : 'bg-navy-950/70 border-navy-800 hover:border-navy-700'
+                  ? 'bg-[#FFF9E6] dark:bg-gradient-to-br dark:from-navy-850 dark:via-gold-950/20 dark:to-navy-900 border-[#FF9500] shadow-xs ring-1 ring-[#FF9500]/40'
+                  : 'bg-white dark:bg-navy-950/70 border-black/10 dark:border-navy-800 hover:border-black/20'
               }`}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-start gap-2.5 min-w-0">
-                  <div className="w-8 h-8 rounded-xl bg-gold-500/20 border border-gold-500/40 flex items-center justify-center text-gold-400 shrink-0 mt-0.5">
-                    <Flame className="w-4 h-4" />
+                  <div className="w-9 h-9 rounded-xl bg-[#FF9500]/15 border border-[#FF9500]/30 flex items-center justify-center text-[#FF9500] shrink-0 mt-0.5">
+                    <Flame className="w-5 h-5" />
                   </div>
                   <div className="min-w-0">
-                    <h4 className="text-sm font-extrabold text-white flex items-center gap-1.5">
+                    <h4 className="text-base font-extrabold text-[#000000] dark:text-white flex items-center gap-1.5">
                       <span>{t('founders_lifetime_title', "Founder's Limited Lifetime Pass")}</span>
                     </h4>
-                    <p className="text-xs text-slate-400 mt-0.5">
+                    <p className="text-[13px] text-[#666666] dark:text-slate-400 mt-0.5 leading-[1.5]">
                       {t('founders_lifetime_desc', 'Pay once, yours forever. No recurring fees.')}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex flex-col items-end gap-1 shrink-0">
-                  <span className="px-2 py-0.5 rounded-md bg-gold-500 text-navy-950 text-[9px] font-extrabold uppercase tracking-wide">
+                  <span className="px-2 py-0.5 rounded-md bg-[#FF9500] text-white text-[10px] font-extrabold uppercase tracking-wide">
                     Best Value
                   </span>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-gold-500/20 text-gold-300 font-bold border border-gold-500/30 whitespace-nowrap">
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-[#FF9500]/10 text-[#8F5B00] dark:text-gold-300 font-bold border border-[#FF9500]/30 whitespace-nowrap">
                     {seatsLeft} / {lifetimeSeatsTotal} {t('spots_remaining', 'spots left')}
                   </span>
                 </div>
               </div>
 
-              <div className="mt-3 pt-2.5 border-t border-navy-800/80 flex items-baseline gap-2">
-                <span className="text-2xl font-black text-gold-300 font-mono">$49.99</span>
-                <span className="text-xs text-slate-400">one-time payment</span>
+              <div className="mt-3 pt-2.5 border-t border-black/10 dark:border-navy-800/80 flex items-baseline gap-2">
+                <span className="text-2xl font-black text-[#FF9500] dark:text-gold-300 font-mono">$49.99</span>
+                <span className="text-xs text-[#666666] dark:text-slate-400">one-time payment</span>
               </div>
             </div>
 
             {/* 2. Annual Card */}
             <div
               onClick={() => setSelectedPlan('ANNUAL')}
-              className={`p-3.5 rounded-2xl border cursor-pointer transition relative ${
+              className={`p-4 rounded-2xl border cursor-pointer transition relative ${
                 selectedPlan === 'ANNUAL'
-                  ? 'bg-navy-850 border-growth-500/80 shadow-md ring-1 ring-growth-500/40'
-                  : 'bg-navy-950/70 border-navy-800 hover:border-navy-700'
+                  ? 'bg-[#F2F2F7] dark:bg-navy-850 border-[#34C759] shadow-xs ring-1 ring-[#34C759]/40'
+                  : 'bg-white dark:bg-navy-950/70 border-black/10 dark:border-navy-800 hover:border-black/20'
               }`}
             >
-              <div className="absolute top-3 right-3 px-2 py-0.5 rounded-md bg-growth-500/20 text-growth-300 text-[10px] font-bold border border-growth-500/40">
+              <div className="absolute top-3 right-3 px-2 py-0.5 rounded-md bg-[#34C759]/15 text-[#34C759] text-[10px] font-bold border border-[#34C759]/30">
                 {t('save_33_percent', 'Save 33%')}
               </div>
               <div className="flex items-start justify-between">
                 <div>
-                  <div className="text-sm font-bold text-white">{t('annual_membership', 'Annual Membership')}</div>
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <div className="text-base font-bold text-[#000000] dark:text-white">{t('annual_membership', 'Annual Membership')}</div>
+                  <p className="text-[13px] text-[#666666] dark:text-slate-400 mt-0.5">
                     $3.33/mo billed annually
                   </p>
                 </div>
               </div>
               <div className="mt-2 flex items-baseline gap-2">
-                <span className="text-xl font-extrabold text-white font-mono">$39.99</span>
-                <span className="text-xs text-slate-400">/ year</span>
+                <span className="text-xl font-extrabold text-[#000000] dark:text-white font-mono">$39.99</span>
+                <span className="text-xs text-[#666666] dark:text-slate-400">/ year</span>
               </div>
             </div>
 
             {/* 3. Monthly Card */}
             <div
               onClick={() => setSelectedPlan('MONTHLY')}
-              className={`p-3.5 rounded-2xl border cursor-pointer transition ${
+              className={`p-4 rounded-2xl border cursor-pointer transition ${
                 selectedPlan === 'MONTHLY'
-                  ? 'bg-navy-850 border-growth-500/80 shadow-md ring-1 ring-growth-500/40'
-                  : 'bg-navy-950/70 border-navy-800 hover:border-navy-700'
+                  ? 'bg-[#F2F2F7] dark:bg-navy-850 border-[#34C759] shadow-xs ring-1 ring-[#34C759]/40'
+                  : 'bg-white dark:bg-navy-950/70 border-black/10 dark:border-navy-800 hover:border-black/20'
               }`}
             >
               <div className="flex items-start justify-between">
                 <div>
-                  <div className="text-sm font-bold text-white">{t('monthly_flex', 'Monthly Flex')}</div>
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <div className="text-base font-bold text-[#000000] dark:text-white">{t('monthly_flex', 'Monthly Flex')}</div>
+                  <p className="text-[13px] text-[#666666] dark:text-slate-400 mt-0.5">
                     Pause or cancel anytime
                   </p>
                 </div>
                 <div className="text-right">
-                  <span className="text-xl font-extrabold text-white font-mono">$4.99</span>
-                  <span className="text-xs text-slate-400">/ mo</span>
+                  <span className="text-xl font-extrabold text-[#000000] dark:text-white font-mono">$4.99</span>
+                  <span className="text-xs text-[#666666] dark:text-slate-400">/ mo</span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Included Pro Features */}
-          <div className="bg-navy-950/80 rounded-2xl p-4 border border-navy-800 space-y-2.5">
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+          <div className="bg-[#F2F2F7] dark:bg-navy-950/80 rounded-2xl p-4 border border-black/5 dark:border-navy-800 space-y-2.5">
+            <h4 className="text-xs font-bold text-[#000000] dark:text-white uppercase tracking-wider">
               All Pro Plans Include:
             </h4>
             <div className="space-y-2">
               {features.map((feat, i) => (
-                <div key={i} className="flex items-center gap-2.5 text-xs text-slate-300">
-                  <div className="w-4 h-4 rounded-full bg-growth-500/20 text-growth-400 flex items-center justify-center shrink-0">
-                    <Check className="w-2.5 h-2.5" />
+                <div key={i} className="flex items-center gap-2.5 text-[13px] text-[#666666] dark:text-slate-300">
+                  <div className="w-5 h-5 rounded-full bg-[#34C759]/15 text-[#34C759] flex items-center justify-center shrink-0">
+                    <Check className="w-3 h-3" />
                   </div>
                   <span>{feat}</span>
                 </div>
@@ -272,27 +272,27 @@ export const UpgradeProModal: React.FC<UpgradeProModalProps> = ({ onClose }) => 
 
           {/* Success / Status Message */}
           {successMessage && (
-            <div className="p-3 rounded-xl bg-growth-950/60 border border-growth-500/50 text-xs text-growth-300 font-semibold text-center animate-fade-in">
+            <div className="p-3.5 rounded-xl bg-[#34C759]/15 border border-[#34C759]/30 text-xs text-[#34C759] font-semibold text-center animate-fade-in">
               {successMessage}
             </div>
           )}
 
           {restoreStatus && (
-            <div className="p-3 rounded-xl bg-navy-950 border border-navy-800 text-xs text-slate-300 text-center">
+            <div className="p-3.5 rounded-xl bg-[#F2F2F7] dark:bg-navy-950 border border-black/10 dark:border-navy-800 text-xs text-[#666666] dark:text-slate-300 text-center">
               {restoreStatus}
             </div>
           )}
         </div>
 
-        {/* Footer Actions */}
-        <div className="p-5 bg-navy-950 border-t border-navy-800 space-y-3">
+        {/* Footer Actions (Thumb Zone: 48px touch targets, min 12px 24px padding) */}
+        <div className="p-5 bg-white dark:bg-navy-950 border-t border-black/10 dark:border-navy-800 space-y-3">
           <button
             onClick={handlePurchase}
             disabled={isProcessing}
-            className={`w-full py-3.5 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition shadow-lg ${
+            className={`w-full min-h-[48px] px-6 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition shadow-xs ${
               selectedPlan === 'LIFETIME'
-                ? 'bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-400 hover:to-gold-500 text-navy-950 font-black'
-                : 'bg-growth-600 hover:bg-growth-500 text-white'
+                ? 'bg-[#FF9500] hover:bg-[#E08500] text-white font-black'
+                : 'bg-[#34C759] hover:bg-[#2EB04E] text-white'
             }`}
           >
             {isProcessing ? (
@@ -311,20 +311,20 @@ export const UpgradeProModal: React.FC<UpgradeProModalProps> = ({ onClose }) => 
             )}
           </button>
 
-          <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
+          <div className="flex items-center justify-between text-xs text-[#8E8E93] dark:text-slate-400 px-1">
             <span className="flex items-center gap-1">
-              <ShieldCheck className="w-3.5 h-3.5 text-growth-400" />
+              <ShieldCheck className="w-4 h-4 text-[#34C759]" />
               <span>Google Play Protected</span>
             </span>
             <button
               onClick={handleRestore}
-              className="text-slate-400 hover:text-white underline transition"
+              className="text-[#8E8E93] hover:text-[#000000] dark:hover:text-white underline transition"
             >
               {t('restore_purchases', 'Restore Purchases')}
             </button>
           </div>
 
-          <p className="text-[10px] text-slate-500 text-center leading-tight">
+          <p className="text-[11px] text-[#8E8E93] text-center leading-tight">
             Subscriptions renew automatically unless canceled at least 24 hours before renewal via Google Play. Educational tool only, does not execute real trades.
           </p>
         </div>

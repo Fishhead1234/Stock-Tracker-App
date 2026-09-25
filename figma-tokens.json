@@ -1,0 +1,211 @@
+{
+  "$schema": "https://design-tokens.github.io/community-group/format/",
+  "name": "InvestLearn Mobile Design System Tokens",
+  "version": "2.0.0",
+  "description": "Design tokens extracted from mobile wireframes and handoff specification for iPhone 375x812 and Android 360x800",
+  "color": {
+    "background": {
+      "primary": {
+        "$value": "#FFFFFF",
+        "$type": "color",
+        "$description": "Primary white background for cards, modas, and wrapped content"
+      },
+      "secondary": {
+        "$value": "#F2F2F7",
+        "$type": "color",
+        "$description": "iOS System Gray 6 neutral background for device canvas"
+      },
+      "tertiary": {
+        "$value": "#E8E8ED",
+        "$type": "color",
+        "$description": "Grouped table headers, inactive segments, and dividers"
+      }
+    },
+    "text": {
+      "primary": {
+        "$value": "#000000",
+        "$type": "color",
+        "$description": "High-emphasis system black for prices, titles, and critical figures"
+      },
+      "secondary": {
+        "$value": "#666666",
+        "$type": "color",
+        "$description": "Medium-emphasis labels, accordion headers, and subtitles"
+      },
+      "tertiary": {
+        "$value": "#8E8E93",
+        "$type": "color",
+        "$description": "Low-emphasis hint text, timestamps, and inactive icons"
+      }
+    },
+    "status": {
+      "green": {
+        "$value": "#34C759",
+        "$type": "color",
+        "$description": "Gains, Buy Window signals, positive performance"
+      },
+      "red": {
+        "$value": "#FF3B30",
+        "$type": "color",
+        "$description": "Losses, Sell/High Risk signals, stop loss alerts"
+      },
+      "orange": {
+        "$value": "#FF9500",
+        "$type": "color",
+        "$description": "Alerts, Trim Profit signals, watchlist warnings"
+      }
+    },
+    "action": {
+      "primary": {
+        "$value": "#007AFF",
+        "$type": "color",
+        "$description": "iOS System Blue - Primary action buttons and selected tab"
+      },
+      "hover": {
+        "$value": "#0062CC",
+        "$type": "color",
+        "$description": "Button hover state"
+      }
+    },
+    "border": {
+      "light": {
+        "$value": "rgba(0, 0, 0, 0.10)",
+        "$type": "color",
+        "$description": "Card borders and section dividers"
+      },
+      "subtle": {
+        "$value": "rgba(0, 0, 0, 0.06)",
+        "$type": "color",
+        "$description": "Row dividers in stock lists"
+      }
+    }
+  },
+  "typography": {
+    "fontFamily": {
+      "body": {
+        "$value": "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', sans-serif",
+        "$type": "fontFamily"
+      },
+      "heading": {
+        "$value": "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif",
+        "$type": "fontFamily"
+      },
+      "mono": {
+        "$value": "'SF Mono', 'JetBrains Mono', monospace",
+        "$type": "fontFamily"
+      }
+    },
+    "fontSize": {
+      "display": {
+        "$value": "32px",
+        "$type": "dimension",
+        "$description": "Large portfolio headline"
+      },
+      "title": {
+        "$value": "20px",
+        "$type": "dimension",
+        "$description": "Section headers"
+      },
+      "body": {
+        "$value": "16px",
+        "$type": "dimension",
+        "$description": "Body text minimum (+14% increase from 14px)"
+      },
+      "label": {
+        "$value": "13px",
+        "$type": "dimension",
+        "$description": "Secondary labels (increased from 12px)"
+      },
+      "caption": {
+        "$value": "12px",
+        "$type": "dimension",
+        "$description": "Subtitles, tags, and badge indicators"
+      }
+    },
+    "lineHeight": {
+      "body": {
+        "$value": "1.6",
+        "$type": "number",
+        "$description": "Line height for comfortable reading (1.4 -> 1.6)"
+      },
+      "heading": {
+        "$value": "1.25",
+        "$type": "number"
+      }
+    },
+    "letterSpacing": {
+      "body": {
+        "$value": "-0.02em",
+        "$type": "dimension",
+        "$description": "Letter spacing to prevent crowding on mobile"
+      }
+    }
+  },
+  "spacing": {
+    "xs": {
+      "$value": "4px",
+      "$type": "dimension",
+      "$description": "Icon padding & micro spacing"
+    },
+    "sm": {
+      "$value": "8px",
+      "$type": "dimension",
+      "$description": "Touch target gaps and chip offsets"
+    },
+    "md": {
+      "$value": "16px",
+      "$type": "dimension",
+      "$description": "Card padding & mobile viewport margin"
+    },
+    "lg": {
+      "$value": "24px",
+      "$type": "dimension",
+      "$description": "Section vertical spacing"
+    },
+    "xl": {
+      "$value": "32px",
+      "$type": "dimension",
+      "$description": "Major screen section boundaries"
+    }
+  },
+  "touchTarget": {
+    "min": {
+      "$value": "48px",
+      "$type": "dimension",
+      "$description": "Absolute minimum touch target bounding box (iOS & Android compliance)"
+    },
+    "navHeight": {
+      "$value": "56px",
+      "$type": "dimension",
+      "$description": "Standard 5-slot bottom navigation bar height"
+    }
+  },
+  "borderRadius": {
+    "card": {
+      "$value": "12px",
+      "$type": "dimension"
+    },
+    "button": {
+      "$value": "8px",
+      "$type": "dimension"
+    },
+    "pill": {
+      "$value": "9999px",
+      "$type": "dimension"
+    }
+  },
+  "viewport": {
+    "primary": {
+      "name": "iPhone 13 / 14 / 15",
+      "width": "375px",
+      "height": "812px",
+      "scale": "@2x"
+    },
+    "secondary": {
+      "name": "Android Standard",
+      "width": "360px",
+      "height": "800px",
+      "scale": "@2.75x"
+    }
+  }
+}

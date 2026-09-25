@@ -84,17 +84,19 @@ export const EducationScreen: React.FC = () => {
       <div className="px-4 space-y-4">
         {/* Top Header */}
         <div className="pt-1">
-          <span className="text-[10px] font-bold text-gold-400 uppercase tracking-wider font-mono">
+          <span className="text-[11px] font-bold text-[#FF9500] uppercase tracking-wider font-mono">
             Investor Academy
           </span>
-          <h2 className="text-xl font-extrabold text-white">Learn Trading & Timing</h2>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <h2 className="text-xl font-extrabold text-[#000000] dark:text-white tracking-tight">
+            Learn Trading & Timing
+          </h2>
+          <p className="text-[13px] text-[#666666] dark:text-slate-400 mt-0.5 leading-[1.6]">
             Understand technical indicators, eliminate emotional trading, and protect your capital.
           </p>
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex items-center bg-navy-950 p-1 rounded-2xl border border-navy-800 text-xs font-semibold">
+        <div className="flex items-center bg-[#F2F2F7] dark:bg-navy-950 p-1.5 rounded-2xl border border-black/10 dark:border-navy-800 text-xs font-semibold">
           {[
             { id: 'lessons', label: 'Core Lessons', icon: BookOpen },
             { id: 'glossary', label: 'Jargon Buster', icon: HelpCircle },
@@ -106,8 +108,10 @@ export const EducationScreen: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex-1 py-2 rounded-xl flex items-center justify-center gap-1.5 transition ${
-                  isActive ? 'bg-navy-800 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-slate-200'
+                className={`flex-1 min-h-[40px] py-2 rounded-xl flex items-center justify-center gap-1.5 transition ${
+                  isActive 
+                    ? 'bg-white dark:bg-navy-800 text-[#000000] dark:text-white shadow-xs font-bold' 
+                    : 'text-[#666666] dark:text-slate-400 hover:text-black dark:hover:text-white'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -124,37 +128,37 @@ export const EducationScreen: React.FC = () => {
               <div
                 key={lesson.id}
                 onClick={() => setSelectedLesson(lesson)}
-                className="bg-navy-900/90 border border-navy-800 hover:border-navy-750 p-4 rounded-2xl cursor-pointer transition shadow-sm space-y-2 group"
+                className="bg-white dark:bg-navy-900/90 border border-black/10 dark:border-navy-800 hover:border-[#007AFF]/30 p-4 rounded-2xl cursor-pointer transition shadow-xs space-y-2 group min-h-[48px]"
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <div className="p-2 rounded-xl bg-navy-800 border border-navy-700/80">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-xl bg-[#F2F2F7] dark:bg-navy-800 border border-black/5 dark:border-navy-700/80">
                       {getLessonIcon(lesson.iconName)}
                     </div>
                     <div>
-                      <span className="text-[10px] uppercase font-bold text-gold-400 font-mono">
+                      <span className="text-[11px] uppercase font-bold text-[#FF9500] font-mono">
                         {lesson.category}
                       </span>
-                      <h4 className="text-sm font-bold text-white group-hover:text-growth-300 transition">
+                      <h4 className="text-base font-bold text-[#000000] dark:text-white group-hover:text-[#007AFF] transition">
                         {lesson.title}
                       </h4>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 text-[11px] text-slate-400 font-mono">
-                    <Clock className="w-3 h-3 text-slate-500" />
+                  <div className="flex items-center gap-1 text-xs text-[#8E8E93] dark:text-slate-400 font-mono">
+                    <Clock className="w-3.5 h-3.5" />
                     <span>{lesson.readTime}</span>
                   </div>
                 </div>
 
-                <p className="text-xs text-slate-300 leading-relaxed line-clamp-2">
+                <p className="text-[13px] text-[#666666] dark:text-slate-300 leading-[1.6] line-clamp-2">
                   {lesson.summary}
                 </p>
 
-                <div className="pt-2 border-t border-navy-800/60 flex items-center justify-between text-xs text-slate-400">
-                  <span className="text-[11px] text-growth-400/90 italic truncate max-w-[240px]">
+                <div className="pt-2 border-t border-black/10 dark:border-navy-800/60 flex items-center justify-between text-xs text-[#8E8E93]">
+                  <span className="text-xs text-[#34C759] dark:text-growth-400 italic truncate max-w-[240px]">
                     "{lesson.beginnerTakeaway}"
                   </span>
-                  <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:translate-x-1 transition" />
+                  <ArrowRight className="w-4 h-4 text-[#8E8E93] group-hover:translate-x-1 group-hover:text-[#007AFF] transition" />
                 </div>
               </div>
             ))}
@@ -166,13 +170,13 @@ export const EducationScreen: React.FC = () => {
           <div className="space-y-3 animate-fadeIn">
             {/* Search Input */}
             <div className="relative">
-              <Search className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+              <Search className="w-5 h-5 text-[#8E8E93] absolute left-3.5 top-3.5" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search financial terms (e.g. RSI, P/E, Golden Cross)..."
-                className="w-full bg-navy-950 border border-navy-800 rounded-xl pl-9 pr-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-growth-500"
+                className="w-full min-h-[48px] bg-white dark:bg-navy-950 border border-black/10 dark:border-navy-800 rounded-xl pl-11 pr-3 py-3 text-[14px] text-[#000000] dark:text-white placeholder-[#8E8E93] focus:outline-none focus:border-[#007AFF] shadow-xs"
               />
             </div>
 
@@ -181,17 +185,17 @@ export const EducationScreen: React.FC = () => {
                 <div
                   key={idx}
                   onClick={() => setSelectedGlossaryTerm(item.term)}
-                  className="bg-navy-900/90 border border-navy-800 p-3.5 rounded-2xl cursor-pointer hover:border-navy-700 transition space-y-1.5"
+                  className="bg-white dark:bg-navy-900/90 border border-black/10 dark:border-navy-800 p-4 rounded-2xl cursor-pointer hover:border-[#007AFF]/30 transition space-y-1.5 shadow-xs"
                 >
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-bold text-white">{item.term}</h4>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-navy-800 text-slate-400 border border-navy-750">
+                    <h4 className="text-base font-bold text-[#000000] dark:text-white">{item.term}</h4>
+                    <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-[#F2F2F7] dark:bg-navy-800 text-[#666666] dark:text-slate-400 border border-black/5 dark:border-navy-750">
                       {item.tag}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-300 leading-relaxed">{item.shortDef}</p>
-                  <div className="pt-1 flex items-start gap-1 text-[11px] text-gold-300/90 italic">
-                    <Lightbulb className="w-3.5 h-3.5 text-gold-400 shrink-0 mt-0.5" />
+                  <p className="text-[13px] text-[#666666] dark:text-slate-300 leading-[1.6]">{item.shortDef}</p>
+                  <div className="pt-1 flex items-start gap-1.5 text-xs text-[#8F5B00] dark:text-gold-300/90 italic">
+                    <Lightbulb className="w-4 h-4 text-[#FF9500] shrink-0 mt-0.5" />
                     <span>Analogy: "{item.analogy}"</span>
                   </div>
                 </div>
@@ -203,9 +207,9 @@ export const EducationScreen: React.FC = () => {
         {/* TAB 3: KNOWLEDGE CHECK (QUIZ) */}
         {activeTab === 'quiz' && (
           <div className="space-y-4 animate-fadeIn">
-            <div className="bg-navy-950/60 p-3.5 rounded-2xl border border-navy-800">
-              <h3 className="text-xs font-bold text-white mb-1">Interactive Trading Quiz</h3>
-              <p className="text-xs text-slate-400">
+            <div className="bg-white dark:bg-navy-950/60 p-4 rounded-2xl border border-black/10 dark:border-navy-800 shadow-xs">
+              <h3 className="text-base font-bold text-[#000000] dark:text-white mb-1">Interactive Trading Quiz</h3>
+              <p className="text-[13px] text-[#666666] dark:text-slate-400 leading-[1.6]">
                 Test your understanding of indicator timing, overbought zones, and risk preservation.
               </p>
             </div>
@@ -217,27 +221,27 @@ export const EducationScreen: React.FC = () => {
                 const isCorrect = selected === q.correctIndex;
 
                 return (
-                  <div key={q.id} className="bg-navy-900/90 border border-navy-800 p-4 rounded-2xl space-y-3">
-                    <div className="flex items-start gap-2">
-                      <span className="w-5 h-5 rounded-full bg-navy-800 text-slate-300 font-mono text-xs flex items-center justify-center shrink-0 mt-0.5 font-bold">
+                  <div key={q.id} className="bg-white dark:bg-navy-900/90 border border-black/10 dark:border-navy-800 p-4 rounded-2xl space-y-3 shadow-xs">
+                    <div className="flex items-start gap-2.5">
+                      <span className="w-6 h-6 rounded-full bg-[#007AFF] text-white font-mono text-xs flex items-center justify-center shrink-0 mt-0.5 font-bold">
                         {qIndex + 1}
                       </span>
-                      <h4 className="text-xs font-bold text-white leading-relaxed">{q.question}</h4>
+                      <h4 className="text-[14px] font-bold text-[#000000] dark:text-white leading-relaxed">{q.question}</h4>
                     </div>
 
                     <div className="space-y-2">
                       {q.options.map((opt, optIndex) => {
-                        let btnStyle = 'bg-navy-950 border-navy-800 text-slate-300 hover:bg-navy-850';
+                        let btnStyle = 'bg-[#F2F2F7] dark:bg-navy-950 border-black/10 dark:border-navy-800 text-[#000000] dark:text-slate-300 hover:bg-[#E8E8ED] dark:hover:bg-navy-850';
 
                         if (selected === optIndex) {
-                          btnStyle = 'bg-navy-800 border-growth-500 text-white font-medium';
+                          btnStyle = 'bg-[#007AFF]/10 border-[#007AFF] text-[#007AFF] font-semibold';
                         }
 
                         if (quizSubmitted) {
                           if (optIndex === q.correctIndex) {
-                            btnStyle = 'bg-growth-950/60 border-growth-500 text-growth-300 font-bold';
+                            btnStyle = 'bg-[#34C759]/15 border-[#34C759] text-[#34C759] font-bold';
                           } else if (selected === optIndex && !isCorrect) {
-                            btnStyle = 'bg-loss-950/60 border-loss-500 text-loss-300';
+                            btnStyle = 'bg-[#FF3B30]/15 border-[#FF3B30] text-[#FF3B30]';
                           }
                         }
 
@@ -246,9 +250,9 @@ export const EducationScreen: React.FC = () => {
                             key={optIndex}
                             type="button"
                             onClick={() => handleAnswerSelect(q.id, optIndex)}
-                            className={`w-full p-2.5 rounded-xl border text-xs text-left transition flex items-start gap-2 ${btnStyle}`}
+                            className={`w-full min-h-[48px] p-3 rounded-xl border text-[13px] text-left transition flex items-start gap-2.5 ${btnStyle}`}
                           >
-                            <span className="w-4 h-4 rounded-full border border-current text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                            <span className="w-5 h-5 rounded-full border border-current text-xs flex items-center justify-center shrink-0 mt-0.5 font-mono">
                               {String.fromCharCode(65 + optIndex)}
                             </span>
                             <span className="leading-snug">{opt}</span>
@@ -258,23 +262,23 @@ export const EducationScreen: React.FC = () => {
                     </div>
 
                     {quizSubmitted && (
-                      <div className={`p-3 rounded-xl text-xs space-y-1 ${
-                        isCorrect ? 'bg-growth-950/30 border border-growth-600/30' : 'bg-loss-950/30 border border-loss-600/30'
+                      <div className={`p-3.5 rounded-xl text-xs space-y-1 ${
+                        isCorrect ? 'bg-[#34C759]/10 border border-[#34C759]/30' : 'bg-[#FF3B30]/10 border border-[#FF3B30]/30'
                       }`}>
                         <div className="flex items-center gap-1.5 font-bold">
                           {isCorrect ? (
                             <>
-                              <CheckCircle2 className="w-4 h-4 text-growth-400" />
-                              <span className="text-growth-400">Correct!</span>
+                              <CheckCircle2 className="w-4 h-4 text-[#34C759]" />
+                              <span className="text-[#34C759]">Correct!</span>
                             </>
                           ) : (
                             <>
-                              <HelpCircle className="w-4 h-4 text-loss-400" />
-                              <span className="text-loss-400">Review Needed</span>
+                              <HelpCircle className="w-4 h-4 text-[#FF3B30]" />
+                              <span className="text-[#FF3B30]">Review Needed</span>
                             </>
                           )}
                         </div>
-                        <p className="text-slate-300 text-[11px] leading-relaxed">{q.explanation}</p>
+                        <p className="text-[#666666] dark:text-slate-300 text-xs leading-relaxed">{q.explanation}</p>
                       </div>
                     )}
                   </div>
@@ -287,19 +291,19 @@ export const EducationScreen: React.FC = () => {
                 <button
                   onClick={handleQuizSubmit}
                   disabled={Object.keys(selectedAnswers).length < QUIZ_QUESTIONS.length}
-                  className={`w-full py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition ${
+                  className={`w-full min-h-[48px] py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition ${
                     Object.keys(selectedAnswers).length === QUIZ_QUESTIONS.length
-                      ? 'bg-growth-600 hover:bg-growth-500 text-white shadow-lg'
-                      : 'bg-navy-800 text-slate-500 cursor-not-allowed'
+                      ? 'bg-[#34C759] hover:bg-[#2EB04E] text-white shadow-xs'
+                      : 'bg-[#E8E8ED] dark:bg-navy-800 text-[#8E8E93] dark:text-slate-500 cursor-not-allowed'
                   }`}
                 >
-                  <Award className="w-4 h-4" />
+                  <Award className="w-5 h-5" />
                   <span>Submit & Check Answers</span>
                 </button>
               ) : (
                 <button
                   onClick={handleResetQuiz}
-                  className="w-full py-3 bg-navy-800 hover:bg-navy-750 text-white font-semibold text-xs rounded-xl transition"
+                  className="w-full min-h-[48px] py-3.5 bg-[#007AFF] hover:bg-[#0062CC] text-white font-semibold text-sm rounded-xl transition shadow-xs"
                 >
                   Try Again
                 </button>

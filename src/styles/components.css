@@ -1,0 +1,408 @@
+/**
+ * InvestLearn Component Library (Mobile-First CSS)
+ * Extracted styles for Cards, Lists, Buttons, Accordions, and Navigation
+ */
+
+@import './design-tokens.css';
+
+/* ==========================================================================
+   1. CARDS (Wrapped Content)
+   ========================================================================== */
+.card-neutral {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-card);
+  padding: var(--spacing-md);
+  box-shadow: var(--shadow-card);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-neutral:hover {
+  box-shadow: var(--shadow-float);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.card-title {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-title);
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: var(--letter-spacing-body);
+  line-height: var(--line-height-heading);
+}
+
+.card-subtitle {
+  font-size: var(--font-size-label);
+  color: var(--text-secondary);
+  line-height: var(--line-height-body);
+}
+
+/* ==========================================================================
+   2. BUTTONS (Touch-Friendly: Min 48x48px, Padding: 12px 24px)
+   ========================================================================== */
+.btn-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  min-height: var(--touch-target-min);
+  padding: 12px 24px;
+  border-radius: var(--border-radius-button);
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-body);
+  font-weight: 600;
+  letter-spacing: var(--letter-spacing-body);
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+  transition: all 0.15s ease-in-out;
+  border: none;
+  text-decoration: none;
+}
+
+.btn-base:active {
+  transform: scale(0.98);
+}
+
+/* Primary Action Button (#007AFF) */
+.btn-primary {
+  background-color: var(--primary-action);
+  color: #FFFFFF;
+  box-shadow: 0 2px 6px rgba(0, 122, 255, 0.25);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-action-hover);
+}
+
+/* Success Button (#34C759) */
+.btn-success {
+  background-color: var(--status-green);
+  color: #FFFFFF;
+  box-shadow: 0 2px 6px rgba(52, 199, 89, 0.25);
+}
+
+.btn-success:hover {
+  filter: brightness(0.95);
+}
+
+/* Danger / Sell Button (#FF3B30) */
+.btn-danger {
+  background-color: var(--status-red);
+  color: #FFFFFF;
+  box-shadow: 0 2px 6px rgba(255, 59, 48, 0.25);
+}
+
+.btn-danger:hover {
+  filter: brightness(0.95);
+}
+
+/* Secondary Outlined Button */
+.btn-secondary {
+  background-color: transparent;
+  color: var(--text-primary);
+  border: 1.5px solid var(--border-light);
+}
+
+.btn-secondary:hover {
+  background-color: var(--bg-secondary);
+}
+
+/* Icon-only Button (Circle / Rounded Square) */
+.btn-icon {
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-light);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-icon:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-tertiary);
+}
+
+/* ==========================================================================
+   3. LISTS & STOCK ITEM ROWS
+   ========================================================================== */
+.stock-list-container {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-primary);
+  border-radius: var(--border-radius-card);
+  border: 1px solid var(--border-light);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+.stock-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 56px;
+  padding: 12px var(--spacing-md);
+  padding-left: var(--spacing-md);
+  border-bottom: 1px solid var(--border-subtle);
+  background-color: var(--bg-primary);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  user-select: none;
+}
+
+.stock-list-item:last-child {
+  border-bottom: none;
+}
+
+.stock-list-item:hover {
+  background-color: var(--bg-secondary);
+}
+
+.stock-item-left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  min-width: 0;
+}
+
+.stock-item-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.stock-item-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.stock-item-ticker {
+  font-family: var(--font-family-mono);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.stock-item-name {
+  font-size: var(--font-size-label);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+.stock-item-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.stock-item-price {
+  font-family: var(--font-family-mono);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.stock-item-change {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-label);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.stock-item-change.is-positive {
+  color: var(--status-green);
+}
+
+.stock-item-change.is-negative {
+  color: var(--status-red);
+}
+
+/* ==========================================================================
+   4. ACCORDIONS (Progressive Disclosure, 0.3s Ease, Keeps All Content Visible)
+   ========================================================================== */
+.accordion-group {
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-card);
+  background-color: var(--bg-primary);
+  overflow: hidden;
+}
+
+.accordion-item {
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background-color 0.2s ease;
+}
+
+.accordion-item:last-child {
+  border-bottom: none;
+}
+
+.accordion-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--touch-target-min);
+  padding: 12px var(--spacing-md);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-size: var(--font-size-body);
+  font-weight: 600;
+  color: var(--text-primary);
+  transition: background-color 0.15s ease;
+}
+
+.accordion-trigger:hover {
+  background-color: var(--bg-secondary);
+}
+
+.accordion-content {
+  color: var(--text-secondary);
+  font-size: var(--font-size-label);
+  line-height: var(--line-height-body);
+  padding: 0 var(--spacing-md) var(--spacing-md);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==========================================================================
+   5. STATUS BADGES & TIMING SIGNALS
+   ========================================================================== */
+.badge-signal {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: 4px 10px;
+  border-radius: var(--border-radius-pill);
+  font-size: var(--font-size-caption);
+  font-family: var(--font-family-mono);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.badge-signal.green {
+  background-color: rgba(52, 199, 89, 0.12);
+  color: var(--status-green);
+  border: 1px solid rgba(52, 199, 89, 0.30);
+}
+
+.badge-signal.orange {
+  background-color: rgba(255, 149, 0, 0.12);
+  color: var(--status-orange);
+  border: 1px solid rgba(255, 149, 0, 0.30);
+}
+
+.badge-signal.red {
+  background-color: rgba(255, 59, 48, 0.12);
+  color: var(--status-red);
+  border: 1px solid rgba(255, 59, 48, 0.30);
+}
+
+.badge-signal.neutral {
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-light);
+}
+
+/* ==========================================================================
+   6. MOBILE BOTTOM NAVIGATION (56px height, 5 slots)
+   ========================================================================== */
+.bottom-nav-5 {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--bottom-nav-height);
+  background-color: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 var(--spacing-xs);
+  z-index: 50;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+[data-theme="dark"] .bottom-nav-5 {
+  background-color: rgba(7, 13, 30, 0.94);
+}
+
+.bottom-nav-tab {
+  flex: 1;
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: var(--text-tertiary);
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.15s ease, transform 0.1s ease;
+  user-select: none;
+}
+
+.bottom-nav-tab.active {
+  color: var(--primary-action);
+  font-weight: 600;
+}
+
+.bottom-nav-tab:active {
+  transform: scale(0.94);
+}
+
+.bottom-nav-label {
+  font-size: 11px;
+  letter-spacing: var(--letter-spacing-body);
+}
+
+/* ==========================================================================
+   7. THUMB ZONE BOTTOM ACTION BAR
+   ========================================================================== */
+.thumb-zone-actions {
+  position: sticky;
+  bottom: calc(var(--bottom-nav-height) + 8px);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: linear-gradient(to top, var(--bg-secondary) 85%, transparent 100%);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  z-index: 40;
+}

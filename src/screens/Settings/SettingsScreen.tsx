@@ -18,7 +18,9 @@ import {
   VolumeX,
   Send,
   AlertCircle,
-  Bot
+  Bot,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { useSettingsStore } from '../../store/settingsStore';
 import { usePortfolioStore } from '../../store/portfolioStore';
@@ -47,7 +49,11 @@ export const SettingsScreen: React.FC = () => {
     isPhoneFrameView,
     setPhoneFrameView,
     currency,
-    setCurrency
+    setCurrency,
+    themeMode,
+    setThemeMode,
+    devicePreset,
+    setDevicePreset
   } = useSettingsStore();
 
   const { clearPortfolio } = usePortfolioStore();
@@ -648,55 +654,130 @@ export const SettingsScreen: React.FC = () => {
           </div>
         </div>
 
-        {/* 8. Display & Viewport Mode */}
-        <div className="bg-navy-900/90 border border-navy-800 rounded-2xl p-4 space-y-3 shadow-sm">
+        {/* 8. Theme & Display System */}
+        <div className="bg-white dark:bg-navy-900/90 border border-black/10 dark:border-navy-800 rounded-2xl p-4 space-y-4 shadow-xs">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Smartphone className="w-4 h-4 text-slate-400" />
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                Preview Frame
-              </h3>
+            <div className="flex items-center gap-2.5">
+              <Sun className="w-5 h-5 text-[#FF9500]" />
+              <div>
+                <h3 className="text-sm font-bold text-[#000000] dark:text-white uppercase tracking-wider">
+                  Color Theme & Layout
+                </h3>
+                <p className="text-xs text-[#666666] dark:text-slate-400">
+                  Select between the Neutral Light design system and Classic Dark mode.
+                </p>
+              </div>
             </div>
+          </div>
+
+          {/* Theme Selector Pills */}
+          <div className="grid grid-cols-2 gap-2">
             <button
-              onClick={() => setPhoneFrameView(!isPhoneFrameView)}
-              className="text-xs bg-navy-800 hover:bg-navy-750 text-white font-semibold px-3 py-1.5 rounded-lg border border-navy-700 transition"
+              type="button"
+              onClick={() => setThemeMode('neutral-light')}
+              className={`min-h-[48px] p-3 rounded-xl border flex items-center justify-center gap-2 text-xs font-semibold transition ${
+                themeMode === 'neutral-light'
+                  ? 'bg-[#007AFF] text-white border-[#007AFF] shadow-xs'
+                  : 'bg-[#F2F2F7] dark:bg-navy-950 text-[#666666] dark:text-slate-300 border-black/10 dark:border-navy-800 hover:text-black'
+              }`}
             >
-              {isPhoneFrameView ? 'Switch to Full Screen' : 'Switch to Phone Frame'}
+              <Sun className="w-4 h-4" />
+              <span>Neutral Light (Spec)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setThemeMode('dark')}
+              className={`min-h-[48px] p-3 rounded-xl border flex items-center justify-center gap-2 text-xs font-semibold transition ${
+                themeMode === 'dark'
+                  ? 'bg-[#007AFF] text-white border-[#007AFF] shadow-xs'
+                  : 'bg-[#F2F2F7] dark:bg-navy-950 text-[#666666] dark:text-slate-300 border-black/10 dark:border-navy-800 hover:text-black'
+              }`}
+            >
+              <Moon className="w-4 h-4" />
+              <span>Classic Dark</span>
             </button>
           </div>
-          <p className="text-xs text-slate-400">
-            Easily toggle between testing on an iPhone chassis or using full desktop width.
-          </p>
+
+          {/* Device Chassis & Presets */}
+          <div className="pt-2 border-t border-black/10 dark:border-navy-800 space-y-2">
+            <span className="text-[11px] font-bold text-[#8E8E93] dark:text-slate-400 uppercase tracking-wider block">
+              Device Target Chassis:
+            </span>
+            <div className="grid grid-cols-3 gap-1.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setPhoneFrameView(true);
+                  setDevicePreset('iphone');
+                }}
+                className={`min-h-[44px] px-2 py-2 rounded-xl text-xs font-medium border text-center transition ${
+                  isPhoneFrameView && devicePreset === 'iphone'
+                    ? 'bg-[#007AFF] text-white border-[#007AFF] font-bold shadow-xs'
+                    : 'bg-[#F2F2F7] dark:bg-navy-950 text-[#666666] dark:text-slate-300 border-black/10 dark:border-navy-800'
+                }`}
+              >
+                iPhone 375×812
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setPhoneFrameView(true);
+                  setDevicePreset('android');
+                }}
+                className={`min-h-[44px] px-2 py-2 rounded-xl text-xs font-medium border text-center transition ${
+                  isPhoneFrameView && devicePreset === 'android'
+                    ? 'bg-[#007AFF] text-white border-[#007AFF] font-bold shadow-xs'
+                    : 'bg-[#F2F2F7] dark:bg-navy-950 text-[#666666] dark:text-slate-300 border-black/10 dark:border-navy-800'
+                }`}
+              >
+                Android 360×800
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setPhoneFrameView(false)}
+                className={`min-h-[44px] px-2 py-2 rounded-xl text-xs font-medium border text-center transition ${
+                  !isPhoneFrameView
+                    ? 'bg-[#007AFF] text-white border-[#007AFF] font-bold shadow-xs'
+                    : 'bg-[#F2F2F7] dark:bg-navy-950 text-[#666666] dark:text-slate-300 border-black/10 dark:border-navy-800'
+                }`}
+              >
+                Full Screen
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* 8. Portfolio Data Management */}
-        <div className="bg-navy-900/90 border border-navy-800 rounded-2xl p-4 space-y-2.5 shadow-sm">
-          <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-1">
+        {/* 9. Portfolio Data Management */}
+        <div className="bg-white dark:bg-navy-900/90 border border-black/10 dark:border-navy-800 rounded-2xl p-4 space-y-3 shadow-xs">
+          <h3 className="text-xs font-bold text-[#000000] dark:text-white uppercase tracking-wider mb-1">
             {t('data_management', 'Data Management')}
           </h3>
 
           <div className="space-y-2">
             <button
               onClick={clearPortfolio}
-              className="w-full py-2.5 bg-navy-800 hover:bg-navy-750 text-loss-400 rounded-xl text-xs font-semibold border border-navy-700 flex items-center justify-center gap-1.5 transition"
+              className="w-full min-h-[48px] py-3 bg-[#F2F2F7] hover:bg-[#FFE5E5] dark:bg-navy-800 dark:hover:bg-navy-750 text-[#FF3B30] rounded-xl text-xs font-semibold border border-black/5 dark:border-navy-700 flex items-center justify-center gap-1.5 transition"
             >
-              <Trash2 className="w-3.5 h-3.5" />
+              <Trash2 className="w-4 h-4" />
               <span>{t('clear_positions', 'Clear Tracked Portfolio Positions')}</span>
             </button>
 
             <button
               onClick={resetOnboarding}
-              className="w-full py-2.5 bg-navy-800 hover:bg-navy-750 text-slate-300 rounded-xl text-xs font-semibold border border-navy-700 flex items-center justify-center gap-1.5 transition"
+              className="w-full min-h-[48px] py-3 bg-[#F2F2F7] hover:bg-[#E8E8ED] dark:bg-navy-800 dark:hover:bg-navy-750 text-[#000000] dark:text-slate-300 rounded-xl text-xs font-semibold border border-black/5 dark:border-navy-700 flex items-center justify-center gap-1.5 transition"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
+              <RotateCcw className="w-4 h-4" />
               <span>{t('reset_onboarding', 'Reset & Re-Take Onboarding')}</span>
             </button>
           </div>
         </div>
 
         {/* App Version & Packaging Info */}
-        <div className="text-center pt-2 text-[11px] text-slate-500 space-y-1">
-          <p>InvestLearn v1.2.0 • Android APK & Universal Stock Tracker</p>
+        <div className="text-center pt-2 text-xs text-[#8E8E93] space-y-1 font-mono">
+          <p>InvestLearn v1.2.0 • Neutral Light & Retina Refinement</p>
           <p>Google Play Billing Ready • 30-Day Full Access Trial</p>
         </div>
       </div>

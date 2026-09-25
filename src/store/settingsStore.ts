@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 
 export type AppTab = 'dashboard' | 'signals' | 'news' | 'education' | 'settings' | 'stockDetail';
+export type ThemeMode = 'neutral-light' | 'dark';
+export type DevicePreset = 'iphone' | 'android' | 'responsive';
 
 interface SettingsState {
   hasCompletedOnboarding: boolean;
@@ -14,6 +16,8 @@ interface SettingsState {
   geminiApiKey: string;
   geminiModel: string;
   isPhoneFrameView: boolean;
+  themeMode: ThemeMode;
+  devicePreset: DevicePreset;
   activeTab: AppTab;
   setAgeConfirmed: (val: boolean) => void;
   setRiskAcknowledged: (val: boolean) => void;
@@ -27,10 +31,12 @@ interface SettingsState {
   setGeminiApiKey: (key: string) => void;
   setGeminiModel: (model: string) => void;
   setPhoneFrameView: (val: boolean) => void;
+  setThemeMode: (mode: ThemeMode) => void;
+  setDevicePreset: (preset: DevicePreset) => void;
   setActiveTab: (tab: AppTab) => void;
 }
 
-const SETTINGS_STORAGE_KEY = 'investlearn_settings_v1';
+const SETTINGS_STORAGE_KEY = 'investlearn_settings_v2';
 
 const loadSavedSettings = () => {
   try {
@@ -40,17 +46,19 @@ const loadSavedSettings = () => {
     console.error(e);
   }
   return {
-    hasCompletedOnboarding: false,
-    ageConfirmed: false,
-    riskAcknowledged: false,
-    experienceLevel: 'never_traded',
-    interestedSectors: [],
-    interestedCompanies: [],
+    hasCompletedOnboarding: true,
+    ageConfirmed: true,
+    riskAcknowledged: true,
+    experienceLevel: 'beginner',
+    interestedSectors: ['Technology', 'Finance'],
+    interestedCompanies: ['AAPL', 'TSLA'],
     currency: 'USD',
     finnhubApiKey: '',
     geminiApiKey: '',
     geminiModel: 'gemini-2.5-flash',
     isPhoneFrameView: true,
+    themeMode: 'neutral-light',
+    devicePreset: 'iphone',
     activeTab: 'dashboard'
   };
 };
@@ -72,7 +80,9 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
         finnhubApiKey: state.finnhubApiKey,
         geminiApiKey: state.geminiApiKey,
         geminiModel: state.geminiModel,
-        isPhoneFrameView: state.isPhoneFrameView
+        isPhoneFrameView: state.isPhoneFrameView,
+        themeMode: state.themeMode,
+        devicePreset: state.devicePreset
       }));
     } catch (e) {
       console.error(e);
@@ -146,6 +156,16 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
 
     setPhoneFrameView: (isPhoneFrameView) => {
       set({ isPhoneFrameView });
+      persist();
+    },
+
+    setThemeMode: (themeMode) => {
+      set({ themeMode });
+      persist();
+    },
+
+    setDevicePreset: (devicePreset) => {
+      set({ devicePreset });
       persist();
     },
 
