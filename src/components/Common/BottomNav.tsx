@@ -88,13 +88,6 @@ export const BottomNav: React.FC<Props> = ({ signalsCount = 0 }) => {
           );
         })}
       </div>
-
-      {/* Subtle bottom gesture bar */}
-      <div className="flex justify-center pb-1.5 pt-0.5 select-none">
-        <div className={`w-32 h-1 rounded-full ${
-          isLight ? 'bg-black/20' : 'bg-white/20'
-        }`} />
-      </div>
     </nav>
   );
 };

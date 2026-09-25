@@ -610,10 +610,6 @@ export const OnboardingScreen: React.FC = () => {
           }}
         />
       )}
-      {/* Bottom gesture indicator */}
-      <div className="flex justify-center pt-2 pb-1 select-none">
-        <div className={`w-32 h-1 rounded-full ${isLight ? 'bg-black/20' : 'bg-white/20'}`} />
-      </div>
     </div>
   );
 };

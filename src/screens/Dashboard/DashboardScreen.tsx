@@ -255,7 +255,7 @@ export const DashboardScreen: React.FC = () => {
               <span>{t('header_universal_tracker', 'Universal Exchange Tracker')}</span>
             </div>
             <h2 className={`text-xl font-extrabold tracking-tight ${isLight ? 'text-[#000000]' : 'text-white'}`}>
-              👋 Hi, Alex! {t('header_hub', 'Global Portfolio Hub')}
+              {t('header_hub', 'Global Portfolio Hub')}
             </h2>
           </div>
 

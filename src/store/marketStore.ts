@@ -18,20 +18,16 @@ interface MarketState {
   removeFromWatchlist: (ticker: string) => void;
 }
 
-const WATCHLIST_STORAGE_KEY = 'investlearn_watchlist_v3';
+const WATCHLIST_STORAGE_KEY = 'investlearn_watchlist_v4';
 
 export const useMarketStore = create<MarketState>((set, get) => {
-  let savedWatchlist: string[] = ['NVDA', 'AAPL'];
+  let savedWatchlist: string[] = [];
   try {
+    localStorage.removeItem('investlearn_watchlist_v2');
+    localStorage.removeItem('investlearn_watchlist_v3');
     const raw = localStorage.getItem(WATCHLIST_STORAGE_KEY);
     if (raw) {
       savedWatchlist = JSON.parse(raw);
-    } else {
-      // Check for v2 migration
-      const legacy = localStorage.getItem('investlearn_watchlist_v2');
-      if (legacy) {
-        savedWatchlist = JSON.parse(legacy);
-      }
     }
   } catch (e) {
     console.error('Failed to load watchlist', e);

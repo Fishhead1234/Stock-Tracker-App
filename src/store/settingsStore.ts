@@ -36,22 +36,25 @@ interface SettingsState {
   setActiveTab: (tab: AppTab) => void;
 }
 
-const SETTINGS_STORAGE_KEY = 'investlearn_settings_v2';
+const SETTINGS_STORAGE_KEY = 'investlearn_settings_v4';
 
 const loadSavedSettings = () => {
   try {
+    // Clear legacy keys so that the app starts fresh at the welcome screen
+    localStorage.removeItem('investlearn_settings_v2');
+    localStorage.removeItem('investlearn_settings_v3');
     const raw = localStorage.getItem(SETTINGS_STORAGE_KEY);
     if (raw) return JSON.parse(raw);
   } catch (e) {
     console.error(e);
   }
   return {
-    hasCompletedOnboarding: true,
-    ageConfirmed: true,
-    riskAcknowledged: true,
-    experienceLevel: 'beginner',
-    interestedSectors: ['Technology', 'Finance'],
-    interestedCompanies: ['AAPL', 'TSLA'],
+    hasCompletedOnboarding: false,
+    ageConfirmed: false,
+    riskAcknowledged: false,
+    experienceLevel: 'never_traded',
+    interestedSectors: [],
+    interestedCompanies: [],
     currency: 'USD',
     finnhubApiKey: '',
     geminiApiKey: '',
