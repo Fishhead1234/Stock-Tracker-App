@@ -17,8 +17,9 @@ export const SUPPORTED_LANGUAGES: LanguageInfo[] = [
   { code: 'de', name: 'German', nativeName: 'Deutsch', flag: '🇩🇪' },
   { code: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷' },
 ];
+import { contentTranslations } from './contentTranslations';
 
-export const translations: Record<SupportedLanguage, Record<string, string>> = {
+const baseTranslations: Record<SupportedLanguage, Record<string, string>> = {
   en: {
     // Navigation
     nav_dashboard: 'Dashboard',
@@ -851,3 +852,13 @@ export const translations: Record<SupportedLanguage, Record<string, string>> = {
     restore_purchases: 'Restaurer les achats'
   }
 };
+
+export const translations: Record<SupportedLanguage, Record<string, string>> = (
+  Object.keys(baseTranslations) as SupportedLanguage[]
+).reduce((acc, lang) => {
+  acc[lang] = {
+    ...baseTranslations[lang],
+    ...(contentTranslations[lang] || {})
+  };
+  return acc;
+}, {} as Record<SupportedLanguage, Record<string, string>>);

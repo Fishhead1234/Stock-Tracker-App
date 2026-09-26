@@ -24,8 +24,10 @@ import { usePortfolioStore } from '../../store/portfolioStore';
 import { useSettingsStore } from '../../store/settingsStore';
 import { DisclaimerBanner } from '../../components/Common/DisclaimerBanner';
 import { AITutorModal } from '../../components/AI/AITutorModal';
+import { useLanguageStore } from '../../store/languageStore';
 
 export const NewsScreen: React.FC = () => {
+  const { language, t } = useLanguageStore();
   const { quotes, selectTicker, watchlist } = useMarketStore();
   const { positions } = usePortfolioStore();
   const { setActiveTab } = useSettingsStore();
@@ -38,8 +40,8 @@ export const NewsScreen: React.FC = () => {
   const portfolioTickers = positions.map(p => p.ticker.toUpperCase());
   const userTrackedTickers = Array.from(new Set([...portfolioTickers, ...watchlist.map(t => t.toUpperCase())]));
 
-  const pulse = newsService.getMarketPulse();
-  const articles = newsService.getArticlesByFilter(activeCategory, userTrackedTickers);
+  const pulse = newsService.getMarketPulse(language);
+  const articles = newsService.getArticlesByFilter(activeCategory, userTrackedTickers, language);
 
   const handleSelectTicker = (ticker: string) => {
     selectTicker(ticker);
@@ -50,20 +52,20 @@ export const NewsScreen: React.FC = () => {
     if (sentiment === 'BULLISH') {
       return (
         <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-growth-500/15 text-growth-400 border border-growth-500/30">
-          <TrendingUp className="w-3 h-3" /> Bullish Catalyst
+          <TrendingUp className="w-3 h-3" /> {t('news_bullish', 'Bullish Catalyst')}
         </span>
       );
     }
     if (sentiment === 'BEARISH') {
       return (
         <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-danger-500/15 text-danger-400 border border-danger-500/30">
-          <TrendingDown className="w-3 h-3" /> Bearish Headwind
+          <TrendingDown className="w-3 h-3" /> {t('news_bearish', 'Bearish Headwind')}
         </span>
       );
     }
     return (
       <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
-        Neutral / Developing
+        {t('news_neutral', 'Neutral / Developing')}
       </span>
     );
   };
@@ -76,13 +78,13 @@ export const NewsScreen: React.FC = () => {
         {/* Top Header */}
         <div className="pt-1">
           <span className="text-[11px] font-bold text-[#34C759] uppercase tracking-wider font-mono">
-            Market Intelligence
+            {t('news_market_intel', 'Market Intelligence')}
           </span>
           <h2 className="text-xl font-extrabold text-[#000000] dark:text-white tracking-tight">
-            Market News & Info Hub
+            {t('news_title', 'Market News & Info Hub')}
           </h2>
           <p className="text-[13px] text-[#666666] dark:text-slate-400 mt-0.5 leading-[1.6]">
-            Executive summaries with educational takeaways on how headlines move stock prices.
+            {t('news_subtitle', 'Executive summaries with educational takeaways on how headlines move stock prices.')}
           </p>
         </div>
 
@@ -95,7 +97,7 @@ export const NewsScreen: React.FC = () => {
               </div>
               <div>
                 <span className="text-[11px] font-bold text-[#8E8E93] dark:text-slate-400 uppercase tracking-wider block">
-                  Today's Market Pulse
+                  {t('news_pulse_title', "Today's Market Pulse")}
                 </span>
                 <span className="text-sm font-bold text-[#000000] dark:text-white">{pulse.sentiment}</span>
               </div>
@@ -128,20 +130,28 @@ export const NewsScreen: React.FC = () => {
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <h4 className="text-[14px] font-bold text-[#000000] dark:text-white">Ask Gemini Market Tutor</h4>
+                <h4 className="text-[14px] font-bold text-[#000000] dark:text-white">
+                  {t('news_ask_gemini', 'Ask Gemini Market Tutor')}
+                </h4>
                 <span className="text-[10px] bg-[#007AFF]/10 text-[#007AFF] px-1.5 py-0.2 rounded font-mono font-bold">2.5 Flash</span>
               </div>
-              <p className="text-xs text-[#666666] dark:text-slate-400 leading-[1.5]">Ask about inflation, Fed rate moves, or why stocks are reacting</p>
+              <p className="text-xs text-[#666666] dark:text-slate-400 leading-[1.5]">
+                {t('news_ask_gemini_desc', 'Ask about inflation, Fed rate moves, or why stocks are reacting')}
+              </p>
             </div>
           </div>
           <button
             onClick={() => {
-              setAiInitialPrompt('Can you explain what today\'s macro headlines and Fed monetary policy signals mean for beginner stock investors?');
+              setAiInitialPrompt(
+                language === 'ko'
+                  ? '오늘의 거시 경제 헤드라인과 연준 통화 정책 신호가 초보 주식 투자자에게 무엇을 의미하는지 쉽게 설명해 주실 수 있나요?'
+                  : 'Can you explain what today\'s macro headlines and Fed monetary policy signals mean for beginner stock investors?'
+              );
               setIsAiModalOpen(true);
             }}
             className="shrink-0 min-h-[44px] px-4 py-2 bg-[#007AFF] hover:bg-[#0062CC] text-white rounded-lg text-xs font-semibold shadow-xs transition"
           >
-            Ask AI
+            {t('news_ask_ai_btn', 'Ask AI')}
           </button>
         </div>
 
@@ -154,8 +164,12 @@ export const NewsScreen: React.FC = () => {
             <div className="flex items-center gap-2.5">
               <BookOpen className="w-4 h-4 text-[#FF9500] shrink-0" />
               <div>
-                <h4 className="text-xs font-bold text-[#000000] dark:text-white">Where Does Real Market Info Come From?</h4>
-                <p className="text-[11px] text-[#666666] dark:text-slate-400">Learn why news outlets are secondary to primary sources</p>
+                <h4 className="text-xs font-bold text-[#000000] dark:text-white">
+                  {t('news_sources_title', 'Where Does Real Market Info Come From?')}
+                </h4>
+                <p className="text-[11px] text-[#666666] dark:text-slate-400">
+                  {t('news_sources_desc', 'Learn why news outlets are secondary to primary sources')}
+                </p>
               </div>
             </div>
             {showPrimarySourcesGuide ? (
@@ -169,23 +183,35 @@ export const NewsScreen: React.FC = () => {
             <div className="p-4 pt-1 border-t border-black/10 dark:border-navy-800/60 space-y-3 text-xs text-[#666666] dark:text-slate-300 bg-[#F2F2F7]/50 dark:bg-navy-950/40">
               <div className="space-y-2">
                 <div className="bg-white dark:bg-navy-900/80 p-3 rounded-xl border border-black/5 dark:border-navy-800">
-                  <span className="font-bold text-[#FF9500] text-xs block mb-0.5">1. SEC EDGAR (Official Legal Filings)</span>
+                  <span className="font-bold text-[#FF9500] text-xs block mb-0.5">
+                    {language === 'ko' ? '1. 미국 증권거래위원회 SEC EDGAR (공식 법적 공시)' : '1. SEC EDGAR (Official Legal Filings)'}
+                  </span>
                   <p className="text-xs text-[#666666] dark:text-slate-400 leading-relaxed">
-                    U.S. public companies are legally required to report to the SEC. Form <span className="font-mono font-semibold text-[#000000] dark:text-slate-200">10-Q</span> (quarterly earnings), <span className="font-mono font-semibold text-[#000000] dark:text-slate-200">10-K</span> (annual reports), and <span className="font-mono font-semibold text-[#000000] dark:text-slate-200">8-K</span> (breaking material events) are free, public, and released at the exact same second to everyone.
+                    {language === 'ko'
+                      ? '미국 상장사는 SEC에 의무적으로 보고해야 합니다. 10-Q(분기 실적), 10-K(연간 사업보고서), 8-K(중대 수시공시)는 무료로 전 세계 모든 투자자에게 1초의 오차도 없이 동일하게 동시 공개됩니다.'
+                      : 'U.S. public companies are legally required to report to the SEC. Form 10-Q (quarterly earnings), 10-K (annual reports), and 8-K (breaking material events) are free, public, and released at the exact same second to everyone.'}
                   </p>
                 </div>
 
                 <div className="bg-white dark:bg-navy-900/80 p-3 rounded-xl border border-black/5 dark:border-navy-800">
-                  <span className="font-bold text-[#007AFF] text-xs block mb-0.5">2. Central Banks & Government Agencies</span>
+                  <span className="font-bold text-[#007AFF] text-xs block mb-0.5">
+                    {language === 'ko' ? '2. 각국 중앙은행 및 정부 공식 통계국' : '2. Central Banks & Government Agencies'}
+                  </span>
                   <p className="text-xs text-[#666666] dark:text-slate-400 leading-relaxed">
-                    Inflation (CPI) and employment data come directly from the Bureau of Labor Statistics (BLS). Interest rates and policy statements are published on the Federal Reserve’s official portal (<span className="font-mono font-semibold text-[#000000] dark:text-slate-200">federalreserve.gov</span>).
+                    {language === 'ko'
+                      ? '인플레이션(CPI)과 고용 지표는 미 노동통계국(BLS)에서 직접 발표됩니다. 기준금리와 정책 성명서는 연방준비제도 공식 포털(federalreserve.gov)에서 직접 확인할 수 있습니다.'
+                      : 'Inflation (CPI) and employment data come directly from the Bureau of Labor Statistics (BLS). Interest rates and policy statements are published on the Federal Reserve’s official portal (federalreserve.gov).'}
                   </p>
                 </div>
 
                 <div className="bg-white dark:bg-navy-900/80 p-3 rounded-xl border border-black/5 dark:border-navy-800">
-                  <span className="font-bold text-[#34C759] text-xs block mb-0.5">3. News Outlets vs Primary Sources</span>
+                  <span className="font-bold text-[#34C759] text-xs block mb-0.5">
+                    {language === 'ko' ? '3. 뉴스 언론사 vs 1차 출처' : '3. News Outlets vs Primary Sources'}
+                  </span>
                   <p className="text-xs text-[#666666] dark:text-slate-400 leading-relaxed">
-                    By the time an article appears on financial news websites, algorithms have already traded on the SEC filing. Successful investors focus on fundamental numbers (revenue growth, margins, cash flow) rather than emotional headlines.
+                    {language === 'ko'
+                      ? '금융 언론에 뉴스가 보도될 즈음에는 이미 고빈도 알고리즘이 공시를 분석해 매매를 마친 뒤입니다. 성공적인 투자자는 감정적 헤드라인보다 본질적인 재무 수치(매출 성장률, 마진, 현금흐름)에 집중합니다.'
+                      : 'By the time an article appears on financial news websites, algorithms have already traded on the SEC filing. Successful investors focus on fundamental numbers (revenue growth, margins, cash flow) rather than emotional headlines.'}
                   </p>
                 </div>
               </div>
@@ -196,12 +222,12 @@ export const NewsScreen: React.FC = () => {
         {/* Filter Pills */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
           {[
-            { id: 'ALL', label: `All News (${newsService.getAllArticles().length})` },
-            { id: 'MY_STOCKS', label: `My Stocks (${userTrackedTickers.length})` },
-            { id: 'EARNINGS', label: 'Earnings & Revenue' },
-            { id: 'MACRO', label: 'Fed & Economy' },
-            { id: 'TECH', label: 'Tech & AI' },
-            { id: 'REGULATION', label: 'Legal & Policy' }
+            { id: 'ALL', label: `${t('news_cat_all', 'All News')} (${newsService.getAllArticles(language).length})` },
+            { id: 'MY_STOCKS', label: `${t('news_cat_mystocks', 'My Stocks')} (${userTrackedTickers.length})` },
+            { id: 'EARNINGS', label: t('news_cat_earnings', 'Earnings & Revenue') },
+            { id: 'MACRO', label: t('news_cat_macro', 'Fed & Economy') },
+            { id: 'TECH', label: t('news_cat_tech', 'Tech & AI') },
+            { id: 'REGULATION', label: t('news_cat_regulation', 'Legal & Policy') }
           ].map(f => (
             <button
               key={f.id}
@@ -274,7 +300,7 @@ export const NewsScreen: React.FC = () => {
                     <div className="flex items-center gap-1.5">
                       {article.impact === 'HIGH' && (
                         <span className="text-[10px] font-bold text-[#FF9500] flex items-center gap-0.5 bg-[#FF9500]/10 px-2 py-0.5 rounded border border-[#FF9500]/20">
-                          <Flame className="w-2.5 h-2.5" /> High Impact
+                          <Flame className="w-2.5 h-2.5" /> {t('news_high_impact', 'High Impact')}
                         </span>
                       )}
                       {getSentimentBadge(article.sentiment)}
@@ -295,7 +321,7 @@ export const NewsScreen: React.FC = () => {
                   <div className="bg-[#F2F2F7] dark:bg-navy-950/90 border border-black/5 dark:border-navy-800 rounded-xl p-3.5 space-y-1">
                     <div className="flex items-center gap-1 text-[11px] font-bold text-[#FF9500] uppercase tracking-wider">
                       <Sparkles className="w-3.5 h-3.5" />
-                      <span>Buyer's Educational Takeaway</span>
+                      <span>{t('news_takeaway', "Buyer's Educational Takeaway")}</span>
                     </div>
                     <p className="text-xs text-[#666666] dark:text-slate-300 leading-relaxed">
                       {article.educationalTakeaway}

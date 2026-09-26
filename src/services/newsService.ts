@@ -133,15 +133,21 @@ const INITIAL_ARTICLES: NewsArticle[] = [
   }
 ];
 
+import { SupportedLanguage } from '../i18n/translations';
+import { getLocalizedArticles, getLocalizedMarketPulse } from './localizedNewsData';
+
 class NewsService {
   private articles: NewsArticle[] = INITIAL_ARTICLES;
 
-  public getAllArticles(): NewsArticle[] {
+  public getAllArticles(lang?: SupportedLanguage): NewsArticle[] {
+    if (lang) {
+      return getLocalizedArticles(this.articles, lang);
+    }
     return this.articles;
   }
 
-  public getMarketPulse(): MarketPulse {
-    return {
+  public getMarketPulse(lang?: SupportedLanguage): MarketPulse {
+    const defaultPulse: MarketPulse = {
       sentiment: 'Cautious Optimism (Greed)',
       sentimentScore: 64,
       keyThemes: [
@@ -151,6 +157,11 @@ class NewsService {
       ],
       fedWatchStatus: '78% likelihood of 25 bps rate adjustment'
     };
+
+    if (lang) {
+      return getLocalizedMarketPulse(defaultPulse, lang);
+    }
+    return defaultPulse;
   }
 
   /**
@@ -158,25 +169,28 @@ class NewsService {
    */
   public getArticlesByFilter(
     category: 'ALL' | 'MY_STOCKS' | 'EARNINGS' | 'MACRO' | 'TECH' | 'REGULATION',
-    userTrackedTickers: string[] = []
+    userTrackedTickers: string[] = [],
+    lang?: SupportedLanguage
   ): NewsArticle[] {
+    const list = lang ? getLocalizedArticles(this.articles, lang) : this.articles;
     const cleanTracked = new Set(userTrackedTickers.map(t => t.toUpperCase()));
 
     if (category === 'MY_STOCKS') {
       if (cleanTracked.size === 0) return [];
-      return this.articles.filter(a => a.ticker && cleanTracked.has(a.ticker.toUpperCase()));
+      return list.filter(a => a.ticker && cleanTracked.has(a.ticker.toUpperCase()));
     }
 
     if (category === 'ALL') {
-      return this.articles;
+      return list;
     }
 
-    return this.articles.filter(a => a.category === category);
+    return list.filter(a => a.category === category);
   }
 
-  public getArticlesForStock(ticker: string): NewsArticle[] {
+  public getArticlesForStock(ticker: string, lang?: SupportedLanguage): NewsArticle[] {
+    const list = lang ? getLocalizedArticles(this.articles, lang) : this.articles;
     const clean = ticker.toUpperCase();
-    return this.articles.filter(a => a.ticker && a.ticker.toUpperCase() === clean);
+    return list.filter(a => a.ticker && a.ticker.toUpperCase() === clean);
   }
 }
 

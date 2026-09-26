@@ -15,6 +15,7 @@ import {
 import { useMarketStore } from '../../store/marketStore';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { useSettingsStore } from '../../store/settingsStore';
+import { useLanguageStore } from '../../store/languageStore';
 import { stockService } from '../../services/stockService';
 import { PriceChart } from '../../components/StockDetail/PriceChart';
 import { TechnicalGauges } from '../../components/StockDetail/TechnicalGauges';
@@ -30,6 +31,7 @@ export const StockDetailScreen: React.FC = () => {
   const { selectedTicker, quotes, watchlist, toggleWatchlist } = useMarketStore();
   const { positions } = usePortfolioStore();
   const { setActiveTab, themeMode } = useSettingsStore();
+  const { language, t } = useLanguageStore();
 
   const isLight = themeMode === 'neutral-light';
 
@@ -62,7 +64,7 @@ export const StockDetailScreen: React.FC = () => {
     );
   }
 
-  const signal = generateTimingSignal(stock);
+  const signal = generateTimingSignal(stock, language);
   const position = positions.find(p => p.ticker.toUpperCase() === stock.ticker.toUpperCase());
   const isWatched = watchlist.includes(stock.ticker.toUpperCase());
   const isPositive = stock.change >= 0;
@@ -197,13 +199,15 @@ export const StockDetailScreen: React.FC = () => {
                 {isPositive ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
                 <span>{isPositive ? '+' : ''}{curr}{Math.abs(stock.change).toFixed(2)}</span>
                 <span>({isPositive ? '+' : ''}{stock.changePercent.toFixed(2)}%)</span>
-                <span className={`text-[11px] font-sans ml-1 ${isLight ? 'text-[#8E8E93]' : 'text-slate-500'}`}>Today</span>
+                <span className={`text-[11px] font-sans ml-1 ${isLight ? 'text-[#8E8E93]' : 'text-slate-500'}`}>
+                  {t('detail_today', 'Today')}
+                </span>
               </div>
             </div>
 
             <div className={`text-right text-[12px] font-mono space-y-0.5 ${isLight ? 'text-[#666666]' : 'text-slate-400'}`}>
-              <div>High: <strong className={isLight ? 'text-black' : 'text-slate-200'}>{curr}{stock.high.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong></div>
-              <div>Low: <strong className={isLight ? 'text-black' : 'text-slate-200'}>{curr}{stock.low.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong></div>
+              <div>{t('detail_high', 'High:')} <strong className={isLight ? 'text-black' : 'text-slate-200'}>{curr}{stock.high.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong></div>
+              <div>{t('detail_low', 'Low:')} <strong className={isLight ? 'text-black' : 'text-slate-200'}>{curr}{stock.low.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong></div>
             </div>
           </div>
 
@@ -215,7 +219,9 @@ export const StockDetailScreen: React.FC = () => {
                 isLight ? 'bg-[#F2F2F7] border-[rgba(0,0,0,0.06)] hover:bg-[#E8E8ED]' : 'bg-navy-950/60 border-navy-800'
               }`}
             >
-              <span className={`text-[11px] font-sans block ${isLight ? 'text-[#666666]' : 'text-slate-400'}`}>Market Cap</span>
+              <span className={`text-[11px] font-sans block ${isLight ? 'text-[#666666]' : 'text-slate-400'}`}>
+                {t('detail_market_cap', 'Market Cap')}
+              </span>
               <strong className={`text-xs ${isLight ? 'text-[#000000]' : 'text-white'}`}>{stock.marketCap}</strong>
             </div>
 
@@ -225,7 +231,9 @@ export const StockDetailScreen: React.FC = () => {
                 isLight ? 'bg-[#F2F2F7] border-[rgba(0,0,0,0.06)] hover:bg-[#E8E8ED]' : 'bg-navy-950/60 border-navy-800'
               }`}
             >
-              <span className={`text-[11px] font-sans block ${isLight ? 'text-[#666666]' : 'text-slate-400'}`}>P/E Ratio</span>
+              <span className={`text-[11px] font-sans block ${isLight ? 'text-[#666666]' : 'text-slate-400'}`}>
+                {t('detail_pe_ratio', 'P/E Ratio')}
+              </span>
               <strong className={`text-xs ${isLight ? 'text-[#000000]' : 'text-white'}`}>{stock.peRatio}x</strong>
             </div>
 
@@ -235,7 +243,9 @@ export const StockDetailScreen: React.FC = () => {
                 isLight ? 'bg-[#F2F2F7] border-[rgba(0,0,0,0.06)] hover:bg-[#E8E8ED]' : 'bg-navy-950/60 border-navy-800'
               }`}
             >
-              <span className={`text-[11px] font-sans block ${isLight ? 'text-[#666666]' : 'text-slate-400'}`}>Volume</span>
+              <span className={`text-[11px] font-sans block ${isLight ? 'text-[#666666]' : 'text-slate-400'}`}>
+                {t('detail_volume', 'Volume')}
+              </span>
               <strong className={`text-xs ${isLight ? 'text-[#000000]' : 'text-white'}`}>{(stock.volume / 1000000).toFixed(1)}M</strong>
             </div>
           </div>
@@ -246,13 +256,13 @@ export const StockDetailScreen: React.FC = () => {
               isLight ? 'bg-[#F2F2F7] text-[#666666] border-[rgba(0,0,0,0.06)]' : 'bg-navy-950 text-slate-300 border-navy-800'
             }`}>
               {expandedMetric === 'cap' && (
-                <p>💡 <strong>Market Capitalization:</strong> The total dollar market value of {stock.ticker}'s outstanding shares. It indicates company size and risk category.</p>
+                <p>💡 <strong>{t('detail_market_cap', 'Market Cap')}:</strong> {language === 'ko' ? `${stock.ticker}의 총 발행주식에 현재가를 곱한 전체 시장 가치입니다. 기업의 규모와 체급을 나타냅니다.` : `The total dollar market value of ${stock.ticker}'s outstanding shares. It indicates company size and risk category.`}</p>
               )}
               {expandedMetric === 'pe' && (
-                <p>💡 <strong>Price-to-Earnings (P/E):</strong> Measures {stock.ticker}'s current share price relative to its per-share earnings. Helps assess whether a stock is cheap or expensive.</p>
+                <p>💡 <strong>{t('detail_pe_ratio', 'P/E Ratio')}:</strong> {language === 'ko' ? `현재 주가를 주당순이익(EPS)으로 나눈 값으로, 기업이 버는 이익 대비 주가가 저렴한지 비싼지 평가하는 대표 지표입니다.` : `Measures ${stock.ticker}'s current share price relative to its per-share earnings. Helps assess whether a stock is cheap or expensive.`}</p>
               )}
               {expandedMetric === 'vol' && (
-                <p>💡 <strong>Trading Volume:</strong> The total number of {stock.ticker} shares traded today. Higher volume confirms stronger market interest and liquid entry/exit.</p>
+                <p>💡 <strong>{t('detail_volume', 'Volume')}:</strong> {language === 'ko' ? `오늘 하루 동안 거래된 ${stock.ticker}의 총 주식 수량입니다. 대량 거래량은 시장의 강한 매수/매도 확신을 대변합니다.` : `The total number of ${stock.ticker} shares traded today. Higher volume confirms stronger market interest and liquid entry/exit.`}</p>
               )}
             </div>
           )}
@@ -266,7 +276,10 @@ export const StockDetailScreen: React.FC = () => {
         }`}>
           <Lock className={`w-4 h-4 shrink-0 mt-0.5 ${isLight ? 'text-[#FF9500]' : 'text-gold-400'}`} />
           <p className="leading-relaxed">
-            <strong className={isLight ? 'text-black' : 'text-slate-200'}>Educational Tool Only:</strong> InvestLearn tracks metrics and educational timing indicators. Execute actual transactions through your licensed stockbroker.
+            <strong className={isLight ? 'text-black' : 'text-slate-200'}>
+              {t('detail_edu_tool_only', 'Educational Tool Only:')}
+            </strong>{' '}
+            {t('detail_broker_notice', 'InvestLearn tracks metrics and educational timing indicators. Execute actual transactions through your licensed stockbroker.')}
           </p>
         </div>
 
@@ -309,14 +322,18 @@ export const StockDetailScreen: React.FC = () => {
           }`}
         >
           <Plus className="w-4 h-4 stroke-[2.5]" />
-          <span>+ Log Holding</span>
+          <span>{position ? t('detail_in_portfolio', 'In Portfolio') : t('detail_log_to_portfolio', '+ Log Holding')}</span>
         </button>
 
         <button
           type="button"
           data-touch-target="true"
           onClick={() => {
-            setInitialAiPrompt(`Can you explain the current timing signals and RSI for ${stock.ticker}?`);
+            setInitialAiPrompt(
+              language === 'ko'
+                ? `${stock.ticker}의 현재 타이밍 신호와 RSI 보조지표를 초보자 눈높이에서 쉽게 설명해 주실 수 있나요?`
+                : `Can you explain the current timing signals and RSI for ${stock.ticker}?`
+            );
             setIsAiModalOpen(true);
           }}
           className={`flex-1 min-h-[48px] px-3 py-2.5 rounded-lg text-xs font-semibold text-white flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-95 shadow-sm ${
@@ -324,7 +341,7 @@ export const StockDetailScreen: React.FC = () => {
           }`}
         >
           <MessageSquare className="w-4 h-4" />
-          <span>Ask AI Tutor</span>
+          <span>{language === 'ko' ? 'AI 튜터 질문' : 'Ask AI Tutor'}</span>
         </button>
       </div>
 

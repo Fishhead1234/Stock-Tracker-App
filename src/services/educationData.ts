@@ -183,3 +183,5 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     explanation: 'Dollar-Cost Averaging removes emotional guessing games. By investing a fixed amount regularly, you automatically buy more shares during dips and fewer when shares are expensive.'
   }
 ];
+
+export { getLocalizedLessons, getLocalizedGlossary, getLocalizedQuiz } from './localizedEducationData';

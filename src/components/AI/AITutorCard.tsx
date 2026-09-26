@@ -3,6 +3,7 @@ import { Sparkles, Bot, ArrowRight, MessageSquareCode } from 'lucide-react';
 import { StockQuote } from '../../types/stock';
 import { aiTutorService, QuickPrompt } from '../../services/aiTutorService';
 import { useSettingsStore } from '../../store/settingsStore';
+import { useLanguageStore } from '../../store/languageStore';
 
 interface Props {
   stock: StockQuote;
@@ -11,8 +12,9 @@ interface Props {
 
 export const AITutorCard: React.FC<Props> = ({ stock, onOpenChat }) => {
   const { themeMode } = useSettingsStore();
+  const { language } = useLanguageStore();
   const isLight = themeMode === 'neutral-light';
-  const quickPrompts: QuickPrompt[] = aiTutorService.getQuickPrompts(stock);
+  const quickPrompts: QuickPrompt[] = aiTutorService.getQuickPrompts(stock, language);
 
   return (
     <div className={`relative overflow-hidden rounded-2xl p-4 border transition-all ${
@@ -49,7 +51,9 @@ export const AITutorCard: React.FC<Props> = ({ stock, onOpenChat }) => {
             <p className={`text-[13px] leading-snug mt-0.5 ${
               isLight ? 'text-[#666666]' : 'text-slate-400'
             }`}>
-              Ask questions about {stock.ticker}'s chart, indicators & risks in plain English.
+              {language === 'ko'
+                ? `${stock.ticker}의 차트, 보조지표 및 투자 리스크에 대해 쉽게 질문하세요.`
+                : `Ask questions about ${stock.ticker}'s chart, indicators & risks in plain English.`}
             </p>
           </div>
         </div>
@@ -64,7 +68,7 @@ export const AITutorCard: React.FC<Props> = ({ stock, onOpenChat }) => {
               : 'bg-gradient-to-r from-purple-600 to-indigo-600'
           }`}
         >
-          <span>Chat</span>
+          <span>{language === 'ko' ? '대화 시작' : 'Chat'}</span>
           <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>

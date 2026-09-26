@@ -4,6 +4,7 @@ import { StockSignal } from '../../types/signal';
 import { SignalBadge } from '../StockCard/SignalBadge';
 import { EducationModal } from '../EducationModal/EducationModal';
 import { useSettingsStore } from '../../store/settingsStore';
+import { useLanguageStore } from '../../store/languageStore';
 
 interface Props {
   signal: StockSignal;
@@ -12,6 +13,7 @@ interface Props {
 export const SignalExplanation: React.FC<Props> = ({ signal }) => {
   const [activeEducationTerm, setActiveEducationTerm] = useState<string | null>(null);
   const { themeMode } = useSettingsStore();
+  const { language, t } = useLanguageStore();
   const isLight = themeMode === 'neutral-light';
 
   const riskColors = {
@@ -34,7 +36,7 @@ export const SignalExplanation: React.FC<Props> = ({ signal }) => {
           <span className={`text-[11px] uppercase font-bold tracking-wider block mb-1 ${
             isLight ? 'text-[#666666]' : 'text-slate-400'
           }`}>
-            Intelligent Timing Advice
+            {language === 'ko' ? '지능형 타이밍 분석' : 'Intelligent Timing Advice'}
           </span>
           <h3 className={`text-base font-bold ${isLight ? 'text-[#000000]' : 'text-white'}`}>
             {signal.title}
@@ -43,7 +45,7 @@ export const SignalExplanation: React.FC<Props> = ({ signal }) => {
         <div className="flex flex-col items-end gap-1">
           <SignalBadge action={signal.action} size="md" />
           <span className={`text-[12px] font-mono ${isLight ? 'text-[#666666]' : 'text-slate-400'}`}>
-            Timing Score: <strong className={isLight ? 'text-black' : 'text-white'}>{signal.score}</strong>/100
+            {t('sig_timing_score', 'Timing Score:')} <strong className={isLight ? 'text-black' : 'text-white'}>{signal.score}</strong>/100
           </span>
         </div>
       </div>
@@ -62,7 +64,7 @@ export const SignalExplanation: React.FC<Props> = ({ signal }) => {
         <CheckCircle2 className={`w-4 h-4 shrink-0 mt-0.5 ${isLight ? 'text-[#34C759]' : 'text-growth-400'}`} />
         <div>
           <span className={`text-xs font-bold block mb-0.5 ${isLight ? 'text-[#34C759]' : 'text-growth-300'}`}>
-            Recommended Approach
+            {language === 'ko' ? '추천 접근법' : 'Recommended Approach'}
           </span>
           <p className={`text-[13px] leading-relaxed ${isLight ? 'text-[#000000]' : 'text-slate-200'}`}>
             {signal.recommendedAction}
@@ -74,10 +76,10 @@ export const SignalExplanation: React.FC<Props> = ({ signal }) => {
       <div className="space-y-2.5 pt-1">
         <div className="flex items-center justify-between">
           <span className={`text-xs font-bold uppercase tracking-wider ${isLight ? 'text-[#000000]' : 'text-white'}`}>
-            Why This Recommendation?
+            {language === 'ko' ? '이 신호를 추천하는 이유' : 'Why This Recommendation?'}
           </span>
           <span className={`text-[12px] ${isLight ? 'text-[#8E8E93]' : 'text-slate-500'}`}>
-            Jargon-Free Analysis
+            {language === 'ko' ? '전문 용어 없는 쉬운 분석' : 'Jargon-Free Analysis'}
           </span>
         </div>
 
@@ -122,7 +124,7 @@ export const SignalExplanation: React.FC<Props> = ({ signal }) => {
                 isLight ? 'text-[#FF9500]' : 'text-gold-300'
               }`}>
                 <Lightbulb className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                <span>Analogy: "{r.plainEnglishAnalogy}"</span>
+                <span>{language === 'ko' ? '일상 비유' : 'Analogy'}: "{r.plainEnglishAnalogy}"</span>
               </div>
             </div>
           ))}
@@ -134,9 +136,11 @@ export const SignalExplanation: React.FC<Props> = ({ signal }) => {
         isLight ? 'border-[rgba(0,0,0,0.06)]' : 'border-navy-800'
       }`}>
         <div className="flex items-center gap-1.5">
-          <span className={`text-xs ${isLight ? 'text-[#666666]' : 'text-slate-400'}`}>Estimated Timing Risk:</span>
+          <span className={`text-xs ${isLight ? 'text-[#666666]' : 'text-slate-400'}`}>
+            {language === 'ko' ? '예상 타이밍 리스크:' : 'Estimated Timing Risk:'}
+          </span>
           <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${riskColors[signal.riskLevel]}`}>
-            {signal.riskLevel}
+            {signal.riskLevel === 'LOW' ? (language === 'ko' ? '낮음' : 'LOW') : signal.riskLevel === 'MODERATE' ? (language === 'ko' ? '보통' : 'MODERATE') : (language === 'ko' ? '높음' : 'HIGH')}
           </span>
         </div>
 
@@ -149,7 +153,7 @@ export const SignalExplanation: React.FC<Props> = ({ signal }) => {
           }`}
         >
           <HelpCircle className="w-3.5 h-3.5" />
-          <span>How we calculate this</span>
+          <span>{language === 'ko' ? '지표 산출 기준 보기' : 'How we calculate this'}</span>
         </button>
       </div>
 

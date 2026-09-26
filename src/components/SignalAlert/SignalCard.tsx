@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp, Lightbulb, ArrowRight, ShieldCheck, HelpCircle 
 import { StockSignal } from '../../types/signal';
 import { SignalBadge } from '../StockCard/SignalBadge';
 import { EducationModal } from '../EducationModal/EducationModal';
+import { useLanguageStore } from '../../store/languageStore';
 
 interface Props {
   signal: StockSignal;
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export const SignalCard: React.FC<Props> = ({ signal, onSelectStock }) => {
+  const { t } = useLanguageStore();
   const [expanded, setExpanded] = useState(false);
   const [educationTerm, setEducationTerm] = useState<string | null>(null);
 
@@ -23,7 +25,7 @@ export const SignalCard: React.FC<Props> = ({ signal, onSelectStock }) => {
             <span className="text-[13px] text-[#666666] dark:text-slate-400 truncate max-w-[140px]">{signal.companyName}</span>
           </div>
           <div className="text-[13px] font-mono text-[#666666] dark:text-slate-300 mt-0.5">
-            Current Price: <strong className="text-[#000000] dark:text-white">${signal.currentPrice.toFixed(2)}</strong>
+            {t('sig_current_price', 'Current Price:')} <strong className="text-[#000000] dark:text-white">${signal.currentPrice.toFixed(2)}</strong>
           </div>
         </div>
 
@@ -39,7 +41,9 @@ export const SignalCard: React.FC<Props> = ({ signal, onSelectStock }) => {
       {/* Timing Score Progress Bar */}
       <div>
         <div className="flex items-center justify-between text-xs mb-1 font-mono">
-          <span className="text-[#666666] dark:text-slate-400 font-sans">Timing Strength Score:</span>
+          <span className="text-[#666666] dark:text-slate-400 font-sans">
+            {t('sig_timing_score', 'Timing Strength Score:')}
+          </span>
           <span className="text-[#000000] dark:text-white font-bold">{signal.score}/100</span>
         </div>
         <div className="h-2 w-full bg-[#E8E8ED] dark:bg-navy-950 rounded-full overflow-hidden border border-black/5 dark:border-navy-800">
@@ -64,7 +68,7 @@ export const SignalCard: React.FC<Props> = ({ signal, onSelectStock }) => {
       {expanded && (
         <div className="space-y-2 pt-2 border-t border-black/10 dark:border-navy-800 transition-all duration-300 ease-in-out">
           <span className="text-[11px] font-bold text-[#8E8E93] dark:text-slate-400 uppercase tracking-wider block">
-            Technical Factors:
+            {t('sig_tech_factors', 'Technical Factors:')}
           </span>
           {signal.reasons.map((r, i) => (
             <div key={i} className="p-3 bg-[#F2F2F7] dark:bg-navy-950/90 rounded-xl border border-black/5 dark:border-navy-800 text-[13px] space-y-1">
@@ -87,7 +91,9 @@ export const SignalCard: React.FC<Props> = ({ signal, onSelectStock }) => {
           ))}
 
           <div className="p-3 bg-[#F2F2F7] dark:bg-navy-950/60 rounded-xl border border-black/5 dark:border-navy-800 text-xs text-[#666666] dark:text-slate-400 leading-[1.5]">
-            <strong className="text-[#000000] dark:text-slate-200 block mb-0.5">Educational Context:</strong>
+            <strong className="text-[#000000] dark:text-slate-200 block mb-0.5">
+              {t('sig_edu_context', 'Educational Context:')}
+            </strong>
             {signal.recommendedAction}
           </div>
         </div>
@@ -99,7 +105,7 @@ export const SignalCard: React.FC<Props> = ({ signal, onSelectStock }) => {
           onClick={() => setExpanded(!expanded)}
           className="min-h-[48px] px-2 text-[13px] font-medium text-[#666666] hover:text-[#000000] dark:text-slate-400 dark:hover:text-white flex items-center gap-1 transition"
         >
-          <span>{expanded ? 'Less Detail' : 'Why this signal?'}</span>
+          <span>{expanded ? t('sig_hide_factors', 'Less Detail') : t('sig_why_signal', 'Why this signal?')}</span>
           {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </button>
 
@@ -107,7 +113,7 @@ export const SignalCard: React.FC<Props> = ({ signal, onSelectStock }) => {
           onClick={() => onSelectStock(signal.ticker)}
           className="min-h-[48px] px-4 py-2 bg-[#007AFF] hover:bg-[#0062CC] text-white text-[13px] font-semibold rounded-lg flex items-center gap-1.5 transition shadow-xs"
         >
-          <span>View Chart & Gauges</span>
+          <span>{t('sig_view_chart', 'View Chart & Gauges')}</span>
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>

@@ -136,9 +136,39 @@ class AITutorService {
   /**
    * Generates tailored 1-tap quick prompts based on stock indicators
    */
-  public getQuickPrompts(stock: StockQuote): QuickPrompt[] {
-    const signal: StockSignal = generateTimingSignal(stock);
+  public getQuickPrompts(stock: StockQuote, lang: string = 'en'): QuickPrompt[] {
+    const signal: StockSignal = generateTimingSignal(stock, lang as any);
     const curr = stock.currencySymbol || '$';
+
+    if (lang === 'ko') {
+      return [
+        {
+          id: 'why_signal',
+          label: `${stock.ticker} 신호 분석`,
+          prompt: `${stock.ticker}의 현재 타이밍 신호가 ${signal.action} (${signal.title})인 이유를 초보자 눈높이에서 쉽게 설명해 주세요. 어떤 보조지표가 이 신호를 유발했는지와 주의해야 할 리스크를 짚어주세요.`
+        },
+        {
+          id: 'explain_rsi_macd',
+          label: 'RSI & MACD 보조지표 설명',
+          prompt: `${stock.ticker}의 RSI (${stock.indicators.rsi.toFixed(1)})와 MACD (${stock.indicators.macd.crossover}) 지표를 초보자가 이해하기 쉬운 일상 비유로 설명해 주세요.`
+        },
+        {
+          id: 'bull_bear',
+          label: '상승 호재 vs 하락 리스크',
+          prompt: `${stock.ticker}에 대한 객관적인 분석을 부탁합니다: 상승 기대 요인(Bull Case)과 주가 하락 위험 요인(Bear Case)은 각각 무엇인가요?`
+        },
+        {
+          id: 'dca_strategy',
+          label: '분할 매수(DCA) 전략',
+          prompt: `초보 투자자가 현재가 ${curr}${stock.price}에서 ${stock.ticker}를 분할 매수(DCA)하고자 할 때 어떤 원칙, 타임라인, 손절 기준을 지켜야 하나요?`
+        },
+        {
+          id: 'news_impact',
+          label: '뉴스 및 호재/악재 영향',
+          prompt: `최근 시장 동향과 기업 관련 이슈가 ${stock.ticker}의 단기 모멘텀과 장기 실적에 어떤 영향을 주나요?`
+        }
+      ];
+    }
 
     return [
       {

@@ -16,22 +16,29 @@ import {
   BarChart2
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { LESSONS, GLOSSARY, QUIZ_QUESTIONS } from '../../services/educationData';
+import { getLocalizedLessons, getLocalizedGlossary, getLocalizedQuiz } from '../../services/educationData';
 import { EducationLesson, GlossaryItem } from '../../types/education';
 import { DisclaimerBanner } from '../../components/Common/DisclaimerBanner';
 import { EducationModal } from '../../components/EducationModal/EducationModal';
+import { useLanguageStore } from '../../store/languageStore';
 
 export const EducationScreen: React.FC = () => {
+  const { language, t } = useLanguageStore();
   const [activeTab, setActiveTab] = useState<'lessons' | 'glossary' | 'quiz'>('lessons');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLesson, setSelectedLesson] = useState<EducationLesson | null>(null);
   const [selectedGlossaryTerm, setSelectedGlossaryTerm] = useState<string | null>(null);
 
+  // Localized data
+  const lessons = getLocalizedLessons(language);
+  const glossary = getLocalizedGlossary(language);
+  const quizQuestions = getLocalizedQuiz(language);
+
   // Quiz state
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, number>>({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
 
-  const filteredGlossary = GLOSSARY.filter(item => 
+  const filteredGlossary = glossary.filter(item => 
     item.term.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.shortDef.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.analogy.toLowerCase().includes(searchQuery.toLowerCase())
@@ -45,7 +52,7 @@ export const EducationScreen: React.FC = () => {
   const handleQuizSubmit = () => {
     setQuizSubmitted(true);
     let correctCount = 0;
-    QUIZ_QUESTIONS.forEach(q => {
+    quizQuestions.forEach(q => {
       if (selectedAnswers[q.id] === q.correctIndex) {
         correctCount++;
       }
@@ -85,22 +92,22 @@ export const EducationScreen: React.FC = () => {
         {/* Top Header */}
         <div className="pt-1">
           <span className="text-[11px] font-bold text-[#FF9500] uppercase tracking-wider font-mono">
-            Investor Academy
+            {t('edu_academy', 'Investor Academy')}
           </span>
           <h2 className="text-xl font-extrabold text-[#000000] dark:text-white tracking-tight">
-            Learn Trading & Timing
+            {t('edu_title', 'Learn Trading & Timing')}
           </h2>
           <p className="text-[13px] text-[#666666] dark:text-slate-400 mt-0.5 leading-[1.6]">
-            Understand technical indicators, eliminate emotional trading, and protect your capital.
+            {t('edu_subtitle', 'Understand technical indicators, eliminate emotional trading, and protect your capital.')}
           </p>
         </div>
 
         {/* Navigation Tabs */}
         <div className="flex items-center bg-[#F2F2F7] dark:bg-navy-950 p-1.5 rounded-2xl border border-black/10 dark:border-navy-800 text-xs font-semibold">
           {[
-            { id: 'lessons', label: 'Core Lessons', icon: BookOpen },
-            { id: 'glossary', label: 'Jargon Buster', icon: HelpCircle },
-            { id: 'quiz', label: 'Knowledge Check', icon: GraduationCap }
+            { id: 'lessons', label: t('edu_tab_lessons', 'Core Lessons'), icon: BookOpen },
+            { id: 'glossary', label: t('edu_tab_glossary', 'Jargon Buster'), icon: HelpCircle },
+            { id: 'quiz', label: t('edu_tab_quiz', 'Knowledge Check'), icon: GraduationCap }
           ].map(tab => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -124,7 +131,7 @@ export const EducationScreen: React.FC = () => {
         {/* TAB 1: CORE LESSONS */}
         {activeTab === 'lessons' && (
           <div className="space-y-3 animate-fadeIn">
-            {LESSONS.map(lesson => (
+            {lessons.map(lesson => (
               <div
                 key={lesson.id}
                 onClick={() => setSelectedLesson(lesson)}
@@ -137,7 +144,11 @@ export const EducationScreen: React.FC = () => {
                     </div>
                     <div>
                       <span className="text-[11px] uppercase font-bold text-[#FF9500] font-mono">
-                        {lesson.category}
+                        {lesson.category === 'Technical Timing' 
+                          ? t('edu_tech_timing', 'TECHNICAL TIMING') 
+                          : lesson.category === 'Risk Management' 
+                          ? t('edu_risk_mgmt', 'RISK MANAGEMENT') 
+                          : lesson.category}
                       </span>
                       <h4 className="text-base font-bold text-[#000000] dark:text-white group-hover:text-[#007AFF] transition">
                         {lesson.title}
@@ -175,7 +186,7 @@ export const EducationScreen: React.FC = () => {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search financial terms (e.g. RSI, P/E, Golden Cross)..."
+                placeholder={t('edu_search_glossary', 'Search financial terms (e.g. RSI, P/E, Golden Cross)...')}
                 className="w-full min-h-[48px] bg-white dark:bg-navy-950 border border-black/10 dark:border-navy-800 rounded-xl pl-11 pr-3 py-3 text-[14px] text-[#000000] dark:text-white placeholder-[#8E8E93] focus:outline-none focus:border-[#007AFF] shadow-xs"
               />
             </div>
@@ -196,7 +207,7 @@ export const EducationScreen: React.FC = () => {
                   <p className="text-[13px] text-[#666666] dark:text-slate-300 leading-[1.6]">{item.shortDef}</p>
                   <div className="pt-1 flex items-start gap-1.5 text-xs text-[#8F5B00] dark:text-gold-300/90 italic">
                     <Lightbulb className="w-4 h-4 text-[#FF9500] shrink-0 mt-0.5" />
-                    <span>Analogy: "{item.analogy}"</span>
+                    <span>{t('edu_plain_analogy', 'Analogy')}: "{item.analogy}"</span>
                   </div>
                 </div>
               ))}
@@ -208,14 +219,16 @@ export const EducationScreen: React.FC = () => {
         {activeTab === 'quiz' && (
           <div className="space-y-4 animate-fadeIn">
             <div className="bg-white dark:bg-navy-950/60 p-4 rounded-2xl border border-black/10 dark:border-navy-800 shadow-xs">
-              <h3 className="text-base font-bold text-[#000000] dark:text-white mb-1">Interactive Trading Quiz</h3>
+              <h3 className="text-base font-bold text-[#000000] dark:text-white mb-1">
+                {t('edu_quiz_title', 'Interactive Trading Quiz')}
+              </h3>
               <p className="text-[13px] text-[#666666] dark:text-slate-400 leading-[1.6]">
-                Test your understanding of indicator timing, overbought zones, and risk preservation.
+                {t('edu_quiz_subtitle', 'Test your understanding of indicator timing, overbought zones, and risk preservation.')}
               </p>
             </div>
 
             <div className="space-y-4">
-              {QUIZ_QUESTIONS.map((q, qIndex) => {
+              {quizQuestions.map((q, qIndex) => {
                 const selected = selectedAnswers[q.id];
                 const isAnswered = selected !== undefined;
                 const isCorrect = selected === q.correctIndex;
@@ -290,22 +303,22 @@ export const EducationScreen: React.FC = () => {
               {!quizSubmitted ? (
                 <button
                   onClick={handleQuizSubmit}
-                  disabled={Object.keys(selectedAnswers).length < QUIZ_QUESTIONS.length}
+                  disabled={Object.keys(selectedAnswers).length < quizQuestions.length}
                   className={`w-full min-h-[48px] py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition ${
-                    Object.keys(selectedAnswers).length === QUIZ_QUESTIONS.length
+                    Object.keys(selectedAnswers).length === quizQuestions.length
                       ? 'bg-[#34C759] hover:bg-[#2EB04E] text-white shadow-xs'
                       : 'bg-[#E8E8ED] dark:bg-navy-800 text-[#8E8E93] dark:text-slate-500 cursor-not-allowed'
                   }`}
                 >
                   <Award className="w-5 h-5" />
-                  <span>Submit & Check Answers</span>
+                  <span>{t('edu_submit_quiz', 'Submit Quiz')}</span>
                 </button>
               ) : (
                 <button
                   onClick={handleResetQuiz}
                   className="w-full min-h-[48px] py-3.5 bg-[#007AFF] hover:bg-[#0062CC] text-white font-semibold text-sm rounded-xl transition shadow-xs"
                 >
-                  Try Again
+                  {t('edu_try_again', 'Retake Quiz')}
                 </button>
               )}
             </div>

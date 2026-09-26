@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from 'recharts';
 import { HistoricalPoint } from '../../types/stock';
 import { useSettingsStore } from '../../store/settingsStore';
+import { useLanguageStore } from '../../store/languageStore';
 
 interface Props {
   history: {
@@ -16,6 +17,7 @@ interface Props {
 
 export const PriceChart: React.FC<Props> = ({ history, currentPrice }) => {
   const { themeMode } = useSettingsStore();
+  const { t } = useLanguageStore();
   const isLight = themeMode === 'neutral-light';
 
   const [timeframe, setTimeframe] = useState<'1D' | '1W' | '1M' | '1Y'>('1M');
@@ -39,7 +41,7 @@ export const PriceChart: React.FC<Props> = ({ history, currentPrice }) => {
       {/* Timeframe Selector Buttons (Min 48px touch targets) */}
       <div className="flex items-center justify-between mb-3">
         <span className={`text-xs font-semibold ${isLight ? 'text-[#666666]' : 'text-slate-400'}`}>
-          Price Trend
+          {t('detail_price_trend', 'Price Trend')}
         </span>
         <div className={`flex items-center p-1 rounded-xl border ${
           isLight ? 'bg-[#F2F2F7] border-[rgba(0,0,0,0.08)]' : 'bg-navy-950 border-navy-800'
