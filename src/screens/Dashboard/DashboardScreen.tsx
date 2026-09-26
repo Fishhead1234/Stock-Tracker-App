@@ -49,7 +49,7 @@ type WatchFilterType = 'ALL' | 'TRIM' | 'STRONG_BUY' | 'BUY' | 'HOLD' | 'STRONG_
 export const DashboardScreen: React.FC = () => {
   const { positions, getSummary } = usePortfolioStore();
   const { quotes, selectTicker, watchlist, addToWatchlist, removeFromWatchlist } = useMarketStore();
-  const { setActiveTab, themeMode } = useSettingsStore();
+  const { setActiveTab, themeMode, userName } = useSettingsStore();
   const { getUnreadCount } = useNotificationStore();
   const { plan, getTrialDaysRemaining } = useSubscriptionStore();
   const { language, t } = useLanguageStore();
@@ -252,10 +252,10 @@ export const DashboardScreen: React.FC = () => {
               isLight ? 'text-[#FF9500]' : 'text-gold-400'
             }`}>
               <Globe className="w-3.5 h-3.5 shrink-0" />
-              <span className="truncate">{t('header_universal_tracker', 'Universal Exchange Tracker')}</span>
+              <span className="truncate">{userName ? t('header_hub', 'Global Portfolio Hub') : t('header_universal_tracker', 'Universal Exchange Tracker')}</span>
             </div>
             <h2 className={`text-xl font-extrabold tracking-tight truncate ${isLight ? 'text-[#000000]' : 'text-white'}`}>
-              {t('header_hub', 'Global Portfolio Hub')}
+              {userName ? `👋 Hi, ${userName}!` : t('header_hub', 'Global Portfolio Hub')}
             </h2>
           </div>
 

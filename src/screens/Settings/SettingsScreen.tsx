@@ -20,7 +20,8 @@ import {
   AlertCircle,
   Bot,
   Sun,
-  Moon
+  Moon,
+  User
 } from 'lucide-react';
 import { useSettingsStore } from '../../store/settingsStore';
 import { usePortfolioStore } from '../../store/portfolioStore';
@@ -48,7 +49,9 @@ export const SettingsScreen: React.FC = () => {
     currency,
     setCurrency,
     themeMode,
-    setThemeMode
+    setThemeMode,
+    userName,
+    setUserName
   } = useSettingsStore();
 
   const isLight = themeMode === 'neutral-light';
@@ -73,6 +76,8 @@ export const SettingsScreen: React.FC = () => {
   } = useSubscriptionStore();
 
   const [inputKey, setInputKey] = useState(finnhubApiKey);
+  const [nameDraft, setNameDraft] = useState(userName || '');
+  const [savedNameMsg, setSavedNameMsg] = useState(false);
   const [testResult, setTestResult] = useState<string | null>(null);
   const [isTesting, setIsTesting] = useState(false);
 
@@ -191,6 +196,81 @@ export const SettingsScreen: React.FC = () => {
           }`}>
             {t('settings_subtitle', 'Configure timing alert notifications, subscription status, and global market feeds.')}
           </p>
+        </div>
+
+        {/* 👤 0. TRADER PROFILE & IDENTITY (OPTIONAL NAME & GOOGLE/APPLE SYNC) */}
+        <div className={`rounded-2xl p-4 space-y-3.5 border shadow-xs transition-all ${
+          isLight 
+            ? 'bg-white border-[rgba(0,0,0,0.1)]' 
+            : 'bg-navy-900/90 border-navy-800'
+        }`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+                isLight ? 'bg-[#007AFF]/15 text-[#007AFF]' : 'bg-growth-500/20 text-growth-400'
+              }`}>
+                <User className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className={`text-xs font-bold uppercase tracking-wider ${
+                  isLight ? 'text-[#000000]' : 'text-white'
+                }`}>
+                  Trader Profile & Greeting
+                </h3>
+                <p className={`text-[11px] ${
+                  isLight ? 'text-[#666666]' : 'text-slate-400'
+                }`}>
+                  Personalize your dashboard greeting. No account or password required.
+                </p>
+              </div>
+            </div>
+            <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
+              userName 
+                ? isLight ? 'bg-[#34C759]/15 text-[#34C759] border border-[#34C759]/30' : 'bg-growth-500/20 text-growth-300'
+                : isLight ? 'bg-black/5 text-[#8E8E93]' : 'bg-navy-800 text-slate-400'
+            }`}>
+              {userName ? 'Personalized' : 'Guest'}
+            </span>
+          </div>
+
+          <div className="space-y-2">
+            <label className={`block text-xs font-semibold ${isLight ? 'text-[#000000]' : 'text-slate-200'}`}>
+              Display Name / Nickname
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={nameDraft}
+                onChange={(e) => setNameDraft(e.target.value)}
+                onBlur={() => {
+                  setUserName(nameDraft.trim());
+                  setSavedNameMsg(true);
+                  setTimeout(() => setSavedNameMsg(false), 2000);
+                }}
+                placeholder="Enter your name (e.g. Alex, Sam)"
+                maxLength={25}
+                className={`flex-1 px-3.5 py-2.5 rounded-xl text-xs border transition focus:outline-none focus:ring-2 ${
+                  isLight 
+                    ? 'bg-[#F2F2F7] border-[rgba(0,0,0,0.1)] text-[#000000] focus:ring-[#007AFF] focus:bg-white' 
+                    : 'bg-navy-950 border-navy-700 text-white focus:ring-growth-500'
+                }`}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setUserName(nameDraft.trim());
+                  setSavedNameMsg(true);
+                  setTimeout(() => setSavedNameMsg(false), 2000);
+                }}
+                className="px-4 py-2.5 rounded-xl bg-[#007AFF] text-white text-xs font-semibold hover:bg-[#0062CC] transition active:scale-95 cursor-pointer shrink-0"
+              >
+                {savedNameMsg ? 'Saved!' : 'Save'}
+              </button>
+            </div>
+            <p className={`text-[11px] ${isLight ? 'text-[#8E8E93]' : 'text-slate-500'}`}>
+              🔒 Purchases, receipts, and free trial status are handled securely via your Google Play / Apple ID account.
+            </p>
+          </div>
         </div>
 
         {/* 🎨 1. THEME & APPEARANCE CARD (MANDATORY PROMINENT TOP POSITION) */}

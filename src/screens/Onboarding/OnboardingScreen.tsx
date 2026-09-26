@@ -35,6 +35,8 @@ export const OnboardingScreen: React.FC = () => {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
 
   const {
+    userName,
+    setUserName,
     experienceLevel,
     setAgeConfirmed,
     setRiskAcknowledged,
@@ -52,6 +54,7 @@ export const OnboardingScreen: React.FC = () => {
   const [isAge18, setIsAge18] = useState(false);
   const [selectedInterests, setSelectedInterests] = useState<string[]>(['tw', 'us']);
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
+  const [nameInput, setNameInput] = useState(userName || '');
 
   const handleToggleSector = (id: string) => {
     setSelectedInterests(prev => 
@@ -63,6 +66,9 @@ export const OnboardingScreen: React.FC = () => {
     setAgeConfirmed(true);
     setRiskAcknowledged(true);
     setInterestedSectors(selectedInterests);
+    if (nameInput.trim()) {
+      setUserName(nameInput.trim());
+    }
 
     const chosenTickers = GLOBAL_SECTORS
       .filter(s => selectedInterests.includes(s.id))
@@ -209,8 +215,37 @@ export const OnboardingScreen: React.FC = () => {
               </div>
             </div>
 
+            {/* Optional User Name / Nickname Input */}
+            <div className={`p-4 rounded-2xl border transition-colors shadow-xs ${
+              isLight ? 'bg-white border-[rgba(0,0,0,0.1)]' : 'bg-navy-900 border-navy-850'
+            }`}>
+              <label className={`block text-xs font-semibold mb-1.5 ${
+                isLight ? 'text-[#000000]' : 'text-slate-200'
+              }`}>
+                What should we call you? <span className={`font-normal ${isLight ? 'text-[#8E8E93]' : 'text-slate-400'}`}>(Optional)</span>
+              </label>
+              <input
+                type="text"
+                value={nameInput}
+                onChange={(e) => setNameInput(e.target.value)}
+                placeholder="e.g. Alex, Sam, or Trader"
+                maxLength={25}
+                className={`w-full px-3.5 py-2.5 rounded-xl text-sm border transition focus:outline-none focus:ring-2 ${
+                  isLight 
+                    ? 'bg-[#F2F2F7] border-[rgba(0,0,0,0.1)] text-[#000000] focus:ring-[#007AFF] focus:bg-white' 
+                    : 'bg-navy-950 border-navy-750 text-white focus:ring-growth-500'
+                }`}
+              />
+              <p className={`text-[11px] mt-1.5 ${isLight ? 'text-[#8E8E93]' : 'text-slate-500'}`}>
+                Leave blank or enter your nickname. No account or password required.
+              </p>
+            </div>
+
             <button
-              onClick={() => setStep(2)}
+              onClick={() => {
+                if (nameInput.trim()) setUserName(nameInput.trim());
+                setStep(2);
+              }}
               className="min-h-[48px] w-full py-3.5 bg-[#007AFF] hover:bg-[#0062CC] text-white font-bold rounded-2xl transition shadow-md flex items-center justify-center gap-2 text-base active:scale-98 cursor-pointer"
             >
               <span>Continue</span>

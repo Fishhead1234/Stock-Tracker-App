@@ -22,6 +22,10 @@ interface SettingsState {
   setAgeConfirmed: (val: boolean) => void;
   setRiskAcknowledged: (val: boolean) => void;
   setExperienceLevel: (val: 'never_traded' | 'beginner' | 'intermediate') => void;
+  userName: string;
+  userEmail: string;
+  setUserName: (name: string) => void;
+  setUserEmail: (email: string) => void;
   setInterestedSectors: (sectors: string[]) => void;
   setInterestedCompanies: (companies: string[]) => void;
   completeOnboarding: () => void;
@@ -55,6 +59,8 @@ const loadSavedSettings = () => {
     experienceLevel: 'never_traded',
     interestedSectors: [],
     interestedCompanies: [],
+    userName: '',
+    userEmail: '',
     currency: 'USD',
     finnhubApiKey: '',
     geminiApiKey: '',
@@ -77,6 +83,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
         ageConfirmed: state.ageConfirmed,
         riskAcknowledged: state.riskAcknowledged,
         experienceLevel: state.experienceLevel,
+        userName: state.userName,
+        userEmail: state.userEmail,
         interestedSectors: state.interestedSectors,
         interestedCompanies: state.interestedCompanies,
         currency: state.currency,
@@ -95,6 +103,16 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
   return {
     ...initial,
     activeTab: 'dashboard',
+
+    setUserName: (userName) => {
+      set({ userName });
+      persist();
+    },
+
+    setUserEmail: (userEmail) => {
+      set({ userEmail });
+      persist();
+    },
 
     setAgeConfirmed: (ageConfirmed) => {
       set({ ageConfirmed });
