@@ -21,10 +21,14 @@ import {
   Bot,
   Sun,
   Moon,
-  User
+  User,
+  Mail,
+  Globe2,
+  Plus
 } from 'lucide-react';
 import { useSettingsStore } from '../../store/settingsStore';
 import { usePortfolioStore } from '../../store/portfolioStore';
+import { useMarketStore } from '../../store/marketStore';
 import { useNotificationStore } from '../../store/notificationStore';
 import { useSubscriptionStore } from '../../store/subscriptionStore';
 import { notificationService } from '../../services/notificationService';
@@ -33,6 +37,7 @@ import { aiTutorService } from '../../services/aiTutorService';
 import { ComplianceModal } from '../../components/Common/ComplianceModal';
 import { UpgradeProModal } from '../../components/Subscription/UpgradeProModal';
 import { COMPLIANCE_NOTICES } from '../../constants/compliance';
+import { GLOBAL_MARKETS, GlobalMarket } from '../../constants/markets';
 import { DisclaimerBanner } from '../../components/Common/DisclaimerBanner';
 import { useLanguageStore } from '../../store/languageStore';
 import { SUPPORTED_LANGUAGES } from '../../i18n/translations';
@@ -51,9 +56,14 @@ export const SettingsScreen: React.FC = () => {
     themeMode,
     setThemeMode,
     userName,
-    setUserName
+    setUserName,
+    userEmail,
+    setUserEmail,
+    interestedSectors,
+    setInterestedSectors
   } = useSettingsStore();
 
+  const { watchlist, addToWatchlist, removeFromWatchlist } = useMarketStore();
   const isLight = themeMode === 'neutral-light';
   const { clearPortfolio } = usePortfolioStore();
 
@@ -78,6 +88,8 @@ export const SettingsScreen: React.FC = () => {
   const [inputKey, setInputKey] = useState(finnhubApiKey);
   const [nameDraft, setNameDraft] = useState(userName || '');
   const [savedNameMsg, setSavedNameMsg] = useState(false);
+  const [emailDraft, setEmailDraft] = useState(userEmail || '');
+  const [savedEmailMsg, setSavedEmailMsg] = useState(false);
   const [testResult, setTestResult] = useState<string | null>(null);
   const [isTesting, setIsTesting] = useState(false);
 
@@ -233,40 +245,96 @@ export const SettingsScreen: React.FC = () => {
             </span>
           </div>
 
-          <div className="space-y-2">
-            <label className={`block text-xs font-semibold ${isLight ? 'text-[#000000]' : 'text-slate-200'}`}>
-              Display Name / Nickname
-            </label>
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={nameDraft}
-                onChange={(e) => setNameDraft(e.target.value)}
-                onBlur={() => {
-                  setUserName(nameDraft.trim());
-                  setSavedNameMsg(true);
-                  setTimeout(() => setSavedNameMsg(false), 2000);
-                }}
-                placeholder="Enter your name (e.g. Alex, Sam)"
-                maxLength={25}
-                className={`flex-1 px-3.5 py-2.5 rounded-xl text-xs border transition focus:outline-none focus:ring-2 ${
-                  isLight 
-                    ? 'bg-[#F2F2F7] border-[rgba(0,0,0,0.1)] text-[#000000] focus:ring-[#007AFF] focus:bg-white' 
-                    : 'bg-navy-950 border-navy-700 text-white focus:ring-growth-500'
-                }`}
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  setUserName(nameDraft.trim());
-                  setSavedNameMsg(true);
-                  setTimeout(() => setSavedNameMsg(false), 2000);
-                }}
-                className="px-4 py-2.5 rounded-xl bg-[#007AFF] text-white text-xs font-semibold hover:bg-[#0062CC] transition active:scale-95 cursor-pointer shrink-0"
-              >
-                {savedNameMsg ? 'Saved!' : 'Save'}
-              </button>
+          <div className="space-y-3">
+            <div>
+              <label className={`block text-xs font-semibold mb-1 ${isLight ? 'text-[#000000]' : 'text-slate-200'}`}>
+                {t('profile_name_label', 'Display Name / Nickname')}
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={nameDraft}
+                  onChange={(e) => setNameDraft(e.target.value)}
+                  onBlur={() => {
+                    setUserName(nameDraft.trim());
+                    setSavedNameMsg(true);
+                    setTimeout(() => setSavedNameMsg(false), 2000);
+                  }}
+                  placeholder={t('onboarding_name_placeholder', 'Enter your name (e.g. Alex, Sam)')}
+                  maxLength={25}
+                  className={`flex-1 px-3.5 py-2.5 rounded-xl text-xs border transition focus:outline-none focus:ring-2 ${
+                    isLight 
+                      ? 'bg-[#F2F2F7] border-[rgba(0,0,0,0.1)] text-[#000000] focus:ring-[#007AFF] focus:bg-white' 
+                      : 'bg-navy-950 border-navy-700 text-white focus:ring-growth-500'
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUserName(nameDraft.trim());
+                    setSavedNameMsg(true);
+                    setTimeout(() => setSavedNameMsg(false), 2000);
+                  }}
+                  className="px-4 py-2.5 rounded-xl bg-[#007AFF] text-white text-xs font-semibold hover:bg-[#0062CC] transition active:scale-95 cursor-pointer shrink-0"
+                >
+                  {savedNameMsg ? t('saved', 'Saved!') : t('save', 'Save')}
+                </button>
+              </div>
             </div>
+
+            {/* Linked Email Address */}
+            <div className="pt-2 border-t border-[rgba(0,0,0,0.06)] dark:border-navy-800">
+              <div className="flex items-center justify-between mb-1">
+                <label className={`block text-xs font-semibold ${isLight ? 'text-[#000000]' : 'text-slate-200'}`}>
+                  {t('profile_email_label', 'Linked Email / Account')}
+                </label>
+                <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
+                  userEmail
+                    ? isLight ? 'bg-[#34C759]/15 text-[#34C759]' : 'bg-growth-500/20 text-growth-400'
+                    : isLight ? 'bg-black/5 text-[#8E8E93]' : 'bg-navy-800 text-slate-400'
+                }`}>
+                  {userEmail ? t('profile_linked', 'Linked') : t('profile_not_linked', 'Not linked')}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <Mail className={`w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 ${
+                    isLight ? 'text-[#8E8E93]' : 'text-slate-500'
+                  }`} />
+                  <input
+                    type="email"
+                    value={emailDraft}
+                    onChange={(e) => setEmailDraft(e.target.value)}
+                    onBlur={() => {
+                      setUserEmail(emailDraft.trim());
+                      setSavedEmailMsg(true);
+                      setTimeout(() => setSavedEmailMsg(false), 2000);
+                    }}
+                    placeholder={t('profile_email_placeholder', 'e.g. trader@example.com')}
+                    className={`w-full pl-9 pr-3.5 py-2.5 rounded-xl text-xs border transition focus:outline-none focus:ring-2 ${
+                      isLight 
+                        ? 'bg-[#F2F2F7] border-[rgba(0,0,0,0.1)] text-[#000000] focus:ring-[#007AFF] focus:bg-white' 
+                        : 'bg-navy-950 border-navy-700 text-white focus:ring-growth-500'
+                    }`}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUserEmail(emailDraft.trim());
+                    setSavedEmailMsg(true);
+                    setTimeout(() => setSavedEmailMsg(false), 2000);
+                  }}
+                  className="px-4 py-2.5 rounded-xl bg-[#007AFF] text-white text-xs font-semibold hover:bg-[#0062CC] transition active:scale-95 cursor-pointer shrink-0"
+                >
+                  {savedEmailMsg ? t('saved', 'Saved!') : t('save', 'Save')}
+                </button>
+              </div>
+              <p className={`text-[11px] mt-1.5 ${isLight ? 'text-[#8E8E93]' : 'text-slate-500'}`}>
+                {t('profile_email_hint', 'Link your Google, Apple, or email address. Used for identity and optional reports.')}
+              </p>
+            </div>
+
             <p className={`text-[11px] ${isLight ? 'text-[#8E8E93]' : 'text-slate-500'}`}>
               🔒 Purchases, receipts, and free trial status are handled securely via your Google Play / Apple ID account.
             </p>
@@ -400,6 +468,130 @@ export const SettingsScreen: React.FC = () => {
                     </div>
                   </div>
                 </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 🌍 2.5. MONITORED GLOBAL MARKETS & EXCHANGES */}
+        <div className={`rounded-2xl p-4 space-y-3.5 border shadow-xs transition-all ${
+          isLight 
+            ? 'bg-white border-[rgba(0,0,0,0.1)]' 
+            : 'bg-navy-900/90 border-navy-800'
+        }`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+                isLight ? 'bg-[#007AFF]/15 text-[#007AFF]' : 'bg-growth-500/20 text-growth-400'
+              }`}>
+                <Globe2 className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className={`text-xs font-bold uppercase tracking-wider ${
+                  isLight ? 'text-[#000000]' : 'text-white'
+                }`}>
+                  {t('markets_section_title', 'Monitored Global Markets & Exchanges')}
+                </h3>
+                <p className={`text-[11px] ${
+                  isLight ? 'text-[#666666]' : 'text-slate-400'
+                }`}>
+                  {t('markets_section_desc', 'Add or toggle international stock markets to track live prices and timing signals.')}
+                </p>
+              </div>
+            </div>
+            <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
+              isLight ? 'bg-[#007AFF]/10 text-[#007AFF]' : 'bg-growth-500/20 text-growth-300'
+            }`}>
+              {GLOBAL_MARKETS.filter(m => m.tickers.some(t => watchlist.map(w => w.toUpperCase()).includes(t.toUpperCase()))).length} / {GLOBAL_MARKETS.length} Active
+            </span>
+          </div>
+
+          <div className="space-y-2 pt-1">
+            {GLOBAL_MARKETS.map(market => {
+              const isMonitored = market.tickers.some(t => 
+                watchlist.map(w => w.toUpperCase()).includes(t.toUpperCase())
+              ) || interestedSectors.includes(market.id);
+
+              const activeCount = market.tickers.filter(t =>
+                watchlist.map(w => w.toUpperCase()).includes(t.toUpperCase())
+              ).length;
+
+              const handleToggle = () => {
+                if (isMonitored) {
+                  market.tickers.forEach(t => removeFromWatchlist(t));
+                  setInterestedSectors(interestedSectors.filter(id => id !== market.id));
+                } else {
+                  market.tickers.forEach(t => addToWatchlist(t));
+                  if (!interestedSectors.includes(market.id)) {
+                    setInterestedSectors([...interestedSectors, market.id]);
+                  }
+                }
+              };
+
+              return (
+                <div
+                  key={market.id}
+                  className={`p-3 rounded-xl border transition flex items-center justify-between gap-3 ${
+                    isMonitored
+                      ? isLight
+                        ? 'bg-[#007AFF]/5 border-[#007AFF]/30 shadow-xs'
+                        : 'bg-growth-950/20 border-growth-500/40'
+                      : isLight
+                        ? 'bg-[#F2F2F7] border-[rgba(0,0,0,0.06)]'
+                        : 'bg-navy-950/50 border-navy-800/80'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="text-xl shrink-0">{market.flag}</span>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className={`text-xs font-bold truncate ${isLight ? 'text-black' : 'text-white'}`}>
+                          {t(market.labelKey, market.defaultLabel)}
+                        </h4>
+                        {isMonitored && (
+                          <span className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded-full ${
+                            isLight ? 'bg-[#34C759]/15 text-[#34C759]' : 'bg-growth-500/20 text-growth-400'
+                          }`}>
+                            {t('markets_active_badge', 'Active')} ({activeCount}/{market.tickers.length})
+                          </span>
+                        )}
+                      </div>
+                      <p className={`text-[11px] truncate mt-0.5 ${isLight ? 'text-[#666666]' : 'text-slate-400'}`}>
+                        {t(market.descriptionKey, market.defaultDescription)}
+                      </p>
+                      <p className={`text-[10px] font-mono mt-0.5 ${isLight ? 'text-[#8E8E93]' : 'text-slate-500'}`}>
+                        {market.tickers.join(' • ')}
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleToggle}
+                    data-touch-target="true"
+                    className={`min-h-[40px] px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1 shrink-0 cursor-pointer active:scale-95 ${
+                      isMonitored
+                        ? isLight
+                          ? 'bg-[#FF3B30]/15 text-[#FF3B30] hover:bg-[#FF3B30]/25'
+                          : 'bg-loss-500/20 text-loss-400 hover:bg-loss-500/30'
+                        : isLight
+                          ? 'bg-[#007AFF] text-white hover:bg-[#0062CC] shadow-xs'
+                          : 'bg-growth-600 text-white hover:bg-growth-500 shadow-sm'
+                    }`}
+                  >
+                    {isMonitored ? (
+                      <>
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>{t('markets_remove_btn', 'Remove')}</span>
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>{t('markets_add_btn', 'Add to Watchlist')}</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               );
             })}
           </div>

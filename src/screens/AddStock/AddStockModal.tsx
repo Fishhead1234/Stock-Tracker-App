@@ -4,6 +4,7 @@ import { usePortfolioStore } from '../../store/portfolioStore';
 import { stockService } from '../../services/stockService';
 import { StockQuote } from '../../types/stock';
 import { SymbolGuideModal } from '../../components/Common/SymbolGuideModal';
+import { useLanguageStore } from '../../store/languageStore';
 
 interface Props {
   onClose: () => void;
@@ -12,6 +13,7 @@ interface Props {
 
 export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) => {
   const { addPosition } = usePortfolioStore();
+  const { t } = useLanguageStore();
 
   const allStocks = stockService.getAllStocks();
   const initialStock = preselectedTicker 
@@ -557,7 +559,7 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
 
               {/* Total Cost Basis */}
               <div className="p-3.5 bg-[#F2F2F7] dark:bg-navy-950/90 rounded-xl border border-black/5 dark:border-navy-800 flex items-center justify-between text-xs font-mono">
-                <span className="text-[#666666] dark:text-slate-400 font-sans">Total Cost Basis:</span>
+                <span className="text-[#666666] dark:text-slate-400 font-sans">{t('total_cost_basis', 'Total Cost Basis:')}</span>
                 <strong className="text-[#000000] dark:text-white text-sm">{curr}{totalCost.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong>
               </div>
 
@@ -574,12 +576,12 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
                 {isSuccess ? (
                   <>
                     <Check className="w-4 h-4" />
-                    <span>Position Added to Tracker!</span>
+                    <span>{t('logged_success', 'Position Added to Tracker!')}</span>
                   </>
                 ) : (
                   <>
                     <PlusCircle className="w-4 h-4" />
-                    <span>Add Position to Tracker ({curr}{totalCost.toLocaleString('en-US', { minimumFractionDigits: 2 })})</span>
+                    <span>{t('log_holding', 'Add Position to Tracker')} ({curr}{totalCost.toLocaleString('en-US', { minimumFractionDigits: 2 })})</span>
                   </>
                 )}
               </button>

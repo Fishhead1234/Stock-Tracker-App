@@ -41,6 +41,7 @@ import { EducationModal } from '../../components/EducationModal/EducationModal';
 import { NotificationCenterModal } from '../../components/Notifications/NotificationCenterModal';
 import { UpgradeProModal } from '../../components/Subscription/UpgradeProModal';
 import { LanguageSelectorModal } from '../../components/Common/LanguageSelectorModal';
+import { ManageMarketsModal } from '../../components/Dashboard/ManageMarketsModal';
 import { useLanguageStore } from '../../store/languageStore';
 import { SUPPORTED_LANGUAGES } from '../../i18n/translations';
 
@@ -61,6 +62,7 @@ export const DashboardScreen: React.FC = () => {
   const [isNotificationCenterOpen, setIsNotificationCenterOpen] = useState(false);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const [isLanguageModalOpen, setIsLanguageModalOpen] = useState(false);
+  const [isManageMarketsOpen, setIsManageMarketsOpen] = useState(false);
 
   const currentLang = SUPPORTED_LANGUAGES.find(l => l.code === language) || SUPPORTED_LANGUAGES[0];
   const unreadCount = getUnreadCount();
@@ -85,7 +87,7 @@ export const DashboardScreen: React.FC = () => {
   // Pre-calculate timing signals and counts for watched stocks
   const watchedWithSignals = watchedQuotes.map(stock => ({
     stock,
-    signal: generateTimingSignal(stock)
+    signal: generateTimingSignal(stock, language)
   }));
 
   const counts = {
@@ -234,7 +236,7 @@ export const DashboardScreen: React.FC = () => {
 
   const filteredWatched = watchedQuotes.filter(stock => {
     if (watchFilter === 'ALL') return true;
-    const s = generateTimingSignal(stock);
+    const s = generateTimingSignal(stock, language);
     return s.action === watchFilter;
   });
 
@@ -330,17 +332,28 @@ export const DashboardScreen: React.FC = () => {
           </div>
         </div>
 
-        {/* Global Market Status Strip */}
+        {/* Global Market Status Strip with Manage Markets Trigger */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 text-[11px] font-mono scrollbar-none w-full">
           <DataStatusBadge />
-          <span className={`shrink-0 font-sans text-[11px] uppercase font-bold ml-1 ${isLight ? 'text-[#666666]' : 'text-slate-500'}`}>
-            {t('badge_markets', 'Markets:')}
-          </span>
+          <button
+            type="button"
+            onClick={() => setIsManageMarketsOpen(true)}
+            data-touch-target="true"
+            className={`shrink-0 font-sans text-[11px] font-bold px-2 py-1 rounded-md border flex items-center gap-1 transition active:scale-95 cursor-pointer ${
+              isLight 
+                ? 'bg-[#007AFF]/10 border-[#007AFF]/30 text-[#007AFF] hover:bg-[#007AFF]/20' 
+                : 'bg-growth-500/15 border-growth-500/30 text-growth-400 hover:bg-growth-500/25'
+            }`}
+            title={t('markets_modal_title', 'Manage Global Markets')}
+          >
+            <span>🌐</span>
+            <span>{t('markets_manage_btn', '+ Manage Markets')}</span>
+          </button>
           <span className={`px-2.5 py-1 rounded-md border flex items-center gap-1.5 shrink-0 ${
-            isLight ? 'bg-white border-[rgba(0,0,0,0.08)] text-[#000000]' : 'bg-navy-900 border-navy-800 text-slate-300'
+            isLight ? 'bg-white border-[rgba(0,0,0,0.08)] text-[#34C759]' : 'bg-navy-900 border-navy-800 text-growth-400'
           }`}>
-            <span>🇹🇼 TWSE</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+            <span>🇺🇸 US</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#34C759] animate-pulse" />
           </span>
           <span className={`px-2.5 py-1 rounded-md border flex items-center gap-1.5 shrink-0 ${
             isLight ? 'bg-white border-[rgba(0,0,0,0.08)] text-[#000000]' : 'bg-navy-900 border-navy-800 text-slate-300'
@@ -349,10 +362,10 @@ export const DashboardScreen: React.FC = () => {
             <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
           </span>
           <span className={`px-2.5 py-1 rounded-md border flex items-center gap-1.5 shrink-0 ${
-            isLight ? 'bg-white border-[rgba(0,0,0,0.08)] text-[#34C759]' : 'bg-navy-900 border-navy-800 text-growth-400'
+            isLight ? 'bg-white border-[rgba(0,0,0,0.08)] text-[#000000]' : 'bg-navy-900 border-navy-800 text-slate-300'
           }`}>
-            <span>🇺🇸 US</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-[#34C759] animate-pulse" />
+            <span>🇹🇼 TWSE</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
           </span>
           <span className={`px-2.5 py-1 rounded-md border flex items-center gap-1.5 shrink-0 ${
             isLight ? 'bg-white border-[rgba(0,0,0,0.08)] text-[#34C759]' : 'bg-navy-900 border-navy-800 text-growth-400'
@@ -386,7 +399,7 @@ export const DashboardScreen: React.FC = () => {
             }`}
           >
             <Briefcase className="w-3.5 h-3.5" />
-            <span>Portfolio</span>
+            <span>{t('dash_tab_portfolio', 'Portfolio')}</span>
           </button>
           <button
             type="button"
@@ -397,7 +410,7 @@ export const DashboardScreen: React.FC = () => {
             }`}
           >
             <BookOpen className="w-3.5 h-3.5" />
-            <span>Learn</span>
+            <span>{t('dash_tab_learn', 'Learn')}</span>
           </button>
           <button
             type="button"
@@ -408,7 +421,7 @@ export const DashboardScreen: React.FC = () => {
             }`}
           >
             <Lightbulb className="w-3.5 h-3.5" />
-            <span>Tips</span>
+            <span>{t('dash_tab_tips', 'Tips')}</span>
           </button>
         </div>
 
@@ -440,7 +453,7 @@ export const DashboardScreen: React.FC = () => {
                 <span className={`text-[11px] uppercase font-bold tracking-wider font-mono ${
                   isLight ? 'text-[#FF9500]' : 'text-gold-400'
                 }`}>
-                  Trading Insight
+                  {t('dash_trading_insight', 'Trading Insight')}
                 </span>
                 <button
                   type="button"
@@ -450,14 +463,14 @@ export const DashboardScreen: React.FC = () => {
                     isLight ? 'text-[#007AFF] hover:text-[#0062CC]' : 'text-slate-400 hover:text-white'
                   }`}
                 >
-                  Learn RSI
+                  {t('dash_learn_rsi', 'Learn RSI')}
                 </button>
               </div>
               <h4 className={`text-sm font-bold ${isLight ? 'text-[#000000]' : 'text-white'}`}>
-                Track Global Timing: Don't Chase Overextended Rallies
+                {t('dash_insight_title', "Track Global Timing: Don't Chase Overextended Rallies")}
               </h4>
               <p className={`text-[13px] leading-relaxed ${isLight ? 'text-[#666666]' : 'text-slate-300'}`}>
-                Whether trading in Taipei, Seoul, London, or New York, buying when RSI &gt; 70 carries high pullback risk. Let healthy pullbacks come to you.
+                {t('dash_insight_desc', 'Whether trading in Taipei, Seoul, London, or New York, buying when RSI > 70 carries high pullback risk. Let healthy pullbacks come to you.')}
               </p>
             </div>
           </div>
@@ -968,6 +981,10 @@ export const DashboardScreen: React.FC = () => {
 
       {isLanguageModalOpen && (
         <LanguageSelectorModal onClose={() => setIsLanguageModalOpen(false)} />
+      )}
+
+      {isManageMarketsOpen && (
+        <ManageMarketsModal onClose={() => setIsManageMarketsOpen(false)} />
       )}
     </div>
   );

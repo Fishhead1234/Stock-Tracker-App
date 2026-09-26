@@ -31,9 +31,9 @@ export const PortfolioChart: React.FC<Props> = ({ currentValue }) => {
 
   // Allocation data (compact horizontal bars per Wireframe 1 spec)
   const allocations = [
-    { sector: 'Technology', percent: 45, color: '#007AFF', amount: currentValue * 0.45 },
-    { sector: 'Finance', percent: 30, color: '#34C759', amount: currentValue * 0.30 },
-    { sector: 'Consumer', percent: 25, color: '#FF9500', amount: currentValue * 0.25 },
+    { sector: t('dash_sec_tech', 'Technology'), percent: 45, color: '#007AFF', amount: currentValue * 0.45 },
+    { sector: t('dash_sec_fin', 'Finance'), percent: 30, color: '#34C759', amount: currentValue * 0.30 },
+    { sector: t('dash_sec_cons', 'Consumer'), percent: 25, color: '#FF9500', amount: currentValue * 0.25 },
   ];
 
   return (
@@ -64,7 +64,7 @@ export const PortfolioChart: React.FC<Props> = ({ currentValue }) => {
                 : isLight ? 'text-[#666666]' : 'text-slate-400'
             }`}
           >
-            Chart
+            {t('dash_chart_view', 'Chart')}
           </button>
           <button
             type="button"
@@ -76,7 +76,7 @@ export const PortfolioChart: React.FC<Props> = ({ currentValue }) => {
                 : isLight ? 'text-[#666666]' : 'text-slate-400'
             }`}
           >
-            Allocation
+            {t('dash_allocation_view', 'Allocation')}
           </button>
         </div>
       </div>
@@ -141,10 +141,10 @@ export const PortfolioChart: React.FC<Props> = ({ currentValue }) => {
           </div>
           <div className="flex items-center justify-between mt-2 pt-2 border-t border-[rgba(0,0,0,0.06)] text-[12px] font-mono">
             <span className={isLight ? 'text-[#666666]' : 'text-slate-400'}>
-              7-Day Trend:
+              {t('dash_7d_trend', '7-Day Trend:')}
             </span>
             <span className={`font-semibold ${isLight ? 'text-[#34C759]' : 'text-growth-400'}`}>
-              +3.8% performance progression
+              {t('dash_7d_trend_val', '+3.8% performance progression')}
             </span>
           </div>
         </div>

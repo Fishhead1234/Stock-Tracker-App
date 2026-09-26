@@ -5,6 +5,7 @@ import { Position } from '../../types/portfolio';
 import { SignalBadge } from './SignalBadge';
 import { generateTimingSignal } from '../../services/signalEngine';
 import { useSettingsStore } from '../../store/settingsStore';
+import { useLanguageStore } from '../../store/languageStore';
 
 interface Props {
   stock: StockQuote;
@@ -15,9 +16,10 @@ interface Props {
 
 export const StockCard: React.FC<Props> = ({ stock, position, onClick, onRemove }) => {
   const { themeMode } = useSettingsStore();
+  const { language } = useLanguageStore();
   const isLight = themeMode === 'neutral-light';
 
-  const signal = generateTimingSignal(stock);
+  const signal = generateTimingSignal(stock, language);
   const isPositive = stock.change >= 0;
 
   let positionProfit = 0;
