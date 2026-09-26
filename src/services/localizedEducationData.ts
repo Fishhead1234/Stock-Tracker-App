@@ -188,18 +188,392 @@ export const KO_QUIZ: QuizQuestion[] = [
   }
 ];
 
-// Localized helper
+export const ZH_TW_LESSONS: EducationLesson[] = [
+  {
+    id: 'lesson-rsi',
+    title: 'RSI：橡皮筋法則指標',
+    category: 'Technical Timing',
+    readTime: '3 分鐘閱讀',
+    summary: '了解相對強弱指標 (RSI) 如何幫助您避開高點追價陷阱，並精準識別超賣超跌的價值區間。',
+    content: [
+      '相對強弱指標 (RSI) 在 0 到 100 的數值區間內，衡量近期價格波動的速度與幅度。',
+      '將 RSI 想像成一條被拉伸的橡皮筋。如果拉得太高（超過 70），獲利了結賣壓通常會將其拉回——這被稱為「超買」。',
+      '若橡皮筋被過度向下拉伸（低於 30），賣方力竭，逢低買盤進場尋找便宜籌碼——這被稱為「超賣」。',
+      '新手實戰金律：當 RSI 超過 75 時切勿衝動追高，耐心等待健康拉回以降低進場風險。'
+    ],
+    beginnerTakeaway: '在市場冷清超賣時（RSI < 35）分批逢低布局，在市場過熱亢奮時（RSI > 70）保持警覺。',
+    iconName: 'Activity'
+  },
+  {
+    id: 'lesson-macd',
+    title: 'MACD：乘上動能的浪潮',
+    category: 'Technical Timing',
+    readTime: '4 分鐘閱讀',
+    summary: '探索指數平滑異同移動平均線 (MACD) 如何充當股價動能的「速度計」。',
+    content: [
+      'MACD 追蹤兩條均線的互動：一條是快速的 12 日指數均線，另一條是慢速的 26 日指數均線。',
+      '當快線由下往上穿過慢速訊號線時，形成「黃金交叉」——如同跑車加速超車。',
+      '當快線跌破訊號線時，形成「死亡交叉」——意味動能正在減弱，操作宜轉為審慎。',
+      'MACD 幫助回答關鍵問題：「今天的買盤力道是正在增強，還是正在衰竭？」'
+    ],
+    beginnerTakeaway: '下跌修正後出現的 MACD 黃金交叉，是買方奪回行情主導權最可靠的早期訊號之一。',
+    iconName: 'TrendingUp'
+  },
+  {
+    id: 'lesson-moving-averages',
+    title: '均線系統：機構投資人的防守支撐線',
+    category: 'Technical Timing',
+    readTime: '4 分鐘閱讀',
+    summary: '為何華爾街避險基金與大型機構法人生死盯住 50 日均線（季線）與 200 日均線（年線）。',
+    content: [
+      '簡單移動平均線 (SMA) 透過計算特定天數的收盤價平均，過濾掉單日市場隨機噪音。',
+      '50 日均線代表中期趨勢防守線。強勢股在多頭拉回時，常在此線獲得支撐並展開反彈。',
+      '200 日均線是多空宏觀分水嶺：站在其上代表處於長期多頭架構，跌破則處於空頭弱勢格局。',
+      '黃金交叉：當 50 日線突破 200 日線時，確立長期正向多頭走勢；死亡交叉則相反。'
+    ],
+    beginnerTakeaway: '隨時掌握 50 日線與 200 日線位置。在動態均線支撐附近布局，擁有最佳的風險報酬比。',
+    iconName: 'LineChart'
+  },
+  {
+    id: 'lesson-risk-management',
+    title: '第一法則：資本保全與定期定額 (DCA)',
+    category: 'Risk Management',
+    readTime: '3 分鐘閱讀',
+    summary: '定期定額與部位控管如何保護您免於情緒化恐慌殺跌。',
+    content: [
+      '新手投資者最大的敵人是情緒：在市場亢奮時盲目追價 (FOMO)，在大盤重挫時恐慌砍在最低點。',
+      '定期定額 (DCA)：不要一次性把資金全數投入，將資金分拆為小份額（例如每月固定或在每次拉回時分批買入）。',
+      '部位控管原則：任何單一高波動個股的投資金額，絕不要超過個人總淨資產的 5% 到 10%。',
+      '停損防護線：在進場前設定好願意承受的最大虧損（例如 -7% 到 -10%），防止單一錯誤損及整體資產。'
+    ],
+    beginnerTakeaway: '投資最重要的原則是先活下來。切勿因為一次單押錯誤而失去本金與信心。',
+    iconName: 'ShieldCheck'
+  },
+  {
+    id: 'lesson-volume',
+    title: '成交量：確認市場真實買盤意圖',
+    category: 'Fundamentals',
+    readTime: '3 分鐘閱讀',
+    summary: '缺乏成交量支持的價格上漲可能是誘多陷阱。透過成交量洞察法人的吸籌足跡。',
+    content: [
+      '成交量是特定交易日內買賣雙方搓合成交的股票總股數。',
+      '若股價大漲且成交量爆發超過 20 日均量的兩倍以上，通常代表法人機構正在大舉建倉。',
+      '相反地，若縮量反彈，代表推升動能不足，次日極易面臨賣壓反轉。',
+      '在關鍵均線支撐處爆出放量紅 K 棒，是主力積極守護支撐防線的強力證據。'
+    ],
+    beginnerTakeaway: '成交量能確認趨勢真偽。高量代表真實信心，低量則預警動能不足或僅為短線反彈。',
+    iconName: 'BarChart2'
+  }
+];
+
+export const ZH_CN_LESSONS: EducationLesson[] = [
+  {
+    id: 'lesson-rsi',
+    title: 'RSI：橡皮筋法则指标',
+    category: 'Technical Timing',
+    readTime: '3 分钟阅读',
+    summary: '了解相对强弱指标 (RSI) 如何帮助您避开高点追涨陷阱，并精准识别超卖低估的价值区间。',
+    content: [
+      '相对强弱指标 (RSI) 在 0 到 100 的数值区间内，衡量近期价格波动的速度与幅度。',
+      '将 RSI 想象成一条被拉伸的橡皮筋。如果拉得太高（超过 70），获利盘卖压通常会将其拉回——这被称为“超买”。',
+      '若橡皮筋被过度向下拉伸（低于 30），卖方力竭，逢低买盘进场寻找便宜筹码——这被称为“超卖”。',
+      '新手实战金律：当 RSI 超过 75 时切勿冲动追高，耐心等待健康回调以降低建仓风险。'
+    ],
+    beginnerTakeaway: '在市场冷清超卖时（RSI < 35）分批逢低布局，在市场过热亢奋时（RSI > 70）保持警惕。',
+    iconName: 'Activity'
+  },
+  {
+    id: 'lesson-macd',
+    title: 'MACD：乘上动能的浪潮',
+    category: 'Technical Timing',
+    readTime: '4 分钟阅读',
+    summary: '探索指数平滑异同移动平均线 (MACD) 如何充当股价动能的“速度计”。',
+    content: [
+      'MACD 追踪两条均线的互动：一条是快速的 12 日指数均线，另一条是慢速的 26 日指数均线。',
+      '当快线由下往上穿过慢速信号线时，形成“金叉”——如同跑车加速超车。',
+      '当快线跌破信号线时，形成“死叉”——意味动能正在减弱，操作宜转为谨慎。',
+      'MACD 帮助回答关键问题：“今天的买盘力量是正在增强，还是正在衰竭？”'
+    ],
+    beginnerTakeaway: '下跌修正后出现的 MACD 金叉，是多头夺回行情主导权最可靠的早期信号之一。',
+    iconName: 'TrendingUp'
+  },
+  {
+    id: 'lesson-moving-averages',
+    title: '均线系统：机构投资人的防守支撑线',
+    category: 'Technical Timing',
+    readTime: '4 分钟阅读',
+    summary: '为何华尔街对冲基金与大型机构法人生死盯住 50 日均线（季线）与 200 日均线（年线）。',
+    content: [
+      '简单移动平均线 (SMA) 通过计算特定天数的收盘价平均，过滤掉单日市场随机噪音。',
+      '50 日均线代表中期趋势防守线。强势股在多头回调时，常在此线获得支撑并展开反弹。',
+      '200 日均线是多空宏观分水岭：站在其上代表处于长期多头架构，跌破则处于空头弱势格局。',
+      '金叉：当 50 日线突破 200 日线时，确立长期正向多头走势；死叉则相反。'
+    ],
+    beginnerTakeaway: '随时掌握 50 日线与 200 日线位置。在动态均线支撑附近布局，拥有最佳的盈亏比。',
+    iconName: 'LineChart'
+  },
+  {
+    id: 'lesson-risk-management',
+    title: '第一法则：资本保全与定期定额 (DCA)',
+    category: 'Risk Management',
+    readTime: '3 分钟阅读',
+    summary: '定期定额与仓位控管如何保护您免于情绪化恐慌割肉。',
+    content: [
+      '新手投资者最大的敌人是情绪：在市场亢奋时盲目追涨 (FOMO)，在大盘重挫时恐慌砍在最低点。',
+      '定投策略 (DCA)：不要一次性把资金全额打满，将资金分拆为小份额（例如每月固定或在每次回调时分批买入）。',
+      '仓位管理原则：任何单一高波动个股的投资金额，绝不要超过个人总净资产的 5% 到 10%。',
+      '止损防线：在建仓前设定好愿意承受的最大亏损（例如 -7% 到 -10%），防止单次失误损及整体资产。'
+    ],
+    beginnerTakeaway: '投资最重要的原则是先活下来。切勿因为一次单押错误而失去本金与信心。',
+    iconName: 'ShieldCheck'
+  },
+  {
+    id: 'lesson-volume',
+    title: '成交量：确认市场真实买盘意图',
+    category: 'Fundamentals',
+    readTime: '3 分钟阅读',
+    summary: '缺乏成交量支持的价格上涨可能是诱多陷阱。通过成交量洞察主力的吸筹足迹。',
+    content: [
+      '成交量是特定交易日内买卖双方撮合成交的股票总股数。',
+      '若股价大涨且成交量爆发超过 20 日均量的两倍以上，通常代表机构正在大举建仓。',
+      '相反地，若缩量反弹，代表推升动能不足，次日极易面临卖压反转。',
+      '在关键均线支撑处出现放量阳线，是主力积极守护支撑防线的强力证据。'
+    ],
+    beginnerTakeaway: '成交量能确认趋势真伪。高量代表真实信心，低量则预警动能不足或仅为短线反抽。',
+    iconName: 'BarChart2'
+  }
+];
+
+export const ZH_TW_GLOSSARY: GlossaryItem[] = [
+  {
+    term: 'RSI (相對強弱指標)',
+    shortDef: '在 0~100 區間內反映近期股價波動強度與速度的動能指標。',
+    fullExplanation: '由 J. Welles Wilder 開發，70 以上為超買，30 以下為超賣。幫助新手避開高點追漲殺跌的情緒化交易。',
+    analogy: '如同單擺鐘擺，向一側盪得太高時，重力自然會將其拉回平衡中心。',
+    relatedIndicators: ['MACD', 'KD 指標'],
+    tag: 'Technical'
+  },
+  {
+    term: 'MACD (平滑異同移動平均線)',
+    shortDef: '透過兩條指數移動平均線的收斂與發散，判斷中短期趨勢動能的指標。',
+    fullExplanation: '以 12 日 EMA 減去 26 日 EMA 計算差離值 (DIF)，並搭配 9 日訊號線 (MACD) 尋找買賣時機交叉點。',
+    analogy: '如同跑道上的兩位跑者，短跑選手超越馬拉松選手時，爆發力全面展現。',
+    relatedIndicators: ['RSI', '均線系統'],
+    tag: 'Technical'
+  },
+  {
+    term: 'DCA (定期定額存股法)',
+    shortDef: '無論市場漲跌，在固定週期以固定金額分批買進資產的投資策略。',
+    fullExplanation: '透過自動化紀律攤平買進成本。價格高時買得少、價格低時買得多，長期有效降低平均持有成本。',
+    analogy: '如同每週以固定預算買蘋果，特價時買得更多，昂貴時買得較少，自然平衡了平均買價。',
+    relatedIndicators: [],
+    tag: 'Strategy'
+  },
+  {
+    term: '黃金交叉 (Golden Cross)',
+    shortDef: '短週期移動平均線（如 50 日季線）由下往上突破長週期均線（如 200 日年線）的多頭形態。',
+    fullExplanation: '代表中長期上升多頭趨勢確立，許多主動型基金與量化演算法會在此時啟動結構性加碼買盤。',
+    analogy: '如同寒冬結束後的第一道暖春曙光，確認氣溫已進入全面回暖的上升週期。',
+    relatedIndicators: ['SMA 50', 'SMA 200'],
+    tag: 'Technical'
+  },
+  {
+    term: '死亡交叉 (Death Cross)',
+    shortDef: '50 日短期均線向下跌破 200 日長期均線的典型空頭警訊形態。',
+    fullExplanation: '代表近期的下跌速度已快於長期趨勢，暗示市場中期可能進入深度修正或長期盤整。',
+    analogy: '如同暴風雨前的防空警報，提醒船隻應及時回港或收起風帆。',
+    relatedIndicators: ['SMA 50', 'SMA 200'],
+    tag: 'Technical'
+  },
+  {
+    term: '本益比 (P/E Ratio)',
+    shortDef: '每股市價除以每股盈餘 (EPS)，評估股票估值貴賤的通用指標。',
+    fullExplanation: '代表投資人願意為企業賺取每 1 元利潤支付多少倍價格。高本益比代表市場對未來成長寄予厚望，低本益比則代表成熟穩定或價值被低估。',
+    analogy: '如果一家年淨利 100 萬的小店開價 1,000 萬轉讓，其本益比即為 10 倍。',
+    relatedIndicators: [],
+    tag: 'Valuation'
+  },
+  {
+    term: '總市值 (Market Cap)',
+    shortDef: '企業已發行總股數乘以目前每股股價的市場總價值。',
+    fullExplanation: '發行股數 × 目前股價。超大型權值股（2,000 億美元以上）、大型股（100 億美元以上）、中型股（20 億~100 億美元）、小型股（20 億美元以下）。',
+    analogy: '今天如果要把這家公司的每一塊磚頭與所有資產全部買下來，所需要的總標價。',
+    relatedIndicators: [],
+    tag: 'Valuation'
+  },
+  {
+    term: '停損委託 (Stop-Loss Order)',
+    shortDef: '當股價跌至預設價位時自動觸發賣出委託，嚴格控制最大下檔虧損。',
+    fullExplanation: '防守型風險管理工具。以  買入並設  停損，若不幸跌至  系統將自動賣出，將單筆損失嚴格限制在 8% 以內。',
+    analogy: '如同腳踏車在下坡失控時的緊急手煞車，防止摔入懸崖。',
+    relatedIndicators: [],
+    tag: 'Strategy'
+  }
+];
+
+export const ZH_CN_GLOSSARY: GlossaryItem[] = [
+  {
+    term: 'RSI (相对强弱指标)',
+    shortDef: '在 0~100 区间内反映近期股价波动强度与速度的动能指标。',
+    fullExplanation: '由 J. Welles Wilder 开发，70 以上为超买，30 以下为超卖。帮助新手避开高点追涨杀跌的情绪化交易。',
+    analogy: '如同单摆钟摆，向一侧荡得太高时，重力自然会将其拉回平衡中心。',
+    relatedIndicators: ['MACD', 'KD 指标'],
+    tag: 'Technical'
+  },
+  {
+    term: 'MACD (平滑异同移动平均线)',
+    shortDef: '通过两条指数移动平均线的收敛与发散，判断中短期趋势动能的指标。',
+    fullExplanation: '以 12 日 EMA 减去 26 日 EMA 计算差离值 (DIF)，并搭配 9 日信号线 (MACD) 寻找买卖时机交叉点。',
+    analogy: '如同跑道上的两位跑者，短跑选手超越马拉松选手时，爆发力全面展现。',
+    relatedIndicators: ['RSI', '均线系统'],
+    tag: 'Technical'
+  },
+  {
+    term: 'DCA (定期定额定投法)',
+    shortDef: '无论市场涨跌，在固定周期以固定金额分批买入资产的投资策略。',
+    fullExplanation: '通过自动化纪律摊平买入成本。价格高时买得少、价格低时买得多，长期有效降低平均持有成本。',
+    analogy: '如同每周以固定预算买苹果，特价时买得更多，昂贵时买得较少，自然平衡了平均买价。',
+    relatedIndicators: [],
+    tag: 'Strategy'
+  },
+  {
+    term: '金叉 (Golden Cross)',
+    shortDef: '短周期移动平均线（如 50 日均线）由下往上突破长周期均线（如 200 日年线）的多头形态。',
+    fullExplanation: '代表中长期上升多头趋势确立，许多主动型基金与量化算法会在此时启动结构性加仓买盘。',
+    analogy: '如同寒冬结束后的第一道暖春曙光，确认气温已进入全面回暖的上升周期。',
+    relatedIndicators: ['SMA 50', 'SMA 200'],
+    tag: 'Technical'
+  },
+  {
+    term: '死叉 (Death Cross)',
+    shortDef: '50 日短期均线向下跌破 200 日长期均线的典型空头警示形态。',
+    fullExplanation: '代表近期的下跌速度已快于长期趋势，暗示市场中期可能进入深度回调或长期阴跌。',
+    analogy: '如同暴风雨前的防空警报，提醒船只应及时回港或收起风帆。',
+    relatedIndicators: ['SMA 50', 'SMA 200'],
+    tag: 'Technical'
+  },
+  {
+    term: '市盈率 (P/E Ratio)',
+    shortDef: '每股市价除以每股收益 (EPS)，评估股票估值贵贱的通用指标。',
+    fullExplanation: '代表投资者愿意为企业赚取每 1 元利润支付多少倍价格。高市盈率代表市场对未来成长寄予厚望，低市盈率则代表成熟稳定或价值被低估。',
+    analogy: '如果一家年净利 100 万的小店开价 1,000 万转让，其市盈率即为 10 倍。',
+    relatedIndicators: [],
+    tag: 'Valuation'
+  },
+  {
+    term: '总市值 (Market Cap)',
+    shortDef: '企业已发行总股数乘以当前每股股价的市场总价值。',
+    fullExplanation: '发行股数 × 当前股价。超大型龙头股（2,000 亿美元以上）、大盘股（100 亿美元以上）、中盘股（20 亿~100 亿美元）、小盘股（20 亿美元以下）。',
+    analogy: '今天如果要把这家公司的每一块砖头与所有资产全部买下来，所需要的总标价。',
+    relatedIndicators: [],
+    tag: 'Valuation'
+  },
+  {
+    term: '止损指令 (Stop-Loss Order)',
+    shortDef: '当股价跌至预设价位时自动触发卖出委托，严格控制最大下行亏损。',
+    fullExplanation: '防守型风险管理工具。以  买入并设  止损，若不幸跌至  系统将自动卖出，将单笔损失严格限制在 8% 以内。',
+    analogy: '如同自行车在下坡失控时的紧急手刹，防止坠入悬崖。',
+    relatedIndicators: [],
+    tag: 'Strategy'
+  }
+];
+
+export const ZH_TW_QUIZ: QuizQuestion[] = [
+  {
+    id: 'q1',
+    question: '某檔股票短線急漲，其 RSI (相對強弱指標) 目前來到 82。這對新手投資者而言代表什麼涵義？',
+    options: [
+      '這檔股票動能極強，保證還會繼續暴漲，應立即追買。',
+      '該股已進入嚴重「超買區」，統計上隨時可能出現短線拉回整理。',
+      '這代表該公司一夜之間實際獲利翻倍。',
+      '證券交易所將立即暫停該股票交易。'
+    ],
+    correctIndex: 1,
+    explanation: 'RSI 高於 70 被歸類為超買區。雖然強勢股在牛市中可能維持超買一段時間，但在 RSI 高於 80 時追價進場，面臨劇烈拉回的風險極高。'
+  },
+  {
+    id: 'q2',
+    question: '在股票日線圖上，何謂「黃金交叉 (Golden Cross)」？',
+    options: [
+      '當黃金期貨價格超越大盤指數表現時。',
+      '當 50 日均線（季線）由下往上突破 200 日均線（年線）時。',
+      '當股票價格剛好收在整數關卡 .00 時。',
+      '當公司宣布發放額外現金股利時。'
+    ],
+    correctIndex: 1,
+    explanation: '當 50 日簡單移動平均線向上突破 200 日移動平均線時，即形成黃金交叉，被視為中長期多頭趨勢確立的經典訊號。'
+  },
+  {
+    id: 'q3',
+    question: '為何紀律嚴謹的投資人廣泛採用定期定額 (DCA) 投資法？',
+    options: [
+      '它能保證您每一次都剛好賣在行情的最高峰。',
+      '它可以免除資本利得的所有稅賦。',
+      '它能消除情緒焦慮，避免試圖預測不可能預測的短期市場低點。',
+      '它能強制券商贈送額外的免費股票。'
+    ],
+    correctIndex: 2,
+    explanation: '定期定額消除了情緒盲點。透過定期固定金額買入，在股價低檔時自動買進更多股數，高檔時買進較少股數，自然平滑持有成本。'
+  }
+];
+
+export const ZH_CN_QUIZ: QuizQuestion[] = [
+  {
+    id: 'q1',
+    question: '某只股票短线急涨，其 RSI (相对强弱指标) 目前来到 82。这对新手投资者而言代表什么涵义？',
+    options: [
+      '该股动能极强，保证还会继续暴涨，应立即追高。',
+      '该股已进入严重“超买区”，统计上随时可能出现短线回调整理。',
+      '这代表该企业一夜之间实际盈利翻倍。',
+      '证券交易所将立即暂停该股票交易。'
+    ],
+    correctIndex: 1,
+    explanation: 'RSI 高于 70 被归类为超买区。虽然强势股在牛市中可能维持超买一段时间，但在 RSI 高于 80 时追涨进场，面临剧烈回调的风险极高。'
+  },
+  {
+    id: 'q2',
+    question: '在股票日线图上，何谓“金叉 (Golden Cross)”？',
+    options: [
+      '当黄金期货价格超越大盘指数表现时。',
+      '当 50 日均线（季线）由下往上突破 200 日均线（年线）时。',
+      '当股票价格刚好收在整数关口 .00 时。',
+      '当企业宣布发放额外现金股息时。'
+    ],
+    correctIndex: 1,
+    explanation: '当 50 日简单移动平均线向上突破 200 日移动平均线时，即形成金叉，被视为中长期多头趋势确立的经典信号。'
+  },
+  {
+    id: 'q3',
+    question: '为何纪律严明的投资人广泛采用定期定额定投 (DCA) 投资法？',
+    options: [
+      '它能保证您每一次都刚好卖在行情的最高峰。',
+      '它可以免除资本利得的所有税负。',
+      '它能消除情绪焦虑，避免试图预测不可能预测的短期市场低点。',
+      '它能强制券商赠送额外的免费股票。'
+    ],
+    correctIndex: 2,
+    explanation: '定投策略消除了情绪盲点。通过定期固定金额买入，在股价低位时自动买入更多股数，高位时买入较少股数，自然平滑持有成本。'
+  }
+];
+
+// Localized helpers
 export function getLocalizedLessons(lang: SupportedLanguage): EducationLesson[] {
   if (lang === 'ko') return KO_LESSONS;
+  if (lang === 'zh-TW') return ZH_TW_LESSONS;
+  if (lang === 'zh-CN') return ZH_CN_LESSONS;
   return EN_LESSONS;
 }
 
 export function getLocalizedGlossary(lang: SupportedLanguage): GlossaryItem[] {
   if (lang === 'ko') return KO_GLOSSARY;
+  if (lang === 'zh-TW') return ZH_TW_GLOSSARY;
+  if (lang === 'zh-CN') return ZH_CN_GLOSSARY;
   return EN_GLOSSARY;
 }
 
 export function getLocalizedQuiz(lang: SupportedLanguage): QuizQuestion[] {
   if (lang === 'ko') return KO_QUIZ;
+  if (lang === 'zh-TW') return ZH_TW_QUIZ;
+  if (lang === 'zh-CN') return ZH_CN_QUIZ;
   return EN_QUIZ;
 }

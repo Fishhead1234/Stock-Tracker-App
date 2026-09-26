@@ -37,7 +37,9 @@ export const useLanguageStore = create<LanguageState>((set, get) => ({
 
   setLanguage: (language: SupportedLanguage) => {
     try {
-      localStorage.setItem(STORAGE_KEY, language);
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY, language);
+      }
     } catch (e) {
       console.error(e);
     }
