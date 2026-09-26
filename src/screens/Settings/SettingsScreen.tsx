@@ -353,22 +353,28 @@ export const SettingsScreen: React.FC = () => {
                     ? 'Pro Annual Member'
                     : plan === 'MONTHLY'
                     ? 'Pro Monthly Member'
+                    : plan === 'FREE'
+                    ? 'Free Member (Trial Expired)'
                     : `30-Day Free Trial (${trialDays} days remaining)`}
                 </p>
               </div>
             </div>
 
             <span className={`text-[10px] px-2.5 py-1 rounded-full font-mono font-bold flex items-center gap-1 ${
-              isLight
+              plan === 'FREE'
+                ? isLight
+                  ? 'bg-[#FF3B30]/15 text-[#FF3B30] border border-[#FF3B30]/30'
+                  : 'bg-loss-500/20 text-loss-300 border border-loss-500/30'
+                : isLight
                 ? 'bg-[#FF9500]/15 text-[#FF9500] border border-[#FF9500]/30'
                 : 'bg-gold-500/20 text-gold-300 border border-gold-500/30'
             }`}>
               <Sparkles className="w-3 h-3 text-[#FF9500]" />
-              <span>{plan === 'LIFETIME' ? 'LIFETIME' : 'PRO ACTIVE'}</span>
+              <span>{plan === 'LIFETIME' ? 'LIFETIME' : plan === 'FREE' ? 'FREE TIER' : 'PRO ACTIVE'}</span>
             </span>
           </div>
 
-          {plan === 'TRIAL' && (
+          {(plan === 'TRIAL' || plan === 'FREE') && (
             <div className={`p-3 rounded-xl border flex items-center justify-between text-xs ${
               isLight 
                 ? 'bg-[#F2F2F7] border-black/10' 

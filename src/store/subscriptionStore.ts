@@ -28,7 +28,22 @@ const TRIAL_DURATION_DAYS = 30;
 const loadSavedSubscription = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const data = JSON.parse(raw);
+      // Auto-expire trial if 30 days have elapsed
+      if (data.plan === 'TRIAL' && data.trialStartDate) {
+        const start = new Date(data.trialStartDate).getTime();
+        const elapsedDays = Math.floor((Date.now() - start) / (1000 * 60 * 60 * 24));
+        if (elapsedDays >= TRIAL_DURATION_DAYS) {
+          return {
+            ...data,
+            isPro: false,
+            plan: 'FREE' as SubscriptionPlan
+          };
+        }
+      }
+      return data;
+    }
   } catch (e) {
     console.error('Failed to load subscription store', e);
   }
@@ -70,13 +85,20 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => {
     ...initial,
 
     getTrialDaysRemaining: () => {
-      const { trialStartDate, plan } = get();
+      const { trialStartDate, plan, isPro } = get();
       if (plan !== 'TRIAL') return 0;
       const start = new Date(trialStartDate).getTime();
       const now = Date.now();
       const elapsedDays = Math.floor((now - start) / (1000 * 60 * 60 * 24));
       const remaining = TRIAL_DURATION_DAYS - elapsedDays;
-      return Math.max(0, remaining);
+      if (remaining <= 0) {
+        if (isPro) {
+          set({ isPro: false, plan: 'FREE' });
+          persist();
+        }
+        return 0;
+      }
+      return remaining;
     },
 
     isTrialExpired: () => {

@@ -282,14 +282,28 @@ export const DashboardScreen: React.FC = () => {
               onClick={() => setIsUpgradeModalOpen(true)}
               data-touch-target="true"
               className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs font-bold hover:scale-105 active:scale-95 transition cursor-pointer shadow-xs ${
-                isLight
+                plan === 'FREE'
+                  ? isLight
+                    ? 'bg-[#FF3B30]/15 text-[#FF3B30] border-[#FF3B30]/30 animate-pulse'
+                    : 'bg-loss-500/20 text-loss-400 border-loss-500/40 animate-pulse'
+                  : isLight
                   ? 'bg-[#FF9500]/15 text-[#FF9500] border-[#FF9500]/30'
                   : 'bg-gradient-to-r from-gold-500/20 to-gold-600/20 text-gold-300 border-gold-500/40'
               }`}
               title={t('membership_status', 'Membership Status')}
             >
-              <Crown className={`w-3 h-3 fill-current ${isLight ? 'text-[#FF9500]' : 'text-gold-400'}`} />
-              <span className="text-[11px]">{plan === 'LIFETIME' ? t('pro_member', 'PRO') : `${trialDays}${t('trial_days_remaining', 'd Trial')}`}</span>
+              <Crown className={`w-3 h-3 fill-current ${
+                plan === 'FREE'
+                  ? isLight ? 'text-[#FF3B30]' : 'text-loss-400'
+                  : isLight ? 'text-[#FF9500]' : 'text-gold-400'
+              }`} />
+              <span className="text-[11px]">
+                {plan === 'LIFETIME' 
+                  ? t('pro_member', 'PRO') 
+                  : plan === 'FREE' 
+                  ? t('upgrade_to_pro', 'Upgrade Pro') 
+                  : `${trialDays}${t('trial_days_remaining', 'd Trial')}`}
+              </span>
             </button>
 
             {/* Notification Bell Button */}

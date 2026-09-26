@@ -70,6 +70,9 @@ export const App: React.FC = () => {
         }
       }
     });
+
+    // Check and enforce 30-day trial status
+    useSubscriptionStore.getState().getTrialDaysRemaining();
   }, []);
 
   // Subscribe to real-time stock ticks
