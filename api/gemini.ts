@@ -101,11 +101,23 @@ ${stockContext.userPosition ? `User's Portfolio: Owns ${stockContext.userPositio
       }
     );
 
-    // If target model returns 404 (not yet enabled in region/account), fallback to gemini-2.5-flash-lite or gemini-3.8-flash
-    if (googleRes.status === 404 && targetModel !== 'gemini-3.8-flash') {
-      console.warn(`Model ${targetModel} returned 404, falling back to gemini-3.8-flash`);
+    // If target model returns 404 (not yet enabled in region/account), fallback to gemini-2.0-flash or gemini-1.5-flash
+    if (googleRes.status === 404 && targetModel !== 'gemini-2.0-flash') {
+      console.warn(`Model ${targetModel} returned 404, falling back to gemini-2.0-flash`);
       googleRes = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(apiKey)}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(apiKey)}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        }
+      );
+    }
+
+    if (googleRes.status === 404 && targetModel !== 'gemini-1.5-flash') {
+      console.warn(`Fallback returned 404, attempting gemini-1.5-flash`);
+      googleRes = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
