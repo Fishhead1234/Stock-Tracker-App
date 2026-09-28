@@ -3,7 +3,7 @@ export interface DirectoryStockItem {
   name: string;
   exchange: string;
   country: string;
-  countryCode: 'US' | 'TW' | 'KR' | 'UK' | 'NZ' | 'AU' | 'JP';
+  countryCode: 'US' | 'TW' | 'KR' | 'UK' | 'NZ' | 'AU' | 'JP' | 'IN' | 'HK' | 'CN';
   currency: string;
   currencySymbol: string;
   basePrice: number;
@@ -178,7 +178,28 @@ export const STOCK_DIRECTORY: DirectoryStockItem[] = [
   { ticker: 'FPH.NZ', name: 'Fisher & Paykel Healthcare', exchange: 'NZX', country: 'New Zealand', countryCode: 'NZ', currency: 'NZD', currencySymbol: 'NZ$', basePrice: 37.20, sector: 'Respiratory & Sleep Apnea Devices', marketCap: 'NZ$21.5B', peRatio: 45.0 },
   { ticker: 'AIR.NZ', name: 'Air New Zealand', exchange: 'NZX', country: 'New Zealand', countryCode: 'NZ', currency: 'NZD', currencySymbol: 'NZ$', basePrice: 0.56, sector: 'Passenger & Cargo Aviation', marketCap: 'NZ$1.9B', peRatio: 11.5 },
   { ticker: 'SPK.NZ', name: 'Spark New Zealand', exchange: 'NZX', country: 'New Zealand', countryCode: 'NZ', currency: 'NZD', currencySymbol: 'NZ$', basePrice: 3.12, sector: 'Mobile, Fiber & Data Centers', marketCap: 'NZ$5.8B', peRatio: 17.5 },
-  { ticker: 'MEL.NZ', name: 'Meridian Energy', exchange: 'NZX', country: 'New Zealand', countryCode: 'NZ', currency: 'NZD', currencySymbol: 'NZ$', basePrice: 6.20, sector: '100% Renewable Electricity', marketCap: 'NZ$16.0B', peRatio: 35.0 }
+  { ticker: 'MEL.NZ', name: 'Meridian Energy', exchange: 'NZX', country: 'New Zealand', countryCode: 'NZ', currency: 'NZD', currencySymbol: 'NZ$', basePrice: 6.20, sector: '100% Renewable Electricity', marketCap: 'NZ$16.0B', peRatio: 35.0 },
+
+  // --- INDIA (NSE) ---
+  { ticker: 'RELIANCE.NS', name: 'Reliance Industries Ltd.', exchange: 'NSE', country: 'India', countryCode: 'IN', currency: 'INR', currencySymbol: '₹', basePrice: 2980.00, sector: 'Energy, Retail & Telecom (Jio)', marketCap: '₹20.1T', peRatio: 28.0 },
+  { ticker: 'TCS.NS', name: 'Tata Consultancy Services', exchange: 'NSE', country: 'India', countryCode: 'IN', currency: 'INR', currencySymbol: '₹', basePrice: 4150.00, sector: 'Global IT Services & Consulting', marketCap: '₹15.2T', peRatio: 31.0 },
+  { ticker: 'HDFCBANK.NS', name: 'HDFC Bank Limited', exchange: 'NSE', country: 'India', countryCode: 'IN', currency: 'INR', currencySymbol: '₹', basePrice: 1680.00, sector: 'Premier Private Sector Banking', marketCap: '₹12.8T', peRatio: 19.5 },
+  { ticker: 'INFY.NS', name: 'Infosys Limited', exchange: 'NSE', country: 'India', countryCode: 'IN', currency: 'INR', currencySymbol: '₹', basePrice: 1890.00, sector: 'Digital Transformation & Cloud', marketCap: '₹7.8T', peRatio: 27.0 },
+  { ticker: 'ICICIBANK.NS', name: 'ICICI Bank Limited', exchange: 'NSE', country: 'India', countryCode: 'IN', currency: 'INR', currencySymbol: '₹', basePrice: 1240.00, sector: 'Commercial Banking & Fintech', marketCap: '₹8.7T', peRatio: 18.2 },
+
+  // --- HONG KONG (HKEX) ---
+  { ticker: '0700.HK', name: 'Tencent Holdings Limited', exchange: 'HKEX', country: 'Hong Kong', countryCode: 'HK', currency: 'HKD', currencySymbol: 'HK$', basePrice: 435.00, sector: 'WeChat, Gaming & AI Cloud', marketCap: 'HK$4.1T', peRatio: 21.0 },
+  { ticker: '9988.HK', name: 'Alibaba Group Holding', exchange: 'HKEX', country: 'Hong Kong', countryCode: 'HK', currency: 'HKD', currencySymbol: 'HK$', basePrice: 98.50, sector: 'Cloud Intelligence & E-Commerce', marketCap: 'HK$1.9T', peRatio: 16.5 },
+  { ticker: '3690.HK', name: 'Meituan', exchange: 'HKEX', country: 'Hong Kong', countryCode: 'HK', currency: 'HKD', currencySymbol: 'HK$', basePrice: 172.00, sector: 'On-Demand Delivery & Local Commerce', marketCap: 'HK$1.07T', peRatio: 24.0 },
+  { ticker: '1810.HK', name: 'Xiaomi Corporation', exchange: 'HKEX', country: 'Hong Kong', countryCode: 'HK', currency: 'HKD', currencySymbol: 'HK$', basePrice: 28.40, sector: 'Smartphones, IoT & SU7 EV', marketCap: 'HK$710B', peRatio: 26.0 },
+  { ticker: '1211.HK', name: 'BYD Company Limited (H-Share)', exchange: 'HKEX', country: 'Hong Kong', countryCode: 'HK', currency: 'HKD', currencySymbol: 'HK$', basePrice: 295.00, sector: 'New Energy Vehicles & Batteries', marketCap: 'HK$860B', peRatio: 22.5 },
+
+  // --- CHINA MAINLAND A-SHARES (SSE / SZSE) ---
+  { ticker: '600519.SS', name: 'Kweichow Moutai Co., Ltd.', exchange: 'SSE', country: 'China', countryCode: 'CN', currency: 'CNY', currencySymbol: '¥', basePrice: 1580.00, sector: 'Premium Baijiu & Cultural Brand', marketCap: '¥1.98T', peRatio: 24.0 },
+  { ticker: '300750.SZ', name: 'CATL (Contemporary Amperex)', exchange: 'SZSE', country: 'China', countryCode: 'CN', currency: 'CNY', currencySymbol: '¥', basePrice: 245.00, sector: 'Global #1 EV & Energy Storage Batteries', marketCap: '¥1.08T', peRatio: 23.5 },
+  { ticker: '601318.SS', name: 'Ping An Insurance Group', exchange: 'SSE', country: 'China', countryCode: 'CN', currency: 'CNY', currencySymbol: '¥', basePrice: 52.80, sector: 'Financial Services & Healthtech', marketCap: '¥960B', peRatio: 9.8 },
+  { ticker: '002594.SZ', name: 'BYD Co., Ltd. (A-Share)', exchange: 'SZSE', country: 'China', countryCode: 'CN', currency: 'CNY', currencySymbol: '¥', basePrice: 298.00, sector: 'Electric Vehicles & Solar Power', marketCap: '¥865B', peRatio: 23.0 },
+  { ticker: '601398.SS', name: 'Industrial & Commercial Bank of China', exchange: 'SSE', country: 'China', countryCode: 'CN', currency: 'CNY', currencySymbol: '¥', basePrice: 6.20, sector: 'Commercial & Global Banking', marketCap: '¥2.2T', peRatio: 5.5 }
 ];
 
 export const DIRECTORY_MAP = new Map<string, DirectoryStockItem>(

@@ -28,8 +28,8 @@ export interface StockQuote {
   ticker: string;
   name: string;
   exchange: string; // e.g. TWSE, KRX, NASDAQ, NYSE, LSE, NZX, ASX, TSE
-  country: string;  // e.g. Taiwan, South Korea, United States, United Kingdom, New Zealand, Australia, Japan
-  countryCode: 'TW' | 'KR' | 'US' | 'UK' | 'NZ' | 'AU' | 'JP';
+  country: string;  // e.g. Taiwan, South Korea, United States, United Kingdom, New Zealand, Australia, Japan, India, Hong Kong, China
+  countryCode: 'TW' | 'KR' | 'US' | 'UK' | 'NZ' | 'AU' | 'JP' | 'IN' | 'HK' | 'CN';
   currency: string; // e.g. TWD, KRW, USD, GBP, NZD, AUD, JPY
   currencySymbol: string; // e.g. NT$, ₩, $, £, NZ$, A$, ¥
   price: number;

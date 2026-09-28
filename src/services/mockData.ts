@@ -9,7 +9,10 @@ export const GLOBAL_EXCHANGES: GlobalExchangeInfo[] = [
   { code: 'UK', name: 'London Stock Exchange (LSE)', city: 'London', country: 'United Kingdom', flag: '🇬🇧', timezone: 'GMT', currency: 'GBP', currencySymbol: '£', isOpen: true },
   { code: 'NZ', name: 'New Zealand Exchange (NZX)', city: 'Auckland', country: 'New Zealand', flag: '🇳🇿', timezone: 'NZST', currency: 'NZD', currencySymbol: 'NZ$', isOpen: false },
   { code: 'AU', name: 'Australian Securities Exchange (ASX)', city: 'Sydney', country: 'Australia', flag: '🇦🇺', timezone: 'AEST', currency: 'AUD', currencySymbol: 'A$', isOpen: false },
-  { code: 'JP', name: 'Tokyo Stock Exchange (TSE)', city: 'Tokyo', country: 'Japan', flag: '🇯🇵', timezone: 'JST', currency: 'JPY', currencySymbol: '¥', isOpen: false }
+  { code: 'JP', name: 'Tokyo Stock Exchange (TSE)', city: 'Tokyo', country: 'Japan', flag: '🇯🇵', timezone: 'JST', currency: 'JPY', currencySymbol: '¥', isOpen: false },
+  { code: 'IN', name: 'National Stock Exchange of India (NSE)', city: 'Mumbai', country: 'India', flag: '🇮🇳', timezone: 'IST', currency: 'INR', currencySymbol: '₹', isOpen: false },
+  { code: 'HK', name: 'Hong Kong Exchanges (HKEX)', city: 'Hong Kong', country: 'Hong Kong', flag: '🇭🇰', timezone: 'HKT', currency: 'HKD', currencySymbol: 'HK$', isOpen: false },
+  { code: 'CN', name: 'Shanghai & Shenzhen (SSE / SZSE)', city: 'Shanghai / Shenzhen', country: 'China', flag: '🇨🇳', timezone: 'CST', currency: 'CNY', currencySymbol: '¥', isOpen: false }
 ];
 
 export function generateHistoricalSeries(basePrice: number): {
