@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Position, PortfolioSummary, Transaction } from '../types/portfolio';
 import { StockQuote } from '../types/stock';
+import { queueWidgetSync } from '../services/widgetBridgeService';
 
 interface PortfolioState {
   positions: Position[];
@@ -96,12 +97,14 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => {
 
       set({ positions: updatedPositions, transactions: updatedTxs });
       save(updatedPositions, get().cashBalance, updatedTxs);
+      queueWidgetSync();
     },
 
     updatePosition: (id, updates) => {
       const updated = get().positions.map(p => p.id === id ? { ...p, ...updates } : p);
       set({ positions: updated });
       save(updated, get().cashBalance, get().transactions);
+      queueWidgetSync();
     },
 
     deletePosition: (id) => {
@@ -124,11 +127,13 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => {
 
       set({ positions: updated, transactions: updatedTxs });
       save(updated, get().cashBalance, updatedTxs);
+      queueWidgetSync();
     },
 
     clearPortfolio: () => {
       set({ positions: [], cashBalance: 0, transactions: [] });
       save([], 0, []);
+      queueWidgetSync();
     },
 
     getSummary: (quotes) => {

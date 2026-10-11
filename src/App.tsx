@@ -19,6 +19,7 @@ import { notificationService } from './services/notificationService';
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { Capacitor } from '@capacitor/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
+import { syncWidgetData, queueWidgetSync, WidgetBridge } from './services/widgetBridgeService';
 
 export const App: React.FC = () => {
   const { hasCompletedOnboarding, activeTab, themeMode } = useSettingsStore();
@@ -87,6 +88,38 @@ export const App: React.FC = () => {
 
     return () => unsubscribe();
   }, [setQuotes]);
+
+  // Handle Android Widget deep-links & initial synchronization
+  useEffect(() => {
+    syncWidgetData();
+
+    if (Capacitor.isNativePlatform()) {
+      WidgetBridge.getInitialRoute()
+        .then((res) => {
+          if (res?.targetTab && ['dashboard', 'signals', 'education', 'news', 'settings'].includes(res.targetTab)) {
+            useSettingsStore.getState().setActiveTab(res.targetTab as any);
+          }
+        })
+        .catch(() => {});
+
+      const handleWidgetNav = (e: any) => {
+        const tab = e?.detail?.targetTab || e?.targetTab;
+        if (tab && ['dashboard', 'signals', 'education', 'news', 'settings'].includes(tab)) {
+          useSettingsStore.getState().setActiveTab(tab as any);
+        }
+      };
+
+      window.addEventListener('widgetNavigation', handleWidgetNav);
+      return () => {
+        window.removeEventListener('widgetNavigation', handleWidgetNav);
+      };
+    }
+  }, []);
+
+  // Reactive widget sync whenever market quotes change
+  useEffect(() => {
+    queueWidgetSync();
+  }, [quotes]);
 
   // If user hasn't finished onboarding, display onboarding wizard
   if (!hasCompletedOnboarding) {

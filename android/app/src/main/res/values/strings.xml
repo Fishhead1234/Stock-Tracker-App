@@ -4,4 +4,6 @@
     <string name="title_activity_main">InvestLearn</string>
     <string name="package_name">com.stocklearner.app</string>
     <string name="custom_url_scheme">com.stocklearner.app</string>
+    <string name="widget_name">InvestLearn Portfolio &amp; Signals</string>
+    <string name="widget_description">Glance at your portfolio balance, today\'s P&amp;L, and top timing signals or daily wisdom.</string>
 </resources>

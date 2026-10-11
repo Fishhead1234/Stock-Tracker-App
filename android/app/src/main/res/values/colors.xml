@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand Base Colors -->
+    <color name="colorPrimary">#0A1128</color>
+    <color name="colorPrimaryDark">#070D1E</color>
+    <color name="colorAccent">#10B981</color>
+
+    <!-- Widget Theming -->
+    <color name="widget_bg">#0A1128</color>
+    <color name="widget_border">#1E293B</color>
+    <color name="widget_card_inner">#111C38</color>
+    <color name="widget_text_primary">#F8FAFC</color>
+    <color name="widget_text_secondary">#94A3B8</color>
+    <color name="widget_text_muted">#64748B</color>
+    <color name="widget_green">#10B981</color>
+    <color name="widget_green_bg">#13362B</color>
+    <color name="widget_red">#EF4444</color>
+    <color name="widget_red_bg">#3E1B24</color>
+    <color name="widget_gold">#FF9500</color>
+    <color name="widget_gold_bg">#3E2A12</color>
+    <color name="widget_divider">#1E293B</color>
+    <color name="widget_chip">#152244</color>
+</resources>

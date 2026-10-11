@@ -33,6 +33,19 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
+
+        <!-- InvestLearn Android Home Screen Widget -->
+        <receiver
+            android:name="com.stocklearner.app.InvestLearnWidgetProvider"
+            android:label="@string/app_name"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_investlearn_info" />
+        </receiver>
     </application>
 
     <!-- Permissions -->
