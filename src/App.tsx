@@ -7,6 +7,7 @@ import { BottomNav } from './components/Common/BottomNav';
 import { OnboardingScreen } from './screens/Onboarding/OnboardingScreen';
 import { DashboardScreen } from './screens/Dashboard/DashboardScreen';
 import { StockDetailScreen } from './screens/StockDetail/StockDetailScreen';
+import { AIAdvisorScreen } from './screens/AIAdvisor/AIAdvisorScreen';
 import { SignalsScreen } from './screens/Signals/SignalsScreen';
 import { NewsScreen } from './screens/News/NewsScreen';
 import { EducationScreen } from './screens/Education/EducationScreen';
@@ -99,7 +100,7 @@ export const App: React.FC = () => {
           if (res?.ticker) {
             useMarketStore.getState().selectTicker(res.ticker);
           }
-          if (res?.targetTab && ['dashboard', 'signals', 'education', 'news', 'settings', 'stockDetail'].includes(res.targetTab)) {
+          if (res?.targetTab && ['dashboard', 'signals', 'aiAdvisor', 'education', 'news', 'settings', 'stockDetail'].includes(res.targetTab)) {
             useSettingsStore.getState().setActiveTab(res.targetTab as any);
           }
         })
@@ -111,7 +112,7 @@ export const App: React.FC = () => {
         if (ticker) {
           useMarketStore.getState().selectTicker(ticker);
         }
-        if (tab && ['dashboard', 'signals', 'education', 'news', 'settings', 'stockDetail'].includes(tab)) {
+        if (tab && ['dashboard', 'signals', 'aiAdvisor', 'education', 'news', 'settings', 'stockDetail'].includes(tab)) {
           useSettingsStore.getState().setActiveTab(tab as any);
         }
       };
@@ -148,7 +149,7 @@ export const App: React.FC = () => {
       <div className="flex-1 flex flex-col min-h-full">
         {activeTab === 'dashboard' && <DashboardScreen />}
         {activeTab === 'stockDetail' && <StockDetailScreen />}
-        {activeTab === 'signals' && <SignalsScreen />}
+        {(activeTab === 'aiAdvisor' || activeTab === 'signals') && <AIAdvisorScreen />}
         {activeTab === 'news' && <NewsScreen />}
         {activeTab === 'education' && <EducationScreen />}
         {activeTab === 'settings' && <SettingsScreen />}

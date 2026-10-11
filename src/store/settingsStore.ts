@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type AppTab = 'dashboard' | 'signals' | 'news' | 'education' | 'settings' | 'stockDetail';
+export type AppTab = 'dashboard' | 'signals' | 'aiAdvisor' | 'news' | 'education' | 'settings' | 'stockDetail';
 export type ThemeMode = 'neutral-light' | 'dark';
 export type DevicePreset = 'iphone' | 'android' | 'responsive';
 

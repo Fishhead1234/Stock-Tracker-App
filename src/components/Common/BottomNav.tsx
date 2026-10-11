@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Zap, Newspaper, GraduationCap, Settings } from 'lucide-react';
+import { LayoutDashboard, Sparkles, Newspaper, GraduationCap, Settings } from 'lucide-react';
 import { useSettingsStore, AppTab } from '../../store/settingsStore';
 import { useLanguageStore } from '../../store/languageStore';
 
@@ -19,7 +19,7 @@ export const BottomNav: React.FC<Props> = ({ signalsCount = 0 }) => {
     icon: React.ComponentType<{ className?: string }>;
   }> = [
     { id: 'dashboard', label: t('nav_dashboard', 'Portfolio'), icon: LayoutDashboard },
-    { id: 'signals', label: t('nav_signals', 'Signals'), icon: Zap },
+    { id: 'aiAdvisor', label: t('nav_ai_advisor', 'AI Coach'), icon: Sparkles },
     { id: 'news', label: t('nav_news', 'News'), icon: Newspaper },
     { id: 'education', label: t('nav_education', 'Learn'), icon: GraduationCap },
     { id: 'settings', label: t('nav_settings', 'Settings'), icon: Settings },
@@ -62,14 +62,8 @@ export const BottomNav: React.FC<Props> = ({ signalsCount = 0 }) => {
                       : ''
                   }`}
                 />
-                {tab.id === 'signals' && signalsCount > 0 && (
-                  <span className={`absolute -top-1.5 -right-3 text-[10px] font-bold px-1.5 py-0.2 rounded-full min-w-[16px] text-center shadow ${
-                    isLight 
-                      ? 'bg-[#FF9500] text-white' 
-                      : 'bg-gold-500 text-navy-950'
-                  }`}>
-                    {signalsCount}
-                  </span>
+                {tab.id === 'aiAdvisor' && (
+                  <span className="absolute -top-1 -right-2 w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 )}
               </div>
               <span
