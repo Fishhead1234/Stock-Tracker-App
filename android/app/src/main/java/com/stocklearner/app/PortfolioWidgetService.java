@@ -29,9 +29,10 @@ class PortfolioRemoteViewsFactory implements RemoteViewsService.RemoteViewsFacto
 
     public static class HoldingItem {
         public String ticker;
-        public String subtitle;
-        public String value;
-        public String pnl;
+        public String action; // "BUY", "HOLD", "SELL"
+        public String subtitle; // e.g. "$219.56 • 1.22 shs"
+        public String value; // e.g. "$267.26"
+        public String pnl; // e.g. "+$23.04 (+9.4%)"
         public boolean isPositive;
     }
 
@@ -62,6 +63,7 @@ class PortfolioRemoteViewsFactory implements RemoteViewsService.RemoteViewsFacto
                 JSONObject obj = array.getJSONObject(i);
                 HoldingItem item = new HoldingItem();
                 item.ticker = obj.optString("ticker", "");
+                item.action = obj.optString("action", "HOLD");
                 item.subtitle = obj.optString("subtitle", "");
                 item.value = obj.optString("value", "$0.00");
                 item.pnl = obj.optString("pnl", "+$0.00 (+0.0%)");
@@ -93,10 +95,25 @@ class PortfolioRemoteViewsFactory implements RemoteViewsService.RemoteViewsFacto
         RemoteViews views = new RemoteViews(mContext.getPackageName(), R.layout.widget_portfolio_holding_item);
 
         views.setTextViewText(R.id.tv_holding_ticker, item.ticker);
+        views.setTextViewText(R.id.tv_holding_signal_badge, item.action);
         views.setTextViewText(R.id.tv_holding_subtitle, item.subtitle);
         views.setTextViewText(R.id.tv_holding_value, item.value);
         views.setTextViewText(R.id.tv_holding_pnl, item.pnl);
 
+        // Style the Signal Action Badge (BUY: Green, HOLD: Grey, SELL/TRIM: Red)
+        String actionUpper = item.action.toUpperCase();
+        if (actionUpper.contains("BUY")) {
+            views.setInt(R.id.tv_holding_signal_badge, "setBackgroundResource", R.drawable.widget_pill_green);
+            views.setTextColor(R.id.tv_holding_signal_badge, Color.parseColor("#10B981"));
+        } else if (actionUpper.contains("SELL") || actionUpper.contains("TRIM")) {
+            views.setInt(R.id.tv_holding_signal_badge, "setBackgroundResource", R.drawable.widget_pill_red);
+            views.setTextColor(R.id.tv_holding_signal_badge, Color.parseColor("#EF4444"));
+        } else {
+            views.setInt(R.id.tv_holding_signal_badge, "setBackgroundResource", R.drawable.widget_pill_grey);
+            views.setTextColor(R.id.tv_holding_signal_badge, Color.parseColor("#94A3B8"));
+        }
+
+        // Style the Holding P&L Badge
         if (item.isPositive) {
             views.setInt(R.id.layout_holding_pnl_badge, "setBackgroundResource", R.drawable.widget_pill_green);
             views.setTextColor(R.id.tv_holding_pnl, Color.parseColor("#10B981"));

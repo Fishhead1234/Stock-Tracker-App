@@ -1,9 +1,13 @@
 import { registerPlugin, Capacitor } from '@capacitor/core';
 import { usePortfolioStore } from '../store/portfolioStore';
 import { useMarketStore } from '../store/marketStore';
+import { useLanguageStore } from '../store/languageStore';
+import { generateTimingSignal } from './signalEngine';
 
 export interface WidgetHoldingItem {
   ticker: string;
+  action: 'BUY' | 'HOLD' | 'SELL';
+  currentPrice: string;
   subtitle: string;
   value: string;
   pnl: string;
@@ -40,6 +44,7 @@ export async function syncWidgetData(): Promise<void> {
 
   const { positions, cashBalance, getSummary } = usePortfolioStore.getState();
   const { quotes } = useMarketStore.getState();
+  const { language } = useLanguageStore.getState();
 
   const summary = getSummary(quotes);
   const totalNetWorth = summary.currentValue + cashBalance;
@@ -65,9 +70,9 @@ export async function syncWidgetData(): Promise<void> {
 
   // Format All-Time Gain / Invested Hint
   const totalGainSign = summary.totalProfitLoss >= 0 ? '+' : '-';
-  const investedHint = `Total: ${totalGainSign}${currencySymbol}${Math.abs(summary.totalProfitLoss).toLocaleString('en-US', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+  const investedHint = `Total Gain: ${totalGainSign}${currencySymbol}${Math.abs(summary.totalProfitLoss).toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   })} (${totalGainSign}${Math.abs(summary.totalProfitLossPercent).toFixed(1)}%)`;
 
   // Format Individual Holdings for the Scrollable ListView
@@ -82,9 +87,39 @@ export async function syncWidgetData(): Promise<void> {
     const holdingSign = isHoldingPositive ? '+' : '-';
     const cur = pos.currencySymbol || '$';
 
+    // Format current market price per share
+    const formattedPrice = `${cur}${currentPrice.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
+
+    // Format clean shares count (e.g. 1.22 instead of 1.21720026)
+    const formattedShares = pos.shares % 1 === 0
+      ? pos.shares.toString()
+      : Number(pos.shares.toFixed(2)).toString();
+
+    // Determine Buy / Hold / Sell index from timing signal
+    let action: 'BUY' | 'HOLD' | 'SELL' = 'HOLD';
+    if (quote && quote.indicators) {
+      try {
+        const signal = generateTimingSignal(quote, language);
+        if (signal.action === 'STRONG_BUY' || signal.action === 'BUY') {
+          action = 'BUY';
+        } else if (signal.action === 'STRONG_SELL' || signal.action === 'TRIM') {
+          action = 'SELL';
+        } else {
+          action = 'HOLD';
+        }
+      } catch (e) {
+        action = 'HOLD';
+      }
+    }
+
     return {
       ticker: pos.ticker,
-      subtitle: `${pos.shares} shs • ${pos.companyName}`,
+      action,
+      currentPrice: formattedPrice,
+      subtitle: `${formattedPrice} • ${formattedShares} shs`,
       value: `${cur}${totalHoldingValue.toLocaleString('en-US', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
