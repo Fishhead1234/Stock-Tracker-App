@@ -8,13 +8,19 @@ import com.getcapacitor.BridgeActivity;
 public class MainActivity extends BridgeActivity {
 
     private static String sLastTargetTab = null;
+    private static String sLastTargetTicker = null;
 
     public static String getLastTargetTab() {
         return sLastTargetTab;
     }
 
+    public static String getLastTargetTicker() {
+        return sLastTargetTicker;
+    }
+
     public static void clearLastTargetTab() {
         sLastTargetTab = null;
+        sLastTargetTicker = null;
     }
 
     @Override
@@ -38,10 +44,13 @@ public class MainActivity extends BridgeActivity {
 
         if (intent.hasExtra("targetTab")) {
             String targetTab = intent.getStringExtra("targetTab");
+            String ticker = intent.getStringExtra("ticker");
             sLastTargetTab = targetTab;
+            sLastTargetTicker = ticker;
 
             if (getBridge() != null) {
-                getBridge().triggerJSEvent("widgetNavigation", "window", "{\"targetTab\":\"" + targetTab + "\"}");
+                String payload = "{\"targetTab\":\"" + targetTab + "\",\"ticker\":\"" + (ticker != null ? ticker : "") + "\"}";
+                getBridge().triggerJSEvent("widgetNavigation", "window", payload);
             }
         }
     }

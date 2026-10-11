@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <!-- Header Row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="INVESTLEARN"
+            android:textColor="@color/widget_text_secondary"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:layout_width="6dp"
+            android:layout_height="6dp"
+            android:layout_marginStart="6dp"
+            android:layout_marginLeft="6dp"
+            android:src="@drawable/widget_dot_live" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginLeft="4dp"
+            android:text="LIVE"
+            android:textColor="@color/widget_green"
+            android:textSize="9sp"
+            android:textStyle="bold" />
+
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/tv_widget_updated"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Updated Just Now"
+            android:textColor="@color/widget_text_muted"
+            android:textSize="9sp" />
+    </LinearLayout>
+
+    <!-- Top Portfolio Summary Card (Deep Link -> Dashboard) -->
+    <LinearLayout
+        android:id="@+id/layout_portfolio_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/widget_chip_dark"
+        android:orientation="vertical"
+        android:paddingLeft="10dp"
+        android:paddingTop="8dp"
+        android:paddingRight="10dp"
+        android:paddingBottom="8dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="PORTFOLIO VALUE"
+            android:textColor="@color/widget_text_muted"
+            android:textSize="9sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_net_worth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="$12,450.80"
+            android:textColor="@color/widget_text_primary"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <!-- Today's P&L Capsule -->
+            <LinearLayout
+                android:id="@+id/layout_pnl_badge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/widget_pill_green"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingLeft="6dp"
+                android:paddingTop="2dp"
+                android:paddingRight="6dp"
+                android:paddingBottom="2dp">
+
+                <TextView
+                    android:id="@+id/tv_pnl_badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="+$240.50 (+1.97%) Today"
+                    android:textColor="@color/widget_green"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_portfolio_invested_hint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="Total Gain: +$1,250"
+                android:textColor="@color/widget_text_muted"
+                android:textSize="9sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Holdings Section Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="HOLDINGS"
+            android:textColor="@color/widget_text_secondary"
+            android:textSize="10sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_holdings_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginLeft="4dp"
+            android:text="(5)"
+            android:textColor="@color/widget_text_muted"
+            android:textSize="10sp" />
+
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Scroll to explore ▾"
+            android:textColor="@color/widget_text_muted"
+            android:textSize="9sp" />
+    </LinearLayout>
+
+    <!-- Horizontal Divider -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="4dp"
+        android:background="@color/widget_divider" />
+
+    <!-- Scrollable ListView for Holdings -->
+    <ListView
+        android:id="@+id/lv_portfolio_holdings"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="2dp"
+        android:layout_weight="1"
+        android:cacheColorHint="@android:color/transparent"
+        android:divider="@color/widget_divider"
+        android:dividerHeight="1dp"
+        android:fadingEdge="none"
+        android:scrollbars="vertical" />
+
+    <!-- Empty State View -->
+    <TextView
+        android:id="@+id/tv_empty_holdings"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:lineSpacingExtra="2dp"
+        android:text="No holdings logged yet.\nTap to add stocks in InvestLearn ➔"
+        android:textColor="@color/widget_text_muted"
+        android:textSize="11sp"
+        android:visibility="gone" />
+
+</LinearLayout>

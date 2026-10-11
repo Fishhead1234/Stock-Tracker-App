@@ -1,60 +1,37 @@
 import { registerPlugin, Capacitor } from '@capacitor/core';
 import { usePortfolioStore } from '../store/portfolioStore';
 import { useMarketStore } from '../store/marketStore';
-import { useLanguageStore } from '../store/languageStore';
-import { generateTimingSignal } from './signalEngine';
+
+export interface WidgetHoldingItem {
+  ticker: string;
+  subtitle: string;
+  value: string;
+  pnl: string;
+  isPositive: boolean;
+}
 
 export interface WidgetDataPayload {
   netWorth: string;
   pnlText: string;
   isPositive: boolean;
-  radarTitle: string;
-  actionBadge: string;
-  headline: string;
-  subtext: string;
-  isTip: boolean;
+  investedHint: string;
+  holdingsCount: number;
+  holdingsJson: string;
   updatedTime: string;
 }
 
 export interface WidgetBridgePlugin {
   updateWidgetData(options: WidgetDataPayload): Promise<{ success: boolean }>;
-  getInitialRoute(): Promise<{ targetTab: string }>;
+  getInitialRoute(): Promise<{ targetTab: string; ticker?: string }>;
 }
 
 export const WidgetBridge = registerPlugin<WidgetBridgePlugin>('WidgetBridge');
 
-const DAILY_WISDOM_TIPS = [
-  {
-    title: 'Dollar-Cost Averaging',
-    body: 'Investing fixed amounts regularly lowers your average purchase price over market swings.',
-  },
-  {
-    title: 'RSI Oversold Rule',
-    body: 'RSI below 30 signals an oversold bargain zone—like a rubber band stretched downward.',
-  },
-  {
-    title: 'Rule of 72',
-    body: 'Divide 72 by your expected return % to calculate the years needed to double your wealth.',
-  },
-  {
-    title: 'Diversification Bedrock',
-    body: 'Spreading investments across index ETFs and steady sectors shields your capital from shock.',
-  },
-  {
-    title: 'MACD Momentum Shift',
-    body: 'When the fast MACD line crosses above the signal line, institutional buyers are entering.',
-  },
-  {
-    title: 'Time in the Market',
-    body: 'Time in the market reliably beats timing the market. Reinvested dividends compound silently.',
-  },
-];
-
 let syncTimeout: ReturnType<typeof setTimeout> | null = null;
 
 /**
- * Synchronizes the latest portfolio figures and top timing signal or educational tip
- * to the Android Native Home Screen Widget.
+ * Synchronizes the full portfolio balance and scrollable holdings list
+ * directly to the native Android 2x4 scrollable widget.
  */
 export async function syncWidgetData(): Promise<void> {
   if (!Capacitor.isNativePlatform()) {
@@ -62,14 +39,15 @@ export async function syncWidgetData(): Promise<void> {
   }
 
   const { positions, cashBalance, getSummary } = usePortfolioStore.getState();
-  const { quotes, watchlist } = useMarketStore.getState();
-  const { language } = useLanguageStore.getState();
+  const { quotes } = useMarketStore.getState();
 
   const summary = getSummary(quotes);
   const totalNetWorth = summary.currentValue + cashBalance;
 
-  // Format Net Worth
+  // Currency Symbol
   const currencySymbol = positions[0]?.currencySymbol || '$';
+
+  // Format Total Balance
   const formattedNetWorth = `${currencySymbol}${totalNetWorth.toLocaleString('en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -83,71 +61,56 @@ export async function syncWidgetData(): Promise<void> {
   const formattedPnL = `${sign}${currencySymbol}${absDayChange.toLocaleString('en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  })} (${sign}${absDayPercent.toFixed(2)}%)`;
+  })} (${sign}${absDayPercent.toFixed(2)}%) Today`;
 
-  // Look for urgent signals in user's portfolio and watchlist
-  const portfolioTickers = new Set(positions.map((p) => p.ticker.toUpperCase()));
-  const watchlistTickers = new Set(watchlist.map((t) => t.toUpperCase()));
-  const trackedTickers = new Set([...portfolioTickers, ...watchlistTickers]);
+  // Format All-Time Gain / Invested Hint
+  const totalGainSign = summary.totalProfitLoss >= 0 ? '+' : '-';
+  const investedHint = `Total: ${totalGainSign}${currencySymbol}${Math.abs(summary.totalProfitLoss).toLocaleString('en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  })} (${totalGainSign}${Math.abs(summary.totalProfitLossPercent).toFixed(1)}%)`;
 
-  const trackedQuotes = Object.values(quotes).filter((q) =>
-    trackedTickers.has(q.ticker.toUpperCase())
-  );
+  // Format Individual Holdings for the Scrollable ListView
+  const holdings: WidgetHoldingItem[] = positions.map((pos) => {
+    const quote = quotes[pos.ticker];
+    const currentPrice = quote?.price ?? pos.averageBuyPrice;
+    const totalHoldingValue = pos.shares * currentPrice;
+    const costBasis = pos.shares * pos.averageBuyPrice;
+    const profitLoss = totalHoldingValue - costBasis;
+    const profitLossPercent = costBasis > 0 ? (profitLoss / costBasis) * 100 : 0;
+    const isHoldingPositive = profitLoss >= 0;
+    const holdingSign = isHoldingPositive ? '+' : '-';
+    const cur = pos.currencySymbol || '$';
 
-  const activeSignals = trackedQuotes.map((q) => generateTimingSignal(q, language));
+    return {
+      ticker: pos.ticker,
+      subtitle: `${pos.shares} shs • ${pos.companyName}`,
+      value: `${cur}${totalHoldingValue.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}`,
+      pnl: `${holdingSign}${cur}${Math.abs(profitLoss).toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })} (${holdingSign}${Math.abs(profitLossPercent).toFixed(1)}%)`,
+      isPositive: isHoldingPositive,
+    };
+  });
 
-  // Prioritize STRONG_BUY / BUY / TRIM signals
-  const urgentSignal = activeSignals.find(
-    (s) =>
-      s.action === 'STRONG_BUY' ||
-      s.action === 'BUY' ||
-      s.action === 'TRIM' ||
-      s.action === 'STRONG_SELL'
-  ) || activeSignals[0];
-
-  let radarTitle = 'DAILY WISDOM';
-  let actionBadge = 'TIP';
-  let headline = '';
-  let subtext = '';
-  let isTip = true;
-
-  if (urgentSignal && urgentSignal.action !== 'HOLD') {
-    radarTitle = 'TIMING RADAR';
-    actionBadge = urgentSignal.action.replace('_', ' ');
-    const stockQuote = quotes[urgentSignal.ticker];
-    const changeSign = (stockQuote?.change || 0) >= 0 ? '+' : '';
-    headline = `${urgentSignal.ticker} ${currencySymbol}${stockQuote?.price?.toFixed(2) || '0.00'} (${changeSign}${stockQuote?.changePercent?.toFixed(2) || '0'}%)`;
-    subtext = urgentSignal.reasons[0]?.plainEnglishAnalogy || urgentSignal.summary || urgentSignal.recommendedAction;
-    isTip = false;
-  } else {
-    // Pick today's tip based on day of year
-    const dayOfYear = Math.floor(
-      (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 1000 / 60 / 60 / 24
-    );
-    const tip = DAILY_WISDOM_TIPS[dayOfYear % DAILY_WISDOM_TIPS.length];
-    radarTitle = 'DAILY WISDOM';
-    actionBadge = 'TIP';
-    headline = tip.title;
-    subtext = tip.body;
-    isTip = true;
-  }
-
-  // Format updated time
+  // Updated Timestamp
   const now = new Date();
   const hours = now.getHours().toString().padStart(2, '0');
   const minutes = now.getMinutes().toString().padStart(2, '0');
-  const updatedTime = `${hours}:${minutes}`;
+  const updatedTime = `Updated ${hours}:${minutes}`;
 
   const payload: WidgetDataPayload = {
     netWorth: formattedNetWorth,
     pnlText: formattedPnL,
     isPositive,
-    radarTitle,
-    actionBadge,
-    headline,
-    subtext,
-    isTip,
-    updatedTime: `Updated ${updatedTime}`,
+    investedHint,
+    holdingsCount: holdings.length,
+    holdingsJson: JSON.stringify(holdings),
+    updatedTime,
   };
 
   try {

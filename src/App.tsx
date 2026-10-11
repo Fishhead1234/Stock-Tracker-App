@@ -96,7 +96,10 @@ export const App: React.FC = () => {
     if (Capacitor.isNativePlatform()) {
       WidgetBridge.getInitialRoute()
         .then((res) => {
-          if (res?.targetTab && ['dashboard', 'signals', 'education', 'news', 'settings'].includes(res.targetTab)) {
+          if (res?.ticker) {
+            useMarketStore.getState().selectTicker(res.ticker);
+          }
+          if (res?.targetTab && ['dashboard', 'signals', 'education', 'news', 'settings', 'stockDetail'].includes(res.targetTab)) {
             useSettingsStore.getState().setActiveTab(res.targetTab as any);
           }
         })
@@ -104,7 +107,11 @@ export const App: React.FC = () => {
 
       const handleWidgetNav = (e: any) => {
         const tab = e?.detail?.targetTab || e?.targetTab;
-        if (tab && ['dashboard', 'signals', 'education', 'news', 'settings'].includes(tab)) {
+        const ticker = e?.detail?.ticker || e?.ticker;
+        if (ticker) {
+          useMarketStore.getState().selectTicker(ticker);
+        }
+        if (tab && ['dashboard', 'signals', 'education', 'news', 'settings', 'stockDetail'].includes(tab)) {
           useSettingsStore.getState().setActiveTab(tab as any);
         }
       };

@@ -46,6 +46,12 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/widget_investlearn_info" />
         </receiver>
+
+        <!-- InvestLearn Portfolio RemoteViews Service for Scrollable ListView -->
+        <service
+            android:name="com.stocklearner.app.PortfolioWidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS"
+            android:exported="false" />
     </application>
 
     <!-- Permissions -->
