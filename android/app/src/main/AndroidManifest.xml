@@ -34,7 +34,7 @@
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
 
-        <!-- InvestLearn Android Home Screen Widget -->
+        <!-- InvestLearn Android Home Screen Widget (2x4 Scrollable Portfolio) -->
         <receiver
             android:name="com.stocklearner.app.InvestLearnWidgetProvider"
             android:label="@string/app_name"
@@ -45,6 +45,19 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/widget_investlearn_info" />
+        </receiver>
+
+        <!-- Nova AI Search Bar Widget (Google Search Bar Style) -->
+        <receiver
+            android:name="com.stocklearner.app.NovaSearchWidgetProvider"
+            android:label="@string/widget_nova_search_name"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_nova_search_info" />
         </receiver>
 
         <!-- InvestLearn Portfolio RemoteViews Service for Scrollable ListView -->

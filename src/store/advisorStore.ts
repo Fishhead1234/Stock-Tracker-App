@@ -8,6 +8,10 @@ interface AdvisorState {
   messages: AdvisorMessage[];
   profile: InvestorProfile;
   isTyping: boolean;
+  pendingPrompt: string | null;
+  shouldFocusInput: boolean;
+  setPendingPrompt: (prompt: string | null) => void;
+  setShouldFocusInput: (focus: boolean) => void;
   sendMessage: (text: string) => Promise<void>;
   updateProfile: (profile: Partial<InvestorProfile>) => void;
   resetChat: () => void;
@@ -51,6 +55,11 @@ export const useAdvisorStore = create<AdvisorState>((set, get) => {
     messages: initial.messages,
     profile: initial.profile,
     isTyping: false,
+    pendingPrompt: null,
+    shouldFocusInput: false,
+
+    setPendingPrompt: (pendingPrompt) => set({ pendingPrompt }),
+    setShouldFocusInput: (shouldFocusInput) => set({ shouldFocusInput }),
 
     updateProfile: (partial) => {
       const updatedProfile = { ...get().profile, ...partial };

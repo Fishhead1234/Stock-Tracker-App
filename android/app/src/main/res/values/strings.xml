@@ -6,4 +6,6 @@
     <string name="custom_url_scheme">com.stocklearner.app</string>
     <string name="widget_name">InvestLearn Portfolio &amp; Signals</string>
     <string name="widget_description">Glance at your portfolio balance, today\'s P&amp;L, and top timing signals or daily wisdom.</string>
+    <string name="widget_nova_search_name">Nova AI Investment Bar</string>
+    <string name="widget_nova_search_description">Chat instantly with Nova AI Coach and get stock guidance right from your home screen.</string>
 </resources>

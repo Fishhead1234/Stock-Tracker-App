@@ -26,7 +26,7 @@ export interface WidgetDataPayload {
 
 export interface WidgetBridgePlugin {
   updateWidgetData(options: WidgetDataPayload): Promise<{ success: boolean }>;
-  getInitialRoute(): Promise<{ targetTab: string; ticker?: string }>;
+  getInitialRoute(): Promise<{ targetTab: string; ticker?: string; prompt?: string; autoFocus?: boolean }>;
 }
 
 export const WidgetBridge = registerPlugin<WidgetBridgePlugin>('WidgetBridge');

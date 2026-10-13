@@ -41,6 +41,7 @@ public class WidgetBridgePlugin extends Plugin {
 
             // Refresh all widget instances on home screen and invalidate list data
             InvestLearnWidgetProvider.updateAllWidgets(getContext());
+            NovaSearchWidgetProvider.updateAllWidgets(getContext());
 
             JSObject res = new JSObject();
             res.put("success", true);
@@ -54,9 +55,15 @@ public class WidgetBridgePlugin extends Plugin {
     public void getInitialRoute(PluginCall call) {
         String targetTab = MainActivity.getLastTargetTab();
         String ticker = MainActivity.getLastTargetTicker();
+        String prompt = MainActivity.getLastPrompt();
+        boolean autoFocus = MainActivity.getLastAutoFocus();
+
         JSObject res = new JSObject();
         res.put("targetTab", targetTab != null ? targetTab : "");
         res.put("ticker", ticker != null ? ticker : "");
+        res.put("prompt", prompt != null ? prompt : "");
+        res.put("autoFocus", autoFocus);
+
         MainActivity.clearLastTargetTab();
         call.resolve(res);
     }

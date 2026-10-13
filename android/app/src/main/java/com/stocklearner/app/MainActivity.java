@@ -9,6 +9,8 @@ public class MainActivity extends BridgeActivity {
 
     private static String sLastTargetTab = null;
     private static String sLastTargetTicker = null;
+    private static String sLastPrompt = null;
+    private static boolean sLastAutoFocus = false;
 
     public static String getLastTargetTab() {
         return sLastTargetTab;
@@ -18,9 +20,19 @@ public class MainActivity extends BridgeActivity {
         return sLastTargetTicker;
     }
 
+    public static String getLastPrompt() {
+        return sLastPrompt;
+    }
+
+    public static boolean getLastAutoFocus() {
+        return sLastAutoFocus;
+    }
+
     public static void clearLastTargetTab() {
         sLastTargetTab = null;
         sLastTargetTicker = null;
+        sLastPrompt = null;
+        sLastAutoFocus = false;
     }
 
     @Override
@@ -45,11 +57,20 @@ public class MainActivity extends BridgeActivity {
         if (intent.hasExtra("targetTab")) {
             String targetTab = intent.getStringExtra("targetTab");
             String ticker = intent.getStringExtra("ticker");
+            String prompt = intent.getStringExtra("prompt");
+            boolean autoFocus = intent.getBooleanExtra("autoFocus", false);
+
             sLastTargetTab = targetTab;
             sLastTargetTicker = ticker;
+            sLastPrompt = prompt;
+            sLastAutoFocus = autoFocus;
 
             if (getBridge() != null) {
-                String payload = "{\"targetTab\":\"" + targetTab + "\",\"ticker\":\"" + (ticker != null ? ticker : "") + "\"}";
+                String safePrompt = prompt != null ? prompt.replace("\"", "\\\"") : "";
+                String payload = "{\"targetTab\":\"" + (targetTab != null ? targetTab : "") + "\","
+                        + "\"ticker\":\"" + (ticker != null ? ticker : "") + "\","
+                        + "\"prompt\":\"" + safePrompt + "\","
+                        + "\"autoFocus\":" + autoFocus + "}";
                 getBridge().triggerJSEvent("widgetNavigation", "window", payload);
             }
         }

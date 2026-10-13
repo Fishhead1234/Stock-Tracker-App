@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout_search_bar_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="2dp">
+
+    <!-- Google-Style Search Pill Container -->
+    <LinearLayout
+        android:id="@+id/layout_search_pill"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@drawable/widget_search_pill_bg"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="12dp"
+        android:paddingEnd="10dp">
+
+        <!-- Left Nova Logo & Branding -->
+        <LinearLayout
+            android:id="@+id/btn_nova_logo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="2dp"
+            android:paddingEnd="6dp">
+
+            <ImageView
+                android:id="@+id/iv_nova_icon"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:contentDescription="Nova AI"
+                android:src="@drawable/ic_nova_sparkle" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="Nova"
+                android:textColor="#38BDF8"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Divider Bar -->
+        <FrameLayout
+            android:layout_width="1dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="8dp"
+            android:background="#223354" />
+
+        <!-- Center Tappable Search Bar Area -->
+        <LinearLayout
+            android:id="@+id/btn_search_input_area"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_search_placeholder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="Ask Nova AI anything..."
+                android:textColor="#CBD5E1"
+                android:textSize="13sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="Tap to chat • Instant stock insights"
+                android:textColor="#64748B"
+                android:textSize="9sp" />
+        </LinearLayout>
+
+        <!-- Quick Prompt Chip: Ideas -->
+        <LinearLayout
+            android:id="@+id/btn_quick_ideas"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="3dp"
+            android:background="@drawable/widget_quick_chip_bg"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingStart="7dp"
+            android:paddingEnd="7dp">
+
+            <ImageView
+                android:layout_width="13dp"
+                android:layout_height="13dp"
+                android:contentDescription="Ideas"
+                android:src="@drawable/ic_lightbulb_ideas" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="3dp"
+                android:text="Ideas"
+                android:textColor="#FBBF24"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Quick Prompt Chip: ETFs -->
+        <LinearLayout
+            android:id="@+id/btn_quick_etfs"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/widget_quick_chip_bg"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingStart="7dp"
+            android:paddingEnd="7dp">
+
+            <ImageView
+                android:layout_width="13dp"
+                android:layout_height="13dp"
+                android:contentDescription="ETFs"
+                android:src="@drawable/ic_shield_safe" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="3dp"
+                android:text="ETFs"
+                android:textColor="#34D399"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Right Chat Launch Icon Button -->
+        <FrameLayout
+            android:id="@+id/btn_launch_chat"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="2dp"
+            android:background="@drawable/widget_circle_blue_btn">
+
+            <ImageView
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:layout_gravity="center"
+                android:contentDescription="Chat"
+                android:src="@drawable/ic_chat_bubble" />
+        </FrameLayout>
+
+    </LinearLayout>
+</LinearLayout>

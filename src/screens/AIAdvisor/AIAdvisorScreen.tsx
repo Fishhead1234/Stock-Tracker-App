@@ -5,14 +5,45 @@ import { Send, RotateCcw, Bot, Sparkles, User, Shield, Info } from 'lucide-react
 import { DisclaimerBanner } from '../../components/Common/DisclaimerBanner';
 
 export const AIAdvisorScreen: React.FC = () => {
-  const { messages, isTyping, sendMessage, resetChat, profile } = useAdvisorStore();
+  const {
+    messages,
+    isTyping,
+    sendMessage,
+    resetChat,
+    profile,
+    pendingPrompt,
+    setPendingPrompt,
+    shouldFocusInput,
+    setShouldFocusInput,
+  } = useAdvisorStore();
   const [inputText, setInputText] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Auto-scroll to bottom of messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
+
+  // Handle incoming prompt from widget chips (e.g. "Ideas" or "ETFs")
+  useEffect(() => {
+    if (pendingPrompt && !isTyping) {
+      const promptToRun = pendingPrompt;
+      setPendingPrompt(null);
+      sendMessage(promptToRun);
+    }
+  }, [pendingPrompt, isTyping, sendMessage, setPendingPrompt]);
+
+  // Handle auto-focus from search bar widget click
+  useEffect(() => {
+    if (shouldFocusInput) {
+      setShouldFocusInput(false);
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 250);
+      return () => clearTimeout(timer);
+    }
+  }, [shouldFocusInput, setShouldFocusInput]);
 
   const handleSend = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -164,6 +195,7 @@ export const AIAdvisorScreen: React.FC = () => {
       <form onSubmit={handleSend} className="px-4 py-3 bg-[#0A1128] border-t border-white/10">
         <div className="flex items-center gap-2 bg-[#070D1E] rounded-2xl border border-white/15 px-3 py-1.5 focus-within:border-blue-500/70 transition-colors">
           <input
+            ref={inputRef}
             type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
