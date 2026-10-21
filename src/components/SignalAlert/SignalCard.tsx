@@ -4,6 +4,7 @@ import { StockSignal } from '../../types/signal';
 import { SignalBadge } from '../StockCard/SignalBadge';
 import { EducationModal } from '../EducationModal/EducationModal';
 import { useLanguageStore } from '../../store/languageStore';
+import { useSettingsStore } from '../../store/settingsStore';
 
 interface Props {
   signal: StockSignal;
@@ -12,17 +13,49 @@ interface Props {
 
 export const SignalCard: React.FC<Props> = ({ signal, onSelectStock }) => {
   const { t } = useLanguageStore();
+  const { themeMode } = useSettingsStore();
+  const isLight = themeMode === 'neutral-light';
+
   const [expanded, setExpanded] = useState(false);
   const [educationTerm, setEducationTerm] = useState<string | null>(null);
 
   return (
-    <div className="bg-white dark:bg-navy-900/90 border border-black/10 dark:border-navy-800 rounded-2xl p-4 shadow-xs hover:border-[#007AFF]/30 transition-all space-y-3">
+    <div className={`rounded-2xl p-4 transition-all duration-300 relative overflow-hidden border space-y-3 ${
+      signal.isHolding
+        ? isLight
+          ? 'bg-gradient-to-b from-[#F2FBF5] via-white to-white border-[#34C759]/60 ring-2 ring-[#34C759]/40 shadow-[0_0_20px_rgba(52,199,89,0.22),0_6px_20px_rgba(52,199,89,0.1)]'
+          : 'bg-gradient-to-b from-[#0B251E] via-navy-900 to-navy-900 border-emerald-500/60 ring-2 ring-emerald-500/50 shadow-[0_0_22px_rgba(16,185,129,0.35),0_0_45px_rgba(16,185,129,0.15)]'
+        : isLight
+          ? 'bg-white border-[rgba(0,0,0,0.1)] shadow-xs hover:border-[#007AFF]/30'
+          : 'bg-navy-900/90 border-navy-800 shadow-sm hover:border-navy-700'
+    }`}>
+      {/* Top glowing accent bar for personal holdings */}
+      {signal.isHolding && (
+        <div 
+          className={`absolute top-0 left-0 right-0 h-[3px] ${
+            isLight
+              ? 'bg-gradient-to-r from-[#34C759] via-emerald-400 to-[#30D158] shadow-[0_0_8px_rgba(52,199,89,0.5)]'
+              : 'bg-gradient-to-r from-emerald-500 via-teal-300 to-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]'
+          }`} 
+        />
+      )}
+
       {/* Top Header: Ticker, Price, Signal */}
       <div className="flex items-start justify-between">
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="font-mono font-bold text-[#000000] dark:text-white text-base">{signal.ticker}</span>
             <span className="text-[13px] text-[#666666] dark:text-slate-400 truncate max-w-[140px]">{signal.companyName}</span>
+            {signal.isHolding && (
+              <span className={`flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-bold border ${
+                isLight 
+                  ? 'bg-[#34C759]/15 text-[#248A3D] border-[#34C759]/30' 
+                  : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-[0_0_8px_rgba(16,185,129,0.3)]'
+              }`}>
+                <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${isLight ? 'bg-[#34C759]' : 'bg-emerald-400'}`} />
+                <span>Holding</span>
+              </span>
+            )}
           </div>
           <div className="text-[13px] font-mono text-[#666666] dark:text-slate-300 mt-0.5">
             {t('sig_current_price', 'Current Price:')} <strong className="text-[#000000] dark:text-white">${signal.currentPrice.toFixed(2)}</strong>

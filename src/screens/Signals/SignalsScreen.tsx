@@ -22,7 +22,20 @@ export const SignalsScreen: React.FC = () => {
 
   // Strictly filter signals to stocks in user's portfolio and monitored watchlist
   const trackedQuotes = Object.values(quotes).filter(s => allTrackedTickers.has(s.ticker.toUpperCase()));
-  const signals = trackedQuotes.map(stock => generateTimingSignal(stock, language));
+  const signals = trackedQuotes.map(stock => {
+    const pos = positions.find(p => p.ticker.toUpperCase() === stock.ticker.toUpperCase());
+    return generateTimingSignal(
+      stock, 
+      language,
+      pos ? {
+        averageBuyPrice: pos.averageBuyPrice,
+        shares: pos.shares,
+        targetSellPrice: pos.targetSellPrice,
+        stopLossPrice: pos.stopLossPrice,
+        currencySymbol: pos.currencySymbol
+      } : undefined
+    );
+  });
 
   // Filter signals
   const filteredSignals = signals.filter(sig => {
