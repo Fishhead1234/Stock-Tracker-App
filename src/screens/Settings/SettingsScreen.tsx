@@ -41,6 +41,7 @@ import { GLOBAL_MARKETS, GlobalMarket } from '../../constants/markets';
 import { DisclaimerBanner } from '../../components/Common/DisclaimerBanner';
 import { useLanguageStore } from '../../store/languageStore';
 import { SUPPORTED_LANGUAGES } from '../../i18n/translations';
+import { scheduleNativeBackgroundTest } from '../../services/widgetBridgeService';
 
 export const SettingsScreen: React.FC = () => {
   const { language, setLanguage, t } = useLanguageStore();
@@ -171,6 +172,20 @@ export const SettingsScreen: React.FC = () => {
     } else {
       setTestNotificationResult(
         '✓ Recorded in in-app notification center. Tap "Enable System Notifications" above to allow Android status bar popups.'
+      );
+    }
+  };
+
+  const handleTriggerBackgroundTest = async () => {
+    setTestNotificationResult(null);
+    const success = await scheduleNativeBackgroundTest(5, 'AAPL');
+    if (success) {
+      setTestNotificationResult(
+        '✓ Background alert scheduled for 5 seconds! Press Home or swipe away the app right now to see the notification pop up on your lock screen & status bar.'
+      );
+    } else {
+      setTestNotificationResult(
+        'Native background alerts require running as an Android APK. If testing in browser, use the live test buttons above.'
       );
     }
   };
@@ -968,6 +983,20 @@ export const SettingsScreen: React.FC = () => {
                   <span>{t('test_watchlist_alert_btn', 'Test Watchlist Alert (NVDA)')}</span>
                 </button>
               </div>
+
+              {/* Native Android Background Alert Test Button */}
+              <button
+                type="button"
+                onClick={handleTriggerBackgroundTest}
+                className={`min-h-[44px] w-full py-2.5 px-3 text-xs font-bold rounded-xl border flex items-center justify-center gap-2 transition cursor-pointer shadow-sm ${
+                  isLight 
+                    ? 'bg-[#007AFF]/10 hover:bg-[#007AFF]/20 text-[#007AFF] border-[#007AFF]/35' 
+                    : 'bg-growth-500/15 hover:bg-growth-500/25 text-growth-300 border-growth-500/40'
+                }`}
+              >
+                <BellRing className="w-4 h-4" />
+                <span>Test Background Alert (Exit App in 5s)</span>
+              </button>
 
               {testNotificationResult && (
                 <div className="p-2.5 rounded-xl bg-[#34C759]/15 border border-[#34C759]/30 text-xs text-[#34C759] animate-fade-in flex items-start gap-2">

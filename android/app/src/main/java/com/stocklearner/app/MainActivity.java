@@ -41,6 +41,16 @@ public class MainActivity extends BridgeActivity {
         super.onCreate(savedInstanceState);
         WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
 
+        // Ensure high-importance notification channel & activate native background scheduler
+        StockAlertReceiver.ensureNotificationChannel(this);
+        android.content.SharedPreferences prefs = getSharedPreferences(
+                InvestLearnWidgetProvider.PREFS_NAME,
+                android.content.Context.MODE_PRIVATE
+        );
+        if (prefs.getBoolean("notifications_enabled", true)) {
+            StockBackgroundScheduler.schedulePeriodicAlerts(this);
+        }
+
         handleWidgetIntent(getIntent());
     }
 

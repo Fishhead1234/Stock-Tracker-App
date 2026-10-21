@@ -65,6 +65,27 @@
             android:name="com.stocklearner.app.PortfolioWidgetService"
             android:permission="android.permission.BIND_REMOTEVIEWS"
             android:exported="false" />
+
+        <!-- Native Background Stock Timing Alert Receiver -->
+        <receiver
+            android:name="com.stocklearner.app.StockAlertReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.stocklearner.app.ACTION_CHECK_ALERTS" />
+                <action android:name="com.stocklearner.app.ACTION_TEST_NOTIFICATION" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Device Boot & Package Update Receiver to persist background alerts -->
+        <receiver
+            android:name="com.stocklearner.app.BootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
     </application>
 
     <!-- Permissions -->
@@ -73,4 +94,6 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 </manifest>

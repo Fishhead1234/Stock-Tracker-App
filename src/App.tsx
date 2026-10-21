@@ -20,7 +20,7 @@ import { notificationService } from './services/notificationService';
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { Capacitor } from '@capacitor/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
-import { syncWidgetData, queueWidgetSync, WidgetBridge } from './services/widgetBridgeService';
+import { syncWidgetData, queueWidgetSync, syncNotificationSettingsToNative, WidgetBridge } from './services/widgetBridgeService';
 import { useAdvisorStore } from './store/advisorStore';
 
 export const App: React.FC = () => {
@@ -94,6 +94,7 @@ export const App: React.FC = () => {
   // Handle Android Widget deep-links & initial synchronization
   useEffect(() => {
     syncWidgetData();
+    syncNotificationSettingsToNative();
 
     if (Capacitor.isNativePlatform()) {
       const handleWidgetAction = (navData: any) => {

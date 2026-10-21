@@ -2,6 +2,7 @@ import { registerPlugin, Capacitor } from '@capacitor/core';
 import { usePortfolioStore } from '../store/portfolioStore';
 import { useMarketStore } from '../store/marketStore';
 import { useLanguageStore } from '../store/languageStore';
+import { useNotificationStore } from '../store/notificationStore';
 import { generateTimingSignal } from './signalEngine';
 
 export interface WidgetHoldingItem {
@@ -24,9 +25,19 @@ export interface WidgetDataPayload {
   updatedTime: string;
 }
 
+export interface NotificationSyncPayload {
+  notificationsEnabled: boolean;
+  notifyPersonalHoldings: boolean;
+  notifyWatchlist: boolean;
+  sensitivity: string;
+  watchlistJson: string;
+}
+
 export interface WidgetBridgePlugin {
   updateWidgetData(options: WidgetDataPayload): Promise<{ success: boolean }>;
   getInitialRoute(): Promise<{ targetTab: string; ticker?: string; prompt?: string; autoFocus?: boolean }>;
+  syncNotificationSettings(options: NotificationSyncPayload): Promise<{ success: boolean; scheduled: boolean }>;
+  scheduleBackgroundTest(options: { delaySeconds?: number; ticker?: string; title?: string; message?: string }): Promise<{ success: boolean; delaySeconds: number }>;
 }
 
 export const WidgetBridge = registerPlugin<WidgetBridgePlugin>('WidgetBridge');
@@ -166,3 +177,62 @@ export function queueWidgetSync(delayMs = 1200): void {
     syncWidgetData();
   }, delayMs);
 }
+
+/**
+ * Synchronizes notification settings to the native Android background alert engine.
+ * Ensures alerts and timing checks continue to run even when the app is completely closed.
+ */
+export async function syncNotificationSettingsToNative(): Promise<void> {
+  if (!Capacitor.isNativePlatform()) {
+    return;
+  }
+
+  const { notificationsEnabled, notifyPersonalHoldings, notifyWatchlist, sensitivity } = useNotificationStore.getState();
+  const { watchlist } = useMarketStore.getState();
+
+  const payload: NotificationSyncPayload = {
+    notificationsEnabled,
+    notifyPersonalHoldings,
+    notifyWatchlist,
+    sensitivity,
+    watchlistJson: JSON.stringify(watchlist),
+  };
+
+  try {
+    await WidgetBridge.syncNotificationSettings(payload);
+  } catch (err) {
+    console.debug('WidgetBridge notification sync skipped (web or unavailable):', err);
+  }
+}
+
+/**
+ * Schedules a native Android background alert to fire in delaySeconds (default 5s).
+ * Gives the user time to exit the app and verify that the notification pops from the background.
+ */
+export async function scheduleNativeBackgroundTest(delaySeconds = 5, ticker = 'AAPL'): Promise<boolean> {
+  if (!Capacitor.isNativePlatform()) {
+    return false;
+  }
+
+  try {
+    await WidgetBridge.scheduleBackgroundTest({
+      delaySeconds,
+      ticker,
+      title: `Holding Alert: ${ticker} Buy Window Active`,
+      message: `${ticker}: RSI oversold indicates attractive accumulation range. (Sent from Android background engine)`
+    });
+    return true;
+  } catch (err) {
+    console.error('Failed to schedule native background test:', err);
+    return false;
+  }
+}
+
+// Auto-sync notification settings to native Android background scheduler on any preference change
+if (typeof window !== 'undefined') {
+  useNotificationStore.subscribe(() => {
+    syncNotificationSettingsToNative();
+  });
+}
+
+

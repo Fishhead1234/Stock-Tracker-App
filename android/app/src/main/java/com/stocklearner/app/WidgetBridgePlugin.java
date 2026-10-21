@@ -67,4 +67,61 @@ public class WidgetBridgePlugin extends Plugin {
         MainActivity.clearLastTargetTab();
         call.resolve(res);
     }
+
+    @PluginMethod
+    public void syncNotificationSettings(PluginCall call) {
+        try {
+            boolean enabled = Boolean.TRUE.equals(call.getBoolean("notificationsEnabled", true));
+            boolean notifyHoldings = Boolean.TRUE.equals(call.getBoolean("notifyPersonalHoldings", true));
+            boolean notifyWatchlist = Boolean.TRUE.equals(call.getBoolean("notifyWatchlist", true));
+            String sensitivity = call.getString("sensitivity", "ALL_TIMING_SIGNALS");
+            String watchlistJson = call.getString("watchlistJson", "[]");
+
+            SharedPreferences prefs = getContext().getSharedPreferences(
+                    InvestLearnWidgetProvider.PREFS_NAME,
+                    Context.MODE_PRIVATE
+            );
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putBoolean("notifications_enabled", enabled);
+            editor.putBoolean("notify_holdings", notifyHoldings);
+            editor.putBoolean("notify_watchlist", notifyWatchlist);
+            editor.putString("notification_sensitivity", sensitivity);
+            editor.putString("watchlist_json", watchlistJson);
+            editor.apply();
+
+            if (enabled) {
+                StockAlertReceiver.ensureNotificationChannel(getContext());
+                StockBackgroundScheduler.schedulePeriodicAlerts(getContext());
+            } else {
+                StockBackgroundScheduler.cancelPeriodicAlerts(getContext());
+            }
+
+            JSObject res = new JSObject();
+            res.put("success", true);
+            res.put("scheduled", enabled);
+            call.resolve(res);
+        } catch (Exception e) {
+            call.reject("Failed to sync notification settings: " + e.getMessage(), e);
+        }
+    }
+
+    @PluginMethod
+    public void scheduleBackgroundTest(PluginCall call) {
+        try {
+            int delaySeconds = call.getInt("delaySeconds", 5);
+            String ticker = call.getString("ticker", "AAPL");
+            String title = call.getString("title", "Holding Alert: " + ticker + " Buy Opportunity");
+            String message = call.getString("message", ticker + " entered attractive accumulation zone. Technical support confirmed.");
+
+            StockAlertReceiver.ensureNotificationChannel(getContext());
+            StockBackgroundScheduler.scheduleTestNotification(getContext(), delaySeconds, ticker, title, message);
+
+            JSObject res = new JSObject();
+            res.put("success", true);
+            res.put("delaySeconds", delaySeconds);
+            call.resolve(res);
+        } catch (Exception e) {
+            call.reject("Failed to schedule background test: " + e.getMessage(), e);
+        }
+    }
 }
