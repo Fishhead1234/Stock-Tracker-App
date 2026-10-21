@@ -85,6 +85,41 @@ export const SignalExplanation: React.FC<Props> = ({ signal }) => {
         </div>
       )}
 
+      {/* Asset-Class Strategy Indicator Banner */}
+      {signal.assetStrategyBadge && (
+        <div className={`p-3 rounded-xl border flex items-start justify-between gap-3 ${
+          signal.assetClass === 'INDEX_ETF'
+            ? isLight ? 'bg-emerald-50/80 border-emerald-300/60 text-emerald-950' : 'bg-emerald-950/40 border-emerald-700/50 text-emerald-200'
+            : signal.assetClass === 'LEVERAGED_ETF'
+              ? isLight ? 'bg-amber-50/80 border-amber-300/60 text-amber-950' : 'bg-amber-950/40 border-amber-700/50 text-amber-200'
+              : signal.assetClass === 'SECTOR_ETF'
+                ? isLight ? 'bg-purple-50/80 border-purple-300/60 text-purple-950' : 'bg-purple-950/40 border-purple-700/50 text-purple-200'
+                : isLight ? 'bg-blue-50/70 border-blue-200/80 text-blue-950' : 'bg-navy-950/80 border-blue-500/30 text-blue-200'
+        }`}>
+          <div className="min-w-0 flex-1">
+            <span className="text-[12px] font-bold tracking-tight block mb-0.5">
+              {signal.assetStrategyBadge}
+            </span>
+            {signal.assetStrategySummary && (
+              <p className={`text-[12px] leading-relaxed ${isLight ? 'text-[#333333]' : 'text-slate-300'}`}>
+                {signal.assetStrategySummary}
+              </p>
+            )}
+          </div>
+          <button
+            type="button"
+            data-touch-target="true"
+            onClick={() => setActiveEducationTerm('lesson-etf-vs-stock')}
+            className={`p-1.5 rounded-lg transition shrink-0 cursor-pointer ${
+              isLight ? 'hover:bg-black/5 text-[#666666]' : 'hover:bg-white/10 text-slate-300'
+            }`}
+            title="Read ETF vs. Stock Strategy Guide"
+          >
+            <HelpCircle className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* Summary */}
       <p className={`text-[13px] leading-relaxed p-3 rounded-xl border ${
         isLight ? 'bg-[#F2F2F7] text-[#666666] border-[rgba(0,0,0,0.06)]' : 'bg-navy-950/60 text-slate-300 border-navy-800/80'
@@ -129,9 +164,13 @@ export const SignalExplanation: React.FC<Props> = ({ signal }) => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded border ${
-                    r.bullish
-                      ? isLight ? 'bg-[#34C759]/15 text-[#34C759] border-[#34C759]/30' : 'bg-growth-500/20 text-growth-400 border-growth-500/30'
-                      : isLight ? 'bg-[#FF3B30]/15 text-[#FF3B30] border-[#FF3B30]/30' : 'bg-loss-500/20 text-loss-400 border-loss-500/30'
+                    r.indicator === 'ASSET_STRATEGY'
+                      ? isLight ? 'bg-purple-500/15 text-purple-700 border-purple-300' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'
+                      : r.indicator === 'COST_BASIS'
+                        ? isLight ? 'bg-blue-500/15 text-blue-700 border-blue-300' : 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+                        : r.bullish
+                          ? isLight ? 'bg-[#34C759]/15 text-[#34C759] border-[#34C759]/30' : 'bg-growth-500/20 text-growth-400 border-growth-500/30'
+                          : isLight ? 'bg-[#FF3B30]/15 text-[#FF3B30] border-[#FF3B30]/30' : 'bg-loss-500/20 text-loss-400 border-loss-500/30'
                   }`}>
                     {r.indicator}
                   </span>
@@ -142,7 +181,7 @@ export const SignalExplanation: React.FC<Props> = ({ signal }) => {
                 <button
                   type="button"
                   data-touch-target="true"
-                  onClick={() => setActiveEducationTerm(r.indicator)}
+                  onClick={() => setActiveEducationTerm(r.indicator === 'ASSET_STRATEGY' ? 'lesson-etf-vs-stock' : r.indicator)}
                   className={`transition cursor-pointer p-1 ${isLight ? 'text-[#8E8E93] hover:text-[#007AFF]' : 'text-slate-500 hover:text-gold-400'}`}
                   title={`Learn more about ${r.indicator}`}
                 >

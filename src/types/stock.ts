@@ -24,6 +24,8 @@ export interface TechnicalIndicators {
   low52Week: number;
 }
 
+export type AssetClass = 'INDEX_ETF' | 'SECTOR_ETF' | 'LEVERAGED_ETF' | 'STOCK';
+
 export interface StockQuote {
   ticker: string;
   name: string;
@@ -43,6 +45,8 @@ export interface StockQuote {
   marketCap: string;
   peRatio: number;
   sector: string;
+  isETF?: boolean;
+  assetClass?: AssetClass;
   indicators: TechnicalIndicators;
   history: {
     '1D': HistoricalPoint[];

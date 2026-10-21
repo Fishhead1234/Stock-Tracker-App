@@ -121,6 +121,9 @@ export async function syncWidgetData(): Promise<void> {
     let action: 'BUY' | 'HOLD' | 'SELL' = 'HOLD';
     let costBasisFeedback = '';
     let holdingStrategy = 'ACCUMULATE';
+    let isETF = false;
+    let assetClass = 'STOCK';
+    let assetStrategyBadge = '';
     if (quote && quote.indicators) {
       try {
         const signal = generateTimingSignal(quote, language, {
@@ -139,6 +142,9 @@ export async function syncWidgetData(): Promise<void> {
         }
         costBasisFeedback = signal.costBasisFeedback || '';
         holdingStrategy = signal.holdingStrategyAction || 'ACCUMULATE';
+        isETF = Boolean(signal.isETF);
+        assetClass = signal.assetClass || 'STOCK';
+        assetStrategyBadge = signal.assetStrategyBadge || '';
       } catch (e) {
         action = 'HOLD';
       }
@@ -156,6 +162,9 @@ export async function syncWidgetData(): Promise<void> {
       pnlPercent: profitLossPercent,
       costBasisFeedback,
       holdingStrategy,
+      isETF,
+      assetClass,
+      assetStrategyBadge,
       subtitle: `${formattedPrice} • ${formattedShares} shs`,
       value: `${cur}${totalHoldingValue.toLocaleString('en-US', {
         minimumFractionDigits: 2,

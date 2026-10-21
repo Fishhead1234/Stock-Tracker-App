@@ -1,6 +1,8 @@
+import { AssetClass } from './stock';
+
 export type SignalAction = 'STRONG_BUY' | 'BUY' | 'HOLD' | 'TRIM' | 'STRONG_SELL';
 
-export type IndicatorCategory = 'RSI' | 'MACD' | 'SMA' | 'VOLUME' | 'SENTIMENT' | 'COST_BASIS';
+export type IndicatorCategory = 'RSI' | 'MACD' | 'SMA' | 'VOLUME' | 'SENTIMENT' | 'COST_BASIS' | 'ASSET_STRATEGY';
 
 export interface SignalReason {
   indicator: IndicatorCategory;
@@ -31,11 +33,16 @@ export interface StockSignal {
   recommendedAction: string;
   educationalTip: string;
   timestamp: string;
+  // Asset-Class Strategy Context
+  isETF?: boolean;
+  assetClass?: AssetClass;
+  assetStrategyBadge?: string;
+  assetStrategySummary?: string;
   // Personal Holding Specific Index & Feedback
   isHolding?: boolean;
   averageBuyPrice?: number;
   pnlPercent?: number;
   pnlAmount?: number;
   costBasisFeedback?: string;
-  holdingStrategyAction?: 'TRIM_PROFIT' | 'DCA_DIP' | 'STOP_LOSS' | 'HOLD_PROFIT' | 'ACCUMULATE' | 'NONE';
+  holdingStrategyAction?: 'TRIM_PROFIT' | 'DCA_DIP' | 'STOP_LOSS' | 'HOLD_PROFIT' | 'ACCUMULATE' | 'DCA_INDEX_DIP' | 'HOLD_COMPOUNDER' | 'NONE';
 }

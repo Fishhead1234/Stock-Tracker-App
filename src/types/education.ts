@@ -1,7 +1,7 @@
 export interface EducationLesson {
   id: string;
   title: string;
-  category: 'Fundamentals' | 'Technical Timing' | 'Risk Management' | 'Psychology';
+  category: 'Fundamentals' | 'Technical Timing' | 'Risk Management' | 'Psychology' | 'Asset Strategy';
   readTime: string;
   summary: string;
   content: string[];

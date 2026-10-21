@@ -1,5 +1,6 @@
 import { SignalAction, SignalReason } from '../types/signal';
 import { SupportedLanguage } from '../i18n/translations';
+import { AssetClass } from '../types/stock';
 
 export interface LocalizedSignalTexts {
   title: string;
@@ -368,7 +369,14 @@ export interface LocalizedHoldingTexts {
   costBasisFeedback: string;
 }
 
-export type HoldingStrategy = 'TRIM_PROFIT' | 'DCA_DIP' | 'STOP_LOSS' | 'HOLD_PROFIT' | 'ACCUMULATE';
+export type HoldingStrategy = 
+  | 'TRIM_PROFIT' 
+  | 'DCA_DIP' 
+  | 'STOP_LOSS' 
+  | 'HOLD_PROFIT' 
+  | 'ACCUMULATE'
+  | 'DCA_INDEX_DIP'
+  | 'HOLD_COMPOUNDER';
 
 export function getLocalizedHoldingTexts(
   strategy: HoldingStrategy,
@@ -385,6 +393,28 @@ export function getLocalizedHoldingTexts(
 
   if (lang === 'ko') {
     switch (strategy) {
+      case 'DCA_INDEX_DIP':
+        return {
+          title: `지수 ETF 분할 매수 적기 (${pnlStr} 평단가 할인)`,
+          summary: `${ticker} 현재가 ${priceStr}로 회원님의 평균 매수가(${costStr}) 대비 ${pnlStr} 할인된 매력적인 가격대입니다. 대표 지수 ETF는 개별 기업 파산 위험이 없으므로 조정장은 역사상 가장 승률 높은 분할 매수(DCA) 기회입니다.`,
+          recommendedAction: `공포에 투매하지 마세요. 대표 지수 ETF는 장기적으로 항상 전고점을 회복했습니다. 여유 자금으로 분할 매수하여 평단가를 낮추세요.`,
+          educationalTip: '워런 버핏의 격언: "남들이 공포에 질려 있을 때 욕심을 내라." 지수 펀드의 -10%~-20% 조정은 경제 전체를 할인된 가격에 사는 축복입니다.',
+          reasonSummary: `지수 ETF 평단가 할인 + 무(無)파산 안전성 (${pnlStr})`,
+          reasonDetail: `개별 주식과 달리 수백 개 초우량 기업에 자동 분산되어 있으므로, 평단가 아래로 내려온 구간은 장기 복리 수익률을 극대화하는 매수 구간입니다.`,
+          reasonAnalogy: '백화점 전체 명품관이 연말 정기 세일을 시작한 것과 같습니다.',
+          costBasisFeedback: `대표 지수 ETF가 평단가 대비 ${pnlStr} 할인 중입니다. 공포 매도를 피하고 분할 매집 기회로 활용하세요.`
+        };
+      case 'HOLD_COMPOUNDER':
+        return {
+          title: `장기 복리 성장 보유 지속 (${pnlStr} 수익 쿠션)`,
+          summary: `${ticker}가 평균 매수가(${costStr}) 대비 ${pnlStr} 상승하여 장기 복리 효과가 순항 중입니다. 지수 ETF는 잦은 단타 매매보다 수년간 묵묵히 보유할 때 가장 큰 부를 창출합니다.`,
+          recommendedAction: `조급하게 매도하지 마시고 장기 복리 추세를 즐기세요. 전체 포트폴리오의 주식 비중을 리밸런싱하는 목적이 아니라면 꾸준히 보유하세요.`,
+          educationalTip: '지수 ETF의 가장 큰 미덕은 "수수료와 세금을 아끼는 지루한 장기 보유"입니다. 시장의 상승 에너지를 온전히 누리세요.',
+          reasonSummary: `지수 복리 엔진 순항 (${pnlStr})`,
+          reasonDetail: `평균 매수가 ${costStr}를 훌륭히 방어하며 자본주의 경제 성장의 과실을 차곡차곡 누적하고 있습니다.`,
+          reasonAnalogy: '눈사람을 굴릴 때 눈덩이가 저절로 불어나는 스노우볼 효과입니다.',
+          costBasisFeedback: `지수 ETF가 평단가 대비 ${pnlStr} 수익 중입니다. 장기 복리를 위해 계속 보유하세요.`
+        };
       case 'TRIM_PROFIT':
         return {
           title: `차익 실현 분할 매도 고려 (${pnlStr})`,
@@ -447,6 +477,48 @@ export function getLocalizedHoldingTexts(
   if (lang === 'zh-TW' || lang === 'zh-CN') {
     const isTW = lang === 'zh-TW';
     switch (strategy) {
+      case 'DCA_INDEX_DIP':
+        return {
+          title: isTW ? `指數型 ETF 分批逢低加碼良機 (${pnlStr})` : `指数型 ETF 分批逢低加码良机 (${pnlStr})`,
+          summary: isTW 
+            ? `${ticker} 現價 ${priceStr}，相較您的平均買進成本 ${costStr} 折價 ${pnlStr}。大盤指數型 ETF 沒有單一公司破產歸零風險，歷史證明回檔拉回是拉高長期複利回報的黃金累積期。`
+            : `${ticker} 现价 ${priceStr}，相较您的平均买入成本 ${costStr} 折价 ${pnlStr}。大盘指数型 ETF 没有单一公司破产归零风险，历史证明回调拉回是提高长期复利回报的黄金累积期。`,
+          recommendedAction: isTW 
+            ? `切忌恐慌殺跌。大盤指數具備長期自我更新向上動能。建議利用閒置資金分批逢低加碼，有效降低整體持股成本。`
+            : `切忌恐慌杀跌。大盘指数具备长期自我更新向上动能。建议利用闲置资金分批逢低加码，有效降低整体持仓成本。`,
+          educationalTip: isTW 
+            ? '巴菲特名言：「在別人恐懼時貪婪。」指數基金出現 -10%～-20% 的修正，等同於整個經濟體打折特賣，是定期定額投資人的天賜良機。'
+            : '巴菲特名言：“在别人恐惧时贪婪。”指数基金出现 -10%～-20% 的修正，等同于整个经济体打折特卖，是定期定额投资人的天赐良机。',
+          reasonSummary: isTW ? `指數成本折價 + 無倒閉歸零風險 (${pnlStr})` : `指数成本折价 + 无倒闭归零风险 (${pnlStr})`,
+          reasonDetail: isTW 
+            ? `相較於個別公司有競爭落敗風險，指數 ETF 具備自我淘汰更新機制，跌破成本往往是勝率最高的逢低加碼點。`
+            : `相较于个别公司有竞争落败风险，指数 ETF 具备自我淘汰更新机制，跌破成本往往是胜率最高的逢低加码点。`,
+          reasonAnalogy: isTW ? '如同整個精品百貨舉辦週年慶全面打折，用特惠價一次打包所有頂尖品牌。' : '如同整个精品百货举办周年庆全面打折，用特惠价一次打包所有顶尖品牌。',
+          costBasisFeedback: isTW 
+            ? `指數 ETF 相較成本折價 ${pnlStr}，大盤無破產風險，是極佳的逢低分批加碼買點。`
+            : `指数 ETF 相较成本折价 ${pnlStr}，大盘无破产风险，是极佳的逢低分批加码买点。`
+        };
+      case 'HOLD_COMPOUNDER':
+        return {
+          title: isTW ? `長期複利增長持續持有 (${pnlStr})` : `长期复利增长持续持有 (${pnlStr})`,
+          summary: isTW 
+            ? `${ticker} 相較您的買進成本 ${costStr} 穩定獲利 ${pnlStr}，複利效應持續累積。指數型 ETF 適合跨越週期的長線持有，無需頻繁短線進出。`
+            : `${ticker} 相较您的买入成本 ${costStr} 稳定盈利 ${pnlStr}，复利效应持续累积。指数型 ETF 适合跨越周期的长线持有，无需频繁短线进出。`,
+          recommendedAction: isTW 
+            ? `無需急於全數停利，讓複利飛輪持續旋轉。除非需要進行整體投資組合之股債資產再平衡，否則建議長線續抱。`
+            : `无需急于全数止盈，让复利飞轮持续旋转。除非需要进行整体投资组合之股债资产再平衡，否则建议长线续抱。`,
+          educationalTip: isTW 
+            ? '指數投資的核心魅力在於「低週轉率與長期複利」。頻繁進出只會徒增手續費與稅負，放眼 5～10 年方顯大智慧。'
+            : '指数投资的核心魅力在于“低周转率与长期复利”。频繁进出只会徒增手续费与税负，放眼 5～10 年方显大智慧。',
+          reasonSummary: isTW ? `指數複利飛輪運轉中 (${pnlStr})` : `指数复利飞轮运转中 (${pnlStr})`,
+          reasonDetail: isTW 
+            ? `成本 ${costStr} 建立之護城河深厚，享受人類科技與經濟成長帶來的長線紅利。`
+            : `成本 ${costStr} 建立之护城河深厚，享受人类科技与经济成长带来的长线红利。`,
+          reasonAnalogy: isTW ? '雪球已經滾過山腰，依靠重力與坡度正在自然越滾越大。' : '雪球已经滚过山腰，依靠重力与坡度正在自然越滚越大。',
+          costBasisFeedback: isTW 
+            ? `指數 ETF 在成本之上穩健獲利 ${pnlStr}，順應長線複利，安心持有。`
+            : `指数 ETF 在成本之上稳健盈利 ${pnlStr}，顺应长线复利，安心持有。`
+        };
       case 'TRIM_PROFIT':
         return {
           title: isTW ? `分批獲利了結預警 (${pnlStr})` : `分批获利了结预警 (${pnlStr})`,
@@ -556,6 +628,28 @@ export function getLocalizedHoldingTexts(
 
   // English fallback
   switch (strategy) {
+    case 'DCA_INDEX_DIP':
+      return {
+        title: `Prime Index DCA Window (${pnlStr} vs Cost)`,
+        summary: `${ticker} is trading at ${priceStr}, down ${pnlStr} below your average buy price of ${costStr}. Broad market index ETFs carry zero single-company bankruptcy risk—market pullbacks are historically the highest-yielding Dollar-Cost Averaging (DCA) discount windows.`,
+        recommendedAction: `Do not panic-sell. Broad market index funds (like S&P 500 / Nasdaq) have a 100% historical recovery rate over long horizons. Use available capital to dollar-cost average and lower your average unit cost.`,
+        educationalTip: 'Warren Buffett: "Be greedy when others are fearful." An index pullback is a storewide discount sale on the most productive corporations in the economy.',
+        reasonSummary: `Index cost discount + zero bankruptcy risk (${pnlStr})`,
+        reasonDetail: `Unlike individual companies with competitive failure risk, index funds automatically replace laggards with new winners. Buying below cost basis accelerates long-term compounding.`,
+        reasonAnalogy: 'Like the entire luxury shopping mall having an annual storewide discount on every top brand.',
+        costBasisFeedback: `Broad index ETF is down ${pnlStr} vs cost. No company bankruptcy risk—prime DCA accumulation opportunity.`
+      };
+    case 'HOLD_COMPOUNDER':
+      return {
+        title: `Long-Term Compounding (${pnlStr} Profit Cushion)`,
+        summary: `${ticker} has gained ${pnlStr} above your ${costStr} average buy price. Broad index ETFs are wealth-compounding engines built to be held across market cycles for years or decades.`,
+        recommendedAction: `Hold steady and let compound interest work. Avoid emotional short-term trading; only trim if rebalancing your target portfolio asset allocation.`,
+        educationalTip: 'The superpower of index investing is low turnover, low fees, and uninterrupted compounding. Patience is the highest-paying skill in investing.',
+        reasonSummary: `Index compounding engine running strong (${pnlStr})`,
+        reasonDetail: `Your ${costStr} cost basis is well protected as the broader economy trends upward over long market cycles.`,
+        reasonAnalogy: 'A snowball that has crested the hill and is now multiplying in size on its own momentum.',
+        costBasisFeedback: `Broad index ETF is up ${pnlStr} past your ${costStr} cost basis. Compounding nicely—hold for long-term growth.`
+      };
     case 'TRIM_PROFIT':
       return {
         title: `Consider Trimming Profit (${pnlStr} vs Cost)`,
@@ -611,6 +705,177 @@ export function getLocalizedHoldingTexts(
         reasonDetail: `Price is consolidating near your ${costStr} purchase price as bulls and bears fight for trend dominance.`,
         reasonAnalogy: 'Pausing at a checkpoint before the road begins its steep climb.',
         costBasisFeedback: `Trading near your ${costStr} purchase price. Hold steady and await a definitive directional breakout.`
+      };
+  }
+}
+
+export interface LocalizedAssetStrategyTexts {
+  badge: string;
+  title: string;
+  summary: string;
+  reasonSummary: string;
+  reasonDetail: string;
+  reasonAnalogy: string;
+  isBullish: boolean;
+}
+
+export function getLocalizedAssetStrategy(
+  assetClass: AssetClass,
+  ticker: string,
+  name: string,
+  lang: SupportedLanguage
+): LocalizedAssetStrategyTexts {
+  if (lang === 'ko') {
+    switch (assetClass) {
+      case 'INDEX_ETF':
+        return {
+          badge: '🛡️ 대표 지수 ETF 전략',
+          title: '광범위 지수 펀드: 장기 복리 & 조정 시 적립식 매수(DCA)',
+          summary: `${name}(${ticker})는 수백 개 핵심 기업으로 구성된 지수 펀드입니다. 단일 기업 파산 위험이 없으므로 지수 조정장은 공포 매도가 아닌 장기 적립 기회입니다.`,
+          reasonSummary: '지수형 ETF 자산군: 시스템 분산 & 복리 엔진',
+          reasonDetail: '개별 종목의 사업 리스크(경영진 교체, 실적 쇼크)가 원천 차단되어 있으며, 장기 우상향하는 경제 성장을 온전히 향유합니다.',
+          reasonAnalogy: '사과 한 알에 전 재산을 거는 대신, 온 나라의 과수원 지분을 골고루 사들이는 것.',
+          isBullish: true
+        };
+      case 'SECTOR_ETF':
+        return {
+          badge: '🎯 섹터 / 테마 ETF 전략',
+          title: '업종 테마 ETF: 산업 사이클 순환 & 분할 익절',
+          summary: `${name}(${ticker})는 특정 산업 분야에 집중 투자하는 테마 ETF입니다. 단일 기업 위험은 낮추지만 산업 고유의 경기 사이클 변동성에 유의해야 합니다.`,
+          reasonSummary: '섹터 ETF 자산군: 특정 산업 집중 분산',
+          reasonDetail: '업종 내 개별 기업 파산 위험은 피할 수 있으나, 산업 전체의 다운사이클 시 지속적인 조정이 발생할 수 있습니다.',
+          reasonAnalogy: '조선소 한 곳이 아닌 전 세계 모든 조선소에 분산 투자하여 개별 조선소 침몰 위험을 없애는 것.',
+          isBullish: true
+        };
+      case 'LEVERAGED_ETF':
+        return {
+          badge: '⚡ 레버리지 / 인버스 ETF 전략',
+          title: '레버리지 ETF: 단기 모멘텀 트레이딩 전용 (복리 음(-)의 왜곡 주의)',
+          summary: `${name}(${ticker})는 일일 수익률을 배수로 추종합니다. 횡보장에서는 변동성 잠식(Volatility Decay)으로 장기 보유 시 원금이 녹아내립니다.`,
+          reasonSummary: '레버리지 파생 ETF: 장기 보유 절대 불가 / 단기 전용',
+          reasonDetail: '매일 포지션을 재조정하는 특성상 횡보 구간에서 원금이 지속적으로 감소하므로 절대 가치투자의 대상이 될 수 없습니다.',
+          reasonAnalogy: '단거리 레이싱용 특수 니트로 연료: 순간 가속은 폭발적이나 탱크에 오래 두면 증발해 버림.',
+          isBullish: false
+        };
+      case 'STOCK':
+      default:
+        return {
+          badge: '🏢 개별 주식 전략',
+          title: '개별 기업 주식: 철저한 리스크 관리 & 엄격한 손절/분할 익절',
+          summary: `${name}(${ticker})는 개별 기업입니다. 실적 악화, 경쟁 격화 등 기업 고유의 리스크가 존재하므로 원금 보호를 위한 손절 규율과 목표 수익 실현이 필수적입니다.`,
+          reasonSummary: '개별 주식 자산군: 기업 고유 리스크 관리 필수',
+          reasonDetail: '지수와 달리 한 번 망가진 개별 기업은 영원히 회복되지 못할 수 있으므로, 엄격한 손절매(-7%~-10%)와 비중 조절이 계좌를 지킵니다.',
+          reasonAnalogy: '날렵한 모터보트 운전: 속도는 빠르고 스릴 넘치지만 항상 구명조끼를 입고 파도를 주시해야 함.',
+          isBullish: false
+        };
+    }
+  }
+
+  if (lang === 'zh-TW' || lang === 'zh-CN') {
+    const isTW = lang === 'zh-TW';
+    switch (assetClass) {
+      case 'INDEX_ETF':
+        return {
+          badge: isTW ? '🛡️ 大盤指數型 ETF 策略' : '🛡️ 大盘指数型 ETF 策略',
+          title: isTW ? '大盤指數基金：長期複利 ＆ 逢低分批加碼 (DCA)' : '大盘指数基金：长期复利 ＆ 逢低分批加码 (DCA)',
+          summary: isTW 
+            ? `${name}（${ticker}）是由數百家頂尖企業組成的一籃子大盤基金。無單一企業倒閉風險，拉回修正正是分批攤平擴大複利的良機。`
+            : `${name}（${ticker}）是由数百家顶尖企业组成的一篮子大盘基金。无单一企业倒闭风险，回调修正正是分批加仓扩大复利的良机。`,
+          reasonSummary: isTW ? '指數型 ETF 資產類別：系統性分散 ＆ 複利引擎' : '指数型 ETF 资产类别：系统性分散 ＆ 复利引擎',
+          reasonDetail: isTW 
+            ? '消除單一公司特有風險（財報暴雷、經營層更迭），長期完整享受經濟成長與科技創新的果實。'
+            : '消除单一公司特有风险（财报暴雷、经营层更迭），长期完整享受经济成长与科技创新的果实。',
+          reasonAnalogy: isTW ? '與其把身家押在單一一棵蘋果樹，不如買下整座國家級果園的股權。' : '与其把身家押在单单一棵苹果树，不如买下整座国家级果园的股权。',
+          isBullish: true
+        };
+      case 'SECTOR_ETF':
+        return {
+          badge: isTW ? '🎯 產業 / 主題型 ETF 策略' : '🎯 产业 / 主题型 ETF 策略',
+          title: isTW ? '產業主題 ETF：順應景氣循環 ＆ 梯次獲利了結' : '产业主题 ETF：顺应景气循环 ＆ 梯次获利了结',
+          summary: isTW 
+            ? `${name}（${ticker}）聚焦特定產業。雖免除了單一公司暴雷風險，但仍受該行業景氣榮枯週期的影響。`
+            : `${name}（${ticker}）聚焦特定产业。虽免除了单一公司暴雷风险，但仍受该行业景气荣枯周期的影响。`,
+          reasonSummary: isTW ? '產業 ETF：行業集中度高之分散投資' : '产业 ETF：行业集中度高之分散投资',
+          reasonDetail: isTW 
+            ? '能避開行業中個別失敗者，但在產業景氣下行時仍會面臨整體估值回調。'
+            : '能避开行业中个别失败者，但在产业景气下行时仍会面临整体估值回调。',
+          reasonAnalogy: isTW ? '投資整支遠洋捕魚船隊：不怕單艘船漏水，但仍須防範海上暴風雨。' : '投资整支远洋捕鱼船队：不怕单艘船漏水，但仍须防范海上暴风雨。',
+          isBullish: true
+        };
+      case 'LEVERAGED_ETF':
+        return {
+          badge: isTW ? '⚡ 槓桿 / 反向型 ETF 策略' : '⚡ 杠杆 / 反向型 ETF 策略',
+          title: isTW ? '槓桿型 ETF：僅限極短線波段操作（嚴防波動損耗）' : '杠杆型 ETF：仅限极短线波段操作（严防波动损耗）',
+          summary: isTW 
+            ? `${name}（${ticker}）具有每日動態再平衡特性。盤整震盪市場中會有嚴重的波動率損耗，切忌長線無腦死抱！`
+            : `${name}（${ticker}）具有每日动态再平衡特性。盘整震荡市场中会有严重的波动率损耗，切忌长线无脑死抱！`,
+          reasonSummary: isTW ? '槓桿衍生 ETF：絕不可長線持有 / 嚴格短打' : '杠杆衍生 ETF：绝不可长线持有 / 严格短打',
+          reasonDetail: isTW 
+            ? '每日倍數重置機制的數學特性會導致雙向盤整時淨值持續流失（Beta Slippage）。'
+            : '每日倍数重置机制的数学特性会导致双向盘整时净值持续流失（Beta Slippage）。',
+          reasonAnalogy: isTW ? '如同百米衝刺專用氮氣火箭：爆發力極強，但留在油箱裡會迅速揮發殆盡。' : '如同百米冲刺专用氮气火箭：爆发力极强，但留在油箱里会迅速挥发殆尽。',
+          isBullish: false
+        };
+      case 'STOCK':
+      default:
+        return {
+          badge: isTW ? '🏢 個別公司股票策略' : '🏢 个别公司股票策略',
+          title: isTW ? '個別股票：嚴格停損本金防禦 ＆ 高檔分批停利' : '个别股票：严格止损本金防御 ＆ 高档分批止盈',
+          summary: isTW 
+            ? `${name}（${ticker}）為個別企業，承受財報不如預期、行業競爭等獨特風險。務必嚴格執行停損（-7%～-10%）以保全資本。`
+            : `${name}（${ticker}）为个别企业，承受财报不如预期、行业竞争等独特风险。务必严格执行止损（-7%～-10%）以保全资本。`,
+          reasonSummary: isTW ? '個股資產：特有風險較高，必須恪守紀律' : '个股资产：特有风险较高，必须恪守纪律',
+          reasonDetail: isTW 
+            ? '個股可能永久失去競爭力甚至倒閉，因此不可像指數一樣無條件無腦攤平，停損是交易者唯一的保護傘。'
+            : '个股可能永久失去竞争力甚至倒闭，因此不可像指数一样无条件无脑摊平，止损是交易者唯一的保护伞。',
+          reasonAnalogy: isTW ? '駕駛高性能快艇：機動性強爆發力大，但隨時要穿好救生衣、嚴密監控海況。' : '驾驶高性能快艇：机动性强爆发力大，但随时要穿好救生衣、严密监控海况。',
+          isBullish: false
+        };
+    }
+  }
+
+  // English fallback
+  switch (assetClass) {
+    case 'INDEX_ETF':
+      return {
+        badge: '🛡️ Broad Index ETF Strategy',
+        title: 'Broad Market Index ETF: Compounding & Aggressive Dip DCA',
+        summary: `${name} (${ticker}) is a self-cleansing basket of hundreds of top corporations. It carries zero single-company bankruptcy risk. Market drawdowns are prime accumulation windows, not panic-sell triggers.`,
+        reasonSummary: 'Asset Strategy: Systematic Market Diversification & Compounding',
+        reasonDetail: 'Company-specific failures (scandals, quarterly earnings misses) are naturally neutralized. Long-term performance reflects the collective economic output of human innovation.',
+        reasonAnalogy: 'Owning a share of the entire nation\'s orchard rather than betting your savings on a single fruit tree.',
+        isBullish: true
+      };
+    case 'SECTOR_ETF':
+      return {
+        badge: '🎯 Sector & Thematic ETF Strategy',
+        title: 'Sector ETF: Industry Cycles & Prudent Rebalancing',
+        summary: `${name} (${ticker}) concentrates on a specific economic sector. While it protects you from individual company failure, it remains subject to broader industry cycles.`,
+        reasonSummary: 'Asset Strategy: Industry Sector Concentration',
+        reasonDetail: 'Eliminates single-firm risk within the sector, but thematic downturns can last multiple quarters. Trim into euphoric industry cycles.',
+        reasonAnalogy: 'Investing in the entire commercial shipping fleet: safe from any one ship leaking, but still vulnerable to stormy seas.',
+        isBullish: true
+      };
+    case 'LEVERAGED_ETF':
+      return {
+        badge: '⚡ Leveraged / Inverse ETF Strategy',
+        title: 'Leveraged ETF: Tactical Short-Term Trades Only (High Decay Risk)',
+        summary: `${name} (${ticker}) resets leverage daily. During choppy sideways markets, volatility decay (beta slippage) erodes principal. Never use as a buy-and-hold vehicle!`,
+        reasonSummary: 'Asset Strategy: High Volatility Decay / Short-Term Tactical Only',
+        reasonDetail: 'Daily compounding mathematics mean choppy markets eat away at share price over time. Only suitable for experienced swing traders holding days, not years.',
+        reasonAnalogy: 'Like nitro racing fuel: explosive thrust in a sprint, but it evaporates rapidly if left sitting in the tank.',
+        isBullish: false
+      };
+    case 'STOCK':
+    default:
+      return {
+        badge: '🏢 Individual Stock Strategy',
+        title: 'Individual Stock: Active Thesis Monitoring & Strict Stop-Losses',
+        summary: `${name} (${ticker}) is a single operating company subject to idiosyncratic business risks. Strict capital preservation (cutting losses at -7% to -10%) and position sizing limits are vital.`,
+        reasonSummary: 'Asset Strategy: Company-Specific Risk & Capital Defense',
+        reasonDetail: 'Unlike broad indexes, broken companies may never recover. Disciplined stop-losses protect against permanent loss of capital.',
+        reasonAnalogy: 'Piloting a high-speed speedboat: agile and thrilling, but you must keep your hands on the wheel and lifejacket on at all times.',
+        isBullish: false
       };
   }
 }

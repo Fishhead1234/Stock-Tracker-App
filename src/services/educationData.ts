@@ -75,10 +75,34 @@ export const LESSONS: EducationLesson[] = [
     ],
     beginnerTakeaway: 'High volume confirms price direction; low volume warns of indecision or lack of real institutional backing.',
     iconName: 'BarChart2'
+  },
+  {
+    id: 'lesson-etf-vs-stock',
+    title: 'ETFs vs. Single Stocks: Why the Strategy Changes',
+    category: 'Asset Strategy',
+    readTime: '4 min',
+    summary: 'Why you should never panic-sell broad index funds on dips, but must strictly cut losses on individual stocks.',
+    content: [
+      '1. Systematic vs. Idiosyncratic Risk: An individual company carries company-specific risk. A single company can experience fraud, disruption, or bankruptcy (e.g. Enron, Blackberry). A broad index ETF (like VOO or QQQ) holds hundreds of top firms and automatically replaces declining businesses with new leaders.',
+      '2. The Buy Strategy: Buying a single stock as it drops can be "catching a falling knife" if the business model is deteriorating. But for a broad market index ETF, drawdowns of -10% to -20% represent storewide discount sales on the entire economy—making Dollar-Cost Averaging (DCA) extremely profitable.',
+      '3. The Hold Strategy: Individual stocks require active monitoring of quarterly earnings reports (10-Q), margins, and competition. Broad index ETFs are designed for decades of passive compounding with minimal turnover and low fees.',
+      '4. The Sell Strategy: For single stocks, execute strict stop-losses (-7% to -10%) to preserve capital. For broad index ETFs, NEVER panic-sell on market drawdowns; only sell for portfolio rebalancing or retirement living expenses.',
+      '5. Leveraged ETFs: High-risk tactical instruments like SOXL or TQQQ rebalance daily and suffer from volatility decay (beta slippage)—they should NEVER be held as long-term buy-and-hold investments.'
+    ],
+    beginnerTakeaway: 'Dollar-cost average into broad index ETFs on dips and hold for decades. For individual stocks, keep position sizes capped and cut losses ruthlessly.',
+    iconName: 'ShieldCheck'
   }
 ];
 
 export const GLOSSARY: GlossaryItem[] = [
+  {
+    term: 'ETF vs Stock Strategy (Asset Strategy)',
+    shortDef: 'The rule that broad index funds thrive on dip DCA, while individual stocks require strict stop-losses.',
+    fullExplanation: 'Because broad market index ETFs cannot go bankrupt and reflect the overall growth of human productivity, selling them during market corrections turns temporary volatility into permanent capital loss. Conversely, individual stocks can suffer terminal business declines, requiring strict stop-loss rules to preserve capital.',
+    analogy: 'Betting on the entire agricultural sector versus betting your life savings on a single avocado farm.',
+    relatedIndicators: ['Dollar-Cost Averaging (DCA)', 'Stop-Loss Order'],
+    tag: 'Strategy'
+  },
   {
     term: 'RSI (Relative Strength Index)',
     shortDef: 'Momentum oscillator that measures speed and change of price moves on a 0-100 scale.',

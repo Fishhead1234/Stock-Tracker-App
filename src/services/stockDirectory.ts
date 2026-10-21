@@ -1,3 +1,5 @@
+import { AssetClass } from '../types/stock';
+
 export interface DirectoryStockItem {
   ticker: string;
   name: string;
@@ -10,6 +12,8 @@ export interface DirectoryStockItem {
   sector: string;
   marketCap?: string;
   peRatio?: number;
+  isETF?: boolean;
+  assetClass?: AssetClass;
 }
 
 export const STOCK_DIRECTORY: DirectoryStockItem[] = [
@@ -205,3 +209,87 @@ export const STOCK_DIRECTORY: DirectoryStockItem[] = [
 export const DIRECTORY_MAP = new Map<string, DirectoryStockItem>(
   STOCK_DIRECTORY.map(s => [s.ticker.toUpperCase(), s])
 );
+
+export interface ClassifiedAsset {
+  isETF: boolean;
+  assetClass: AssetClass;
+  strategyLabel: string;
+  strategyKey: 'INDEX_ETF' | 'SECTOR_ETF' | 'LEVERAGED_ETF' | 'STOCK';
+}
+
+export function classifyAsset(
+  ticker: string,
+  sector: string = '',
+  name: string = ''
+): ClassifiedAsset {
+  const upperTicker = (ticker || '').toUpperCase().trim();
+  const lowerSector = (sector || '').toLowerCase();
+  const lowerName = (name || '').toLowerCase();
+
+  // 1. Leveraged / Inverse ETFs
+  const leveragedTickers = ['SOXL', 'SOXS', 'TQQQ', 'SQQQ', 'UPRO', 'SPXU', 'NVDL', 'TSLL', 'FAS', 'FAZ'];
+  if (
+    leveragedTickers.includes(upperTicker) ||
+    lowerSector.includes('leveraged') ||
+    lowerSector.includes('inverse') ||
+    lowerName.includes('3x') ||
+    lowerName.includes('2x') ||
+    lowerName.includes('ultra')
+  ) {
+    return {
+      isETF: true,
+      assetClass: 'LEVERAGED_ETF',
+      strategyLabel: 'Leveraged ETF (High Decay / Tactical Momentum)',
+      strategyKey: 'LEVERAGED_ETF'
+    };
+  }
+
+  // 2. Broad Benchmark / Market Index ETFs (Systematic risk only; zero individual bankruptcy risk)
+  const broadTickers = [
+    'SPY', 'VOO', 'IVV', 'QQQ', 'QQQM', 'VTI', 'VT', 'IWM', 'DIA', 'VEA', 'VWO',
+    '0050.TW', '0056.TW', '00878.TW', 'USF.NZ', 'FNZ.NZ', 'VAS.AX', 'VGS.AX',
+    'SCHD', 'SPLG', 'RSP', 'VOOV', 'VOOG'
+  ];
+  if (
+    broadTickers.includes(upperTicker) ||
+    lowerSector.includes('benchmark') ||
+    lowerSector.includes('index') ||
+    lowerName.includes('s&p 500') ||
+    lowerName.includes('nasdaq 100') ||
+    lowerName.includes('russell 2000') ||
+    lowerName.includes('top 50') ||
+    lowerName.includes('total stock') ||
+    (lowerName.includes('spdr') && lowerName.includes('trust'))
+  ) {
+    return {
+      isETF: true,
+      assetClass: 'INDEX_ETF',
+      strategyLabel: 'Broad Index ETF (DCA & Long-Term Compounding)',
+      strategyKey: 'INDEX_ETF'
+    };
+  }
+
+  // 3. Sector / Thematic ETFs
+  const sectorTickers = ['SMH', 'XLF', 'XLE', 'XLK', 'XLV', 'XLI', 'XLY', 'XLP', 'XLU', 'XLB', 'VNQ', 'ARKK', 'SOXX'];
+  if (
+    sectorTickers.includes(upperTicker) ||
+    lowerSector.includes('etf') ||
+    lowerName.includes('etf') ||
+    lowerName.includes('select sector')
+  ) {
+    return {
+      isETF: true,
+      assetClass: 'SECTOR_ETF',
+      strategyLabel: 'Sector ETF (Industry Cycle & Thematic Focus)',
+      strategyKey: 'SECTOR_ETF'
+    };
+  }
+
+  // 4. Default: Individual Company Stock
+  return {
+    isETF: false,
+    assetClass: 'STOCK',
+    strategyLabel: 'Individual Stock (Active Risk & Capital Defense)',
+    strategyKey: 'STOCK'
+  };
+}

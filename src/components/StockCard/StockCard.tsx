@@ -115,6 +115,27 @@ export const StockCard: React.FC<Props> = ({ stock, position, onClick, onRemove 
               }`}>
                 {stock.exchange}
               </span>
+              {signal.assetClass === 'INDEX_ETF' && (
+                <span className={`text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded border ${
+                  isLight ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-emerald-950/60 text-emerald-400 border-emerald-800'
+                }`}>
+                  Index ETF
+                </span>
+              )}
+              {signal.assetClass === 'SECTOR_ETF' && (
+                <span className={`text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded border ${
+                  isLight ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-purple-950/60 text-purple-400 border-purple-800'
+                }`}>
+                  Sector ETF
+                </span>
+              )}
+              {signal.assetClass === 'LEVERAGED_ETF' && (
+                <span className={`text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded border ${
+                  isLight ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-amber-950/60 text-amber-400 border-amber-800'
+                }`}>
+                  Leveraged ETF
+                </span>
+              )}
               {position && (
                 <span className={`flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full font-bold border transition-shadow ${
                   isLight 

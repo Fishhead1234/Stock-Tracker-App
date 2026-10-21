@@ -103,13 +103,25 @@ public class StockAlertReceiver extends BroadcastReceiver {
                     String pnlSign = pnlPercent >= 0 ? "+" : "";
                     String pnlFormatted = pnlSign + String.format(Locale.US, "%.1f", pnlPercent) + "%";
 
-                    // Cost-Basis Calibrated Feedback
-                    if ("TRIM_PROFIT".equals(strategy) || (pnlPercent >= 18.0) || (signalAction.contains("SELL") && pnlPercent >= 10.0)) {
+                    boolean isETF = holding.optBoolean("isETF", false) || "INDEX_ETF".equals(holding.optString("assetClass", ""));
+
+                    // Cost-Basis Calibrated Feedback (ETF-Aware)
+                    if ("DCA_INDEX_DIP".equals(strategy) || (isETF && pnlPercent <= -5.0)) {
+                        notifTitle = "🟢 Index Sale (DCA): " + ticker + " (" + pnlFormatted + ")";
+                        notifBody = !feedback.isEmpty()
+                                ? feedback
+                                : ticker + " is down " + pnlFormatted + " below your cost basis. Broad index funds carry zero bankruptcy risk—prime DCA accumulation window!";
+                    } else if ("HOLD_COMPOUNDER".equals(strategy) || (isETF && pnlPercent >= 18.0)) {
+                        notifTitle = "🛡️ Compounding Strong: " + ticker + " (" + pnlFormatted + ")";
+                        notifBody = !feedback.isEmpty()
+                                ? feedback
+                                : ticker + " is up " + pnlFormatted + " past your " + avgBuyPriceStr + " cost basis. Broad index funds compound over decades—let winners run!";
+                    } else if ("TRIM_PROFIT".equals(strategy) || (!isETF && pnlPercent >= 18.0) || (signalAction.contains("SELL") && pnlPercent >= 10.0)) {
                         notifTitle = "💰 Take Profit: " + ticker + " (" + pnlFormatted + ")";
                         notifBody = !feedback.isEmpty()
                                 ? feedback
                                 : ticker + " (" + currentPrice + ") is " + pnlFormatted + " above your " + avgBuyPriceStr + " avg cost. Consider trimming partial shares to lock in gains.";
-                    } else if ("STOP_LOSS".equals(strategy) || pnlPercent <= -10.0 || (signalAction.contains("SELL") && pnlPercent <= -7.0)) {
+                    } else if ("STOP_LOSS".equals(strategy) || (!isETF && (pnlPercent <= -10.0 || (signalAction.contains("SELL") && pnlPercent <= -7.0)))) {
                         notifTitle = "⚠️ Capital Defense: " + ticker + " (" + pnlFormatted + ")";
                         notifBody = !feedback.isEmpty()
                                 ? feedback
