@@ -19,7 +19,17 @@ export const StockCard: React.FC<Props> = ({ stock, position, onClick, onRemove 
   const { language } = useLanguageStore();
   const isLight = themeMode === 'neutral-light';
 
-  const signal = generateTimingSignal(stock, language);
+  const signal = generateTimingSignal(
+    stock, 
+    language,
+    position ? {
+      averageBuyPrice: position.averageBuyPrice,
+      shares: position.shares,
+      targetSellPrice: position.targetSellPrice,
+      stopLossPrice: position.stopLossPrice,
+      currencySymbol: position.currencySymbol
+    } : undefined
+  );
   const isPositive = stock.change >= 0;
 
   let positionProfit = 0;
@@ -155,22 +165,29 @@ export const StockCard: React.FC<Props> = ({ stock, position, onClick, onRemove 
 
       {/* Position Specific Metrics Row (If user owns this stock) */}
       {position && (
-        <div className={`mt-2.5 pt-2 border-t flex items-center justify-between text-[13px] font-mono ${
+        <div className={`mt-2.5 pt-2 border-t text-[12px] font-mono ${
           isLight ? 'border-[rgba(0,0,0,0.06)] bg-[#F2F2F7] -mx-4 -mb-4 p-3 rounded-b-xl' : 'border-navy-800/50 bg-navy-950/40 -mx-4 -mb-4 p-2.5 rounded-b-xl'
         }`}>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between">
             <span className={isLight ? 'text-[#666666]' : 'text-slate-400'}>
-              Val: <strong className={isLight ? 'text-[#000000]' : 'text-white'}>${currentEquity.toFixed(2)}</strong>
+              Avg Cost: <strong className={isLight ? 'text-[#000000]' : 'text-white'}>{curr}{position.averageBuyPrice.toFixed(2)}</strong>
             </span>
+            <div className={`font-bold flex items-center gap-1 ${
+              positionProfit >= 0 
+                ? isLight ? 'text-[#34C759]' : 'text-growth-400' 
+                : isLight ? 'text-[#FF3B30]' : 'text-loss-500'
+            }`}>
+              <span>P&L:</span>
+              <span>{positionProfit >= 0 ? '+' : ''}{curr}{Math.abs(positionProfit).toFixed(2)} ({positionProfit >= 0 ? '+' : ''}{positionProfitPercent.toFixed(1)}%)</span>
+            </div>
           </div>
-          <div className={`font-bold flex items-center gap-1 ${
-            positionProfit >= 0 
-              ? isLight ? 'text-[#34C759]' : 'text-growth-400' 
-              : isLight ? 'text-[#FF3B30]' : 'text-loss-500'
-          }`}>
-            <span>P&L:</span>
-            <span>{positionProfit >= 0 ? '+' : ''}${positionProfit.toFixed(2)} ({positionProfit >= 0 ? '+' : ''}{positionProfitPercent.toFixed(1)}%)</span>
-          </div>
+          {signal.costBasisFeedback && (
+            <p className={`mt-1.5 text-[11px] font-sans leading-tight font-medium ${
+              isLight ? 'text-[#007AFF]' : 'text-growth-300'
+            }`}>
+              💡 {signal.costBasisFeedback}
+            </p>
+          )}
         </div>
       )}
     </div>

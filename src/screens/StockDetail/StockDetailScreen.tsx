@@ -64,8 +64,18 @@ export const StockDetailScreen: React.FC = () => {
     );
   }
 
-  const signal = generateTimingSignal(stock, language);
   const position = positions.find(p => p.ticker.toUpperCase() === stock.ticker.toUpperCase());
+  const signal = generateTimingSignal(
+    stock, 
+    language,
+    position ? {
+      averageBuyPrice: position.averageBuyPrice,
+      shares: position.shares,
+      targetSellPrice: position.targetSellPrice,
+      stopLossPrice: position.stopLossPrice,
+      currencySymbol: position.currencySymbol
+    } : undefined
+  );
   const isWatched = watchlist.includes(stock.ticker.toUpperCase());
   const isPositive = stock.change >= 0;
   const curr = stock.currencySymbol || '$';

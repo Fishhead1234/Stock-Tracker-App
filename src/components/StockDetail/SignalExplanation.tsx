@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Lightbulb, CheckCircle2, HelpCircle } from 'lucide-react';
+import { Lightbulb, CheckCircle2, HelpCircle, Briefcase } from 'lucide-react';
 import { StockSignal } from '../../types/signal';
 import { SignalBadge } from '../StockCard/SignalBadge';
 import { EducationModal } from '../EducationModal/EducationModal';
@@ -36,7 +36,9 @@ export const SignalExplanation: React.FC<Props> = ({ signal }) => {
           <span className={`text-[11px] uppercase font-bold tracking-wider block mb-1 ${
             isLight ? 'text-[#666666]' : 'text-slate-400'
           }`}>
-            {language === 'ko' ? '지능형 타이밍 분석' : 'Intelligent Timing Advice'}
+            {signal.isHolding 
+              ? (language === 'ko' ? '보유 주식 맞춤 분석' : 'Personal Holding Analysis') 
+              : (language === 'ko' ? '지능형 타이밍 분석' : 'Intelligent Timing Advice')}
           </span>
           <h3 className={`text-base font-bold ${isLight ? 'text-[#000000]' : 'text-white'}`}>
             {signal.title}
@@ -49,6 +51,39 @@ export const SignalExplanation: React.FC<Props> = ({ signal }) => {
           </span>
         </div>
       </div>
+
+      {/* Cost Basis Context Banner (for Holdings) */}
+      {signal.isHolding && signal.averageBuyPrice !== undefined && (
+        <div className={`p-3.5 rounded-xl border flex items-start gap-3 ${
+          isLight ? 'bg-[#007AFF]/8 border-[#007AFF]/25' : 'bg-navy-950/80 border-[#007AFF]/30'
+        }`}>
+          <div className="p-2 rounded-xl bg-[#007AFF]/15 text-[#007AFF] shrink-0 mt-0.5">
+            <Briefcase className="w-4 h-4" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center justify-between flex-wrap gap-1 mb-1">
+              <span className={`text-[11px] font-bold uppercase tracking-wider ${isLight ? 'text-[#007AFF]' : 'text-blue-400'}`}>
+                {language === 'ko' ? '보유 포지션 평단가 지수' : 'Holding Cost-Basis Index'}
+              </span>
+              <span className={`text-[12px] font-mono font-bold ${
+                (signal.pnlPercent || 0) >= 0 
+                  ? isLight ? 'text-[#34C759]' : 'text-growth-400'
+                  : isLight ? 'text-[#FF3B30]' : 'text-loss-500'
+              }`}>
+                {(signal.pnlPercent || 0) >= 0 ? '+' : ''}{(signal.pnlPercent || 0).toFixed(1)}% vs Cost
+              </span>
+            </div>
+            <p className={`text-[12px] font-mono ${isLight ? 'text-[#666666]' : 'text-slate-300'}`}>
+              Avg Buy Price: <strong>${signal.averageBuyPrice.toFixed(2)}</strong> • Current: <strong>${signal.currentPrice.toFixed(2)}</strong>
+            </p>
+            {signal.costBasisFeedback && (
+              <p className={`text-[12px] leading-relaxed mt-1 font-sans ${isLight ? 'text-black' : 'text-slate-200'}`}>
+                💡 {signal.costBasisFeedback}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Summary */}
       <p className={`text-[13px] leading-relaxed p-3 rounded-xl border ${

@@ -356,3 +356,262 @@ export function getLocalizedReasonTexts(
       };
   }
 }
+
+export interface LocalizedHoldingTexts {
+  title: string;
+  summary: string;
+  recommendedAction: string;
+  educationalTip: string;
+  reasonSummary: string;
+  reasonDetail: string;
+  reasonAnalogy: string;
+  costBasisFeedback: string;
+}
+
+export type HoldingStrategy = 'TRIM_PROFIT' | 'DCA_DIP' | 'STOP_LOSS' | 'HOLD_PROFIT' | 'ACCUMULATE';
+
+export function getLocalizedHoldingTexts(
+  strategy: HoldingStrategy,
+  ticker: string,
+  costBasis: number,
+  currentPrice: number,
+  pnlPercent: number,
+  curr: string,
+  lang: SupportedLanguage
+): LocalizedHoldingTexts {
+  const pnlStr = (pnlPercent >= 0 ? '+' : '') + pnlPercent.toFixed(1) + '%';
+  const costStr = `${curr}${costBasis.toFixed(2)}`;
+  const priceStr = `${curr}${currentPrice.toFixed(2)}`;
+
+  if (lang === 'ko') {
+    switch (strategy) {
+      case 'TRIM_PROFIT':
+        return {
+          title: `차익 실현 분할 매도 고려 (${pnlStr})`,
+          summary: `${ticker} 현재가 ${priceStr}로, 회원님의 평균 매수가(${costStr}) 대비 ${pnlStr} 수익 구간입니다. 기술적 지표가 단기 과열권을 가리키고 있어 수익을 확정하기에 유리한 시점입니다.`,
+          recommendedAction: `원금 회수 및 이익 확정을 위해 보유 수량의 25~50% 분할 매도를 권장합니다. 나머지 물량은 손절선을 평단가 위로 올려(익절선 상향) 추가 수익을 추구하세요.`,
+          educationalTip: '수익은 계좌에 매도 입금되기 전까지는 단지 숫자에 불과합니다. 분할 매도로 확정 이익을 챙기는 것이 승률을 높입니다.',
+          reasonSummary: `평균 단가 대비 높은 수익권 (${pnlStr})`,
+          reasonDetail: `평균 매수가 ${costStr} 대비 주가가 급등하여 목표 수익률에 도달했습니다. 이 구간에서는 과욕을 줄이고 이익을 실현하는 것이 현명합니다.`,
+          reasonAnalogy: '사과나무에 열린 탐스러운 사과를 한 번에 다 따지 않고 잘 익은 것부터 바구니에 담는 것과 같습니다.',
+          costBasisFeedback: `회원님 평단가 ${costStr} 대비 ${pnlStr} 수익 중입니다. 일부 물량 익절로 수익을 확정하세요.`
+        };
+      case 'STOP_LOSS':
+        return {
+          title: `손실 방어 / 리스크 관리 경고 (${pnlStr})`,
+          summary: `${ticker} 현재가 ${priceStr}로, 회원님의 평균 매수가(${costStr}) 대비 ${pnlStr} 하락했습니다. 핵심 지지선이 위협받고 있어 추가 원금 손실을 제한해야 하는 구간입니다.`,
+          recommendedAction: `투자 아이디어가 훼손되었는지 냉정하게 재검토하세요. 손실이 눈덩이처럼 불어나기 전에 비중 축소나 과감한 손절매를 권장합니다.`,
+          educationalTip: '작은 손실을 자르는 것은 패배가 아니라 계좌를 지키는 프로의 기술입니다. -10% 손실은 쉽게 복구되지만 -50%는 원금의 2배가 필요합니다.',
+          reasonSummary: `평균 단가 대비 손실 한도 초과 (${pnlStr})`,
+          reasonDetail: `평균 매수가 ${costStr} 아래로 밀리며 손실이 방어 한도를 넘어섰습니다. 추가 하락 시 기회비용과 원금 손실이 확대됩니다.`,
+          reasonAnalogy: '배에 작은 구멍이 뚫렸을 때 즉시 메우거나 구명보트를 타야 침몰을 막을 수 있습니다.',
+          costBasisFeedback: `회원님 평단가 ${costStr} 대비 ${pnlStr} 하락했습니다. 추가 손실을 막기 위해 리스크 관리가 필요합니다.`
+        };
+      case 'DCA_DIP':
+        return {
+          title: `평단가 인하 분할 매수 기회 (${pnlStr})`,
+          summary: `${ticker} 현재가 ${priceStr}는 회원님의 평균 매수가(${costStr})보다 할인된 가격대(${pnlStr})이며, RSI 등 보조지표상 과매도 반등 지지선에 위치해 있습니다.`,
+          recommendedAction: `기업의 장기 펀더멘털에 변함이 없다면, 이번 눌림목에서 소액 분할 매수하여 평균 매수가를 ${costStr} 아래로 낮추는 전략을 검토하세요.`,
+          educationalTip: '물타기(DCA)는 무계획적인 추가 매수가 아닙니다. 반드시 기술적 지지선과 과매도 시그널이 확인된 자리에서만 실행해야 합니다.',
+          reasonSummary: `평단가 할인 구간 + 과매도 지지 확인 (${pnlStr})`,
+          reasonDetail: `현재 주가가 평균 매수가 ${costStr} 아래에 있어 평단가를 낮추기 유리하며, 하락 모멘텀이 진정되는 반등 신호가 관측됩니다.`,
+          reasonAnalogy: '단골 마트에서 평소 사고 싶던 양질의 제품을 깜짝 세일할 때 알뜰하게 추가 구매하는 것과 같습니다.',
+          costBasisFeedback: `회원님 평단가 ${costStr}보다 ${Math.abs(pnlPercent).toFixed(1)}% 저렴합니다. 기술적 지지 구간에서 평단가를 낮출 수 있습니다.`
+        };
+      case 'HOLD_PROFIT':
+        return {
+          title: `수익 보유 지속 (${pnlStr} 이익 쿠션)`,
+          summary: `${ticker}가 평균 매수가(${costStr}) 대비 ${pnlStr} 상승하여 안정적인 수익 쿠션을 유지하고 있습니다. 상승 추세선이 잘 유지되고 있습니다.`,
+          recommendedAction: `서둘러 전량 매도하지 마시고 추세를 즐기세요. 마음 편한 투자를 위해 손절 기준을 평단가(${costStr}) 위로 설정해 원금을 100% 보장하세요.`,
+          educationalTip: '수익이 나는 주식을 너무 일찍 팔아치우고 손실 나는 주식만 오래 붙들고 있는 것은 초보 투자자의 가장 흔한 실수입니다.',
+          reasonSummary: `견고한 수익 쿠션 형성 (${pnlStr})`,
+          reasonDetail: `평균 매수가 ${costStr} 위에서 편안한 수익 마진을 누리며 주가가 상승 추세를 순항 중입니다.`,
+          reasonAnalogy: '언덕 정상으로 가는 버스를 탔다면 중간 정류장에서 굳이 내릴 이유가 없습니다.',
+          costBasisFeedback: `회원님 평단가 ${costStr} 대비 ${pnlStr} 상승 중입니다. 추세가 살아있으므로 편안하게 보유하세요.`
+        };
+      case 'ACCUMULATE':
+      default:
+        return {
+          title: `평균 단가 부근 횡보 (${costStr})`,
+          summary: `${ticker}가 회원님의 평균 매수가(${costStr}) 부근인 ${priceStr}(${pnlStr})에서 숨고르기 중입니다. 시장의 다음 방향성을 모니터링하세요.`,
+          recommendedAction: `기존 보유 비중을 유지하며 거래량이 실린 확실한 방향성 돌파가 나올 때까지 관망하세요.`,
+          educationalTip: '평단가 근처에서는 조급한 손절이나 섣부른 추매를 자제하고 추세가 어느 쪽으로 터지는지 지켜보는 것이 정석입니다.',
+          reasonSummary: `평단가 보합권 (${pnlStr})`,
+          reasonDetail: `평단가 ${costStr}와 현재 주가의 차이가 크지 않아 리스크와 기회가 균형을 이루고 있습니다.`,
+          reasonAnalogy: '출발선에서 신호탄이 터지기를 기다리며 호흡을 가다듬는 순간입니다.',
+          costBasisFeedback: `회원님 평단가 ${costStr} 부근에서 안정적으로 거래 중입니다. 기존 포지션을 유지하세요.`
+        };
+    }
+  }
+
+  if (lang === 'zh-TW' || lang === 'zh-CN') {
+    const isTW = lang === 'zh-TW';
+    switch (strategy) {
+      case 'TRIM_PROFIT':
+        return {
+          title: isTW ? `分批獲利了結預警 (${pnlStr})` : `分批获利了结预警 (${pnlStr})`,
+          summary: isTW 
+            ? `${ticker} 現價 ${priceStr}，相較您的平均買進成本 ${costStr} 已獲利 ${pnlStr}。技術指標顯示進入短線過熱區，是鎖定獲利的好時機。`
+            : `${ticker} 现价 ${priceStr}，相较您的平均买入成本 ${costStr} 已盈利 ${pnlStr}。技术指标显示进入短线过热区，是锁定利润的好时机。`,
+          recommendedAction: isTW 
+            ? `建議減碼 25%–50% 部位鎖定現金獲利，並將剩餘部位的停損點上移至成本價之上以保全利潤。`
+            : `建议减仓 25%–50% 仓位锁定现金利润，并将剩余仓位的止损点上移至成本价之上以保全利润。`,
+          educationalTip: isTW 
+            ? '獲利入袋才是真金白銀。分批停利讓您永遠處於不敗之地。'
+            : '落袋为安才是真金白银。分批止盈让您永远立于不败之地。',
+          reasonSummary: isTW ? `相較買進成本獲利豐厚 (${pnlStr})` : `相较买入成本获利丰厚 (${pnlStr})`,
+          reasonDetail: isTW 
+            ? `股價大幅超越您的買進成本 ${costStr}，適度停利能將紙上富貴轉化為穩健收益。`
+            : `股价大幅超越您的买入成本 ${costStr}，适度止盈能将账面富贵转化为稳健收益。`,
+          reasonAnalogy: isTW ? '如同果園採收：將成熟的果實先放入竹簍，讓未熟的繼續生長。' : '如同果园采收：将成熟的果实先放入竹篓，让未熟的继续生长。',
+          costBasisFeedback: isTW 
+            ? `相較您的買進成本 ${costStr} 已獲利 ${pnlStr}，建議分批減碼鎖定利潤。`
+            : `相较您的买入成本 ${costStr} 已盈利 ${pnlStr}，建议分批减仓锁定利润。`
+        };
+      case 'STOP_LOSS':
+        return {
+          title: isTW ? `防守性停損 / 風險警報 (${pnlStr})` : `防守性止损 / 风险警报 (${pnlStr})`,
+          summary: isTW 
+            ? `${ticker} 現價 ${priceStr}，已跌破您的平均買進成本 ${costStr} 達 ${pnlStr}。關鍵支撐面臨考驗，請嚴格控制本金風險。`
+            : `${ticker} 现价 ${priceStr}，已跌破您的平均买入成本 ${costStr} 达 ${pnlStr}。关键支撑面临考验，请严格控制本金风险。`,
+          recommendedAction: isTW 
+            ? `客觀檢視當初買進的理由是否改變。若跌破預設停損位，請果斷執行紀律停損以防止虧損擴大。`
+            : `客观检视当初买入的理由是否改变。若跌破预设止损位，请果断执行纪律止损以防止亏损扩大。`,
+          educationalTip: isTW 
+            ? '砍掉小虧損是保護大資金的鐵律。虧損 10% 很容易賺回，虧損 50% 需要上漲 100% 才能打平。'
+            : '截断小亏损是保护大资金的铁律。亏损 10% 很容易赚回，亏损 50% 需要上涨 100% 才能回本。',
+          reasonSummary: isTW ? `虧損超過防守底線 (${pnlStr})` : `亏损超过防守底线 (${pnlStr})`,
+          reasonDetail: isTW 
+            ? `現價低於買進成本 ${costStr}，若不加防範可能面臨更深度的資金回撤。`
+            : `现价低于买入成本 ${costStr}，若不加防范可能面临更深度的资金回撤。`,
+          reasonAnalogy: isTW ? '如同開車安全氣囊，及時彈出能避免遭受更嚴重的衝擊。' : '如同开车安全气囊，及时弹出能避免遭受更严重的冲击。',
+          costBasisFeedback: isTW 
+            ? `低於您的成本 ${costStr} 達 ${pnlStr}，請嚴格審視停損保護本金。`
+            : `低于您的成本 ${costStr} 达 ${pnlStr}，请严格审视止损保护本金。`
+        };
+      case 'DCA_DIP':
+        return {
+          title: isTW ? `逢低攤平降低成本契機 (${pnlStr})` : `逢低加仓摊平成本良机 (${pnlStr})`,
+          summary: isTW 
+            ? `${ticker} 現價 ${priceStr} 比您的平均成本 ${costStr} 便宜 ${Math.abs(pnlPercent).toFixed(1)}%，且技術面出現超賣反彈訊號。`
+            : `${ticker} 现价 ${priceStr} 比您的平均成本 ${costStr} 便宜 ${Math.abs(pnlPercent).toFixed(1)}%，且技术面出现超卖反弹信号。`,
+          recommendedAction: isTW 
+            ? `若公司長期前景未變，可趁此回檔分批加碼，將整體持股成本自 ${costStr} 有效拉低。`
+            : `若公司长期前景未变，可趁此回调分批加仓，将整体持仓成本自 ${costStr} 有效拉低。`,
+          educationalTip: isTW 
+            ? '攤平不是盲目抄底，唯有在技術面有支撐且超賣確認時攤平，才能發揮最大的複利威力。'
+            : '摊平不是盲目抄底，唯有在技术面有支撑且超卖确认时摊平，才能发挥最大的复利威力。',
+          reasonSummary: isTW ? `低於成本之超賣進場點 (${pnlStr})` : `低于成本之超卖进场点 (${pnlStr})`,
+          reasonDetail: isTW 
+            ? `價格低於歷史持有均價 ${costStr}，技術指標浮現買盤進駐跡象。`
+            : `价格低于历史持有均价 ${costStr}，技术指标浮现买盘进驻迹象。`,
+          reasonAnalogy: isTW ? '如同您喜愛的優質商品遇到限時特價，用更便宜的價格補充庫存。' : '如同您喜爱的优质商品遇到限时特价，用更便宜的价格补充库存。',
+          costBasisFeedback: isTW 
+            ? `現價比成本 ${costStr} 優惠 ${Math.abs(pnlPercent).toFixed(1)}%，技術支撐帶有助於拉低均價。`
+            : `现价比成本 ${costStr} 优惠 ${Math.abs(pnlPercent).toFixed(1)}%，技术支撑带助于拉低均价。`
+        };
+      case 'HOLD_PROFIT':
+        return {
+          title: isTW ? `持有獲利部位 (${pnlStr} 獲利墊)` : `持有盈利仓位 (${pnlStr} 盈利垫)`,
+          summary: isTW 
+            ? `${ticker} 相較您的買進成本 ${costStr} 穩定上漲 ${pnlStr}，趨勢結構保持完好。`
+            : `${ticker} 相较您的买入成本 ${costStr} 稳定上涨 ${pnlStr}，趋势结构保持完好。`,
+          recommendedAction: isTW 
+            ? `續抱讓利潤奔馳。可將停損線移至成本價 ${costStr} 形成零風險交易。`
+            : `续抱让利润奔跑。可将止损线移至成本价 ${costStr} 形成零风险交易。`,
+          educationalTip: isTW 
+            ? '放任獲利奔馳、及早截斷虧損，是成功投資人的雙翼。'
+            : '放任盈利奔跑、及早截断亏损，是成功投资人的双翼。',
+          reasonSummary: isTW ? `具備健康獲利緩衝 (${pnlStr})` : `具备健康盈利缓冲 (${pnlStr})`,
+          reasonDetail: isTW 
+            ? `在成本價 ${costStr} 之上穩步推進，不需隨短線雜訊頻繁進出。`
+            : `在成本价 ${costStr} 之上稳步推进，不需随短线杂讯频繁进出。`,
+          reasonAnalogy: isTW ? '乘順風車向前行駛，沿途風景優美無須急著下車。' : '乘顺风车向前行驶，沿途风景优美无须急着下车。',
+          costBasisFeedback: isTW 
+            ? `成本 ${costStr} 之上獲利 ${pnlStr}，順勢續抱讓利潤擴大。`
+            : `成本 ${costStr} 之上盈利 ${pnlStr}，顺势续抱让利润扩大。`
+        };
+      case 'ACCUMULATE':
+      default:
+        return {
+          title: isTW ? `於成本價附近整理 (${costStr})` : `在成本价附近整理 (${costStr})`,
+          summary: isTW 
+            ? `${ticker} 目前在您的平均買進成本 ${costStr} 附近（${priceStr}，${pnlStr}）整理蓄勢。`
+            : `${ticker} 目前在您的平均买入成本 ${costStr} 附近（${priceStr}，${pnlStr}）整理蓄势。`,
+          recommendedAction: isTW 
+            ? `維持現有持股，等待突破確立後再行決定是否加碼或調節。`
+            : `维持现有持股，等待突破确立后再行决定是否加码或调节。`,
+          educationalTip: isTW 
+            ? '整理行情中過度交易只會白白耗損手續費，耐心是最佳策略。'
+            : '整理行情中过度交易只会白白耗损手续费，耐心是最佳策略。',
+          reasonSummary: isTW ? `貼近買進成本線 (${pnlStr})` : `贴近买入成本线 (${pnlStr})`,
+          reasonDetail: isTW ? `價格與成本 ${costStr} 相當，靜待市場催化劑引導新趨勢。` : `价格与成本 ${costStr} 相当，静待市场催化剂引导新趋势。`,
+          reasonAnalogy: isTW ? '賽跑起跑線前的深呼吸，等待發令槍聲響起。' : '赛跑起跑线前的深呼吸，等待发令枪声响起。',
+          costBasisFeedback: isTW 
+            ? `現價緊貼您的平均成本 ${costStr}，耐心持有觀察突破方向。`
+            : `现价紧贴您的平均成本 ${costStr}，耐心持有观察突破方向。`
+        };
+    }
+  }
+
+  // English fallback
+  switch (strategy) {
+    case 'TRIM_PROFIT':
+      return {
+        title: `Consider Trimming Profit (${pnlStr} vs Cost)`,
+        summary: `${ticker} is trading at ${priceStr}, up ${pnlStr} above your average cost basis of ${costStr}. Technical gauges indicate short-term overextension, creating a prime window to lock in gains.`,
+        recommendedAction: `Consider trimming 25% to 50% of your shares to secure cash profit. Trail your stop-loss on remaining shares above your ${costStr} cost basis to protect your gain.`,
+        educationalTip: 'Paper gains only turn into real wealth when captured. Trimming a portion of winning positions removes risk and builds confidence.',
+        reasonSummary: `Substantial profit cushion vs cost basis (${pnlStr})`,
+        reasonDetail: `Price has appreciated significantly past your entry at ${costStr}, reaching a favorable profit-taking target.`,
+        reasonAnalogy: 'Harvesting the ripest apples from the branch into your basket while letting others keep growing.',
+        costBasisFeedback: `You are up ${pnlStr} above your ${costStr} avg cost. Locking in partial profit here protects your capital.`
+      };
+    case 'STOP_LOSS':
+      return {
+        title: `Capital Defense / Stop-Loss Warning (${pnlStr})`,
+        summary: `${ticker} has declined to ${priceStr}, falling ${pnlStr} below your average buy price of ${costStr}. Key technical support is compromised.`,
+        recommendedAction: `Re-evaluate your initial investment thesis. If support is broken, strictly execute your defensive stop-loss rules to prevent deeper capital erosion.`,
+        educationalTip: 'Cutting small losses is the defining hallmark of professional investors. It takes a 100% gain to recover from a 50% loss.',
+        reasonSummary: `Drawdown exceeds defensive threshold (${pnlStr})`,
+        reasonDetail: `Position has dropped below your ${costStr} cost basis. Limiting drawdown now preserves capital for higher-conviction opportunities.`,
+        reasonAnalogy: 'Fastening your seatbelt during sudden turbulence to protect against severe impact.',
+        costBasisFeedback: `Down ${pnlStr} below your ${costStr} avg cost. Review your risk limits and prepare a defensive exit if support fails.`
+      };
+    case 'DCA_DIP':
+      return {
+        title: `DCA Dip Window (${pnlStr} below Cost)`,
+        summary: `${ticker} is trading at ${priceStr}, a ${Math.abs(pnlPercent).toFixed(1)}% discount below your ${costStr} average buy price, while technical indicators signal an oversold support bounce zone.`,
+        recommendedAction: `If your long-term fundamental thesis remains solid, accumulating a small tranche here allows you to dollar-cost average and reduce your break-even cost basis below ${costStr}.`,
+        educationalTip: 'Dollar-cost averaging into dips only works when done deliberately at proven technical support levels—never blindly average down on broken businesses.',
+        reasonSummary: `Discounted below avg cost + oversold support (${pnlStr})`,
+        reasonDetail: `Price is favorably discounted compared to your ${costStr} purchase price, while momentum indicators signal seller exhaustion.`,
+        reasonAnalogy: 'Buying top-grade inventory on seasonal discount to lower your overall unit cost.',
+        costBasisFeedback: `Trading ${Math.abs(pnlPercent).toFixed(1)}% below your ${costStr} cost basis in an oversold bounce zone. Good DCA window.`
+      };
+    case 'HOLD_PROFIT':
+      return {
+        title: `Holding Steady (${pnlStr} Profit Cushion)`,
+        summary: `${ticker} is performing solidly at +${pnlPercent.toFixed(1)}% above your average purchase price of ${costStr}. Upward trend structure remains healthy and intact.`,
+        recommendedAction: `Hold and let your winner run. Move your mental stop-loss up to break-even (${costStr}) to guarantee a risk-free trade while riding the trend.`,
+        educationalTip: 'The biggest mistake retail investors make is selling their winners too quickly while stubbornly holding their losers.',
+        reasonSummary: `Comfortable profit cushion (${pnlStr})`,
+        reasonDetail: `Your ${costStr} entry price is well-protected by current market levels, allowing you to ride the primary trend with minimal stress.`,
+        reasonAnalogy: 'Sitting in a well-built cruise ship with calm waters and favorable winds.',
+        costBasisFeedback: `Position is up ${pnlStr} from your ${costStr} cost basis. Trend is constructive—let winners run.`
+      };
+    case 'ACCUMULATE':
+    default:
+      return {
+        title: `Consolidating Near Cost Basis (${costStr})`,
+        summary: `${ticker} is hovering within range of your entry price (${costStr} vs ${priceStr}, ${pnlStr}). Price is building energy for its next directional move.`,
+        recommendedAction: `Hold existing position. Refrain from adjusting size until volume confirms a breakout above resistance or breakdown below support.`,
+        educationalTip: 'During sideways consolidation near your entry, patience is the highest-value discipline. Avoid churn and unnecessary transaction fees.',
+        reasonSummary: `Trading near breakeven cost (${pnlStr})`,
+        reasonDetail: `Price is consolidating near your ${costStr} purchase price as bulls and bears fight for trend dominance.`,
+        reasonAnalogy: 'Pausing at a checkpoint before the road begins its steep climb.',
+        costBasisFeedback: `Trading near your ${costStr} purchase price. Hold steady and await a definitive directional breakout.`
+      };
+  }
+}
+

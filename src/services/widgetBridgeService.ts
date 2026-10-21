@@ -9,6 +9,14 @@ export interface WidgetHoldingItem {
   ticker: string;
   action: 'BUY' | 'HOLD' | 'SELL';
   currentPrice: string;
+  currentPriceNum: number;
+  averageBuyPrice: number;
+  averageBuyPriceFormatted: string;
+  shares: number;
+  sharesFormatted: string;
+  pnlPercent: number;
+  costBasisFeedback: string;
+  holdingStrategy: string;
   subtitle: string;
   value: string;
   pnl: string;
@@ -109,11 +117,19 @@ export async function syncWidgetData(): Promise<void> {
       ? pos.shares.toString()
       : Number(pos.shares.toFixed(2)).toString();
 
-    // Determine Buy / Hold / Sell index from timing signal
+    // Determine Buy / Hold / Sell index and feedback calibrated to user's average buy price
     let action: 'BUY' | 'HOLD' | 'SELL' = 'HOLD';
+    let costBasisFeedback = '';
+    let holdingStrategy = 'ACCUMULATE';
     if (quote && quote.indicators) {
       try {
-        const signal = generateTimingSignal(quote, language);
+        const signal = generateTimingSignal(quote, language, {
+          averageBuyPrice: pos.averageBuyPrice,
+          shares: pos.shares,
+          targetSellPrice: pos.targetSellPrice,
+          stopLossPrice: pos.stopLossPrice,
+          currencySymbol: pos.currencySymbol
+        });
         if (signal.action === 'STRONG_BUY' || signal.action === 'BUY') {
           action = 'BUY';
         } else if (signal.action === 'STRONG_SELL' || signal.action === 'TRIM') {
@@ -121,6 +137,8 @@ export async function syncWidgetData(): Promise<void> {
         } else {
           action = 'HOLD';
         }
+        costBasisFeedback = signal.costBasisFeedback || '';
+        holdingStrategy = signal.holdingStrategyAction || 'ACCUMULATE';
       } catch (e) {
         action = 'HOLD';
       }
@@ -130,6 +148,14 @@ export async function syncWidgetData(): Promise<void> {
       ticker: pos.ticker,
       action,
       currentPrice: formattedPrice,
+      currentPriceNum: currentPrice,
+      averageBuyPrice: pos.averageBuyPrice,
+      averageBuyPriceFormatted: `${cur}${pos.averageBuyPrice.toFixed(2)}`,
+      shares: pos.shares,
+      sharesFormatted: formattedShares,
+      pnlPercent: profitLossPercent,
+      costBasisFeedback,
+      holdingStrategy,
       subtitle: `${formattedPrice} • ${formattedShares} shs`,
       value: `${cur}${totalHoldingValue.toLocaleString('en-US', {
         minimumFractionDigits: 2,
@@ -218,8 +244,8 @@ export async function scheduleNativeBackgroundTest(delaySeconds = 5, ticker = 'A
     await WidgetBridge.scheduleBackgroundTest({
       delaySeconds,
       ticker,
-      title: `Holding Alert: ${ticker} Buy Window Active`,
-      message: `${ticker}: RSI oversold indicates attractive accumulation range. (Sent from Android background engine)`
+      title: `Holding Alert: ${ticker} (+18.4% vs Cost)`,
+      message: `${ticker} is +18.4% above your $184.50 avg buy price. Profit target reached—consider trimming partial shares.`
     });
     return true;
   } catch (err) {

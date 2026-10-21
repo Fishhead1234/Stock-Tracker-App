@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { usePortfolioStore } from '../store/portfolioStore';
 import { useMarketStore } from '../store/marketStore';
 import { useNotificationStore } from '../store/notificationStore';
+import { useLanguageStore } from '../store/languageStore';
 import { generateTimingSignal } from '../services/signalEngine';
 import { notificationService } from '../services/notificationService';
 import { SignalAction } from '../types/signal';
@@ -10,6 +11,7 @@ export const useSignalNotifier = () => {
   const { positions } = usePortfolioStore();
   const { quotes, watchlist } = useMarketStore();
   const { notificationsEnabled, notifyPersonalHoldings, notifyWatchlist } = useNotificationStore();
+  const { language } = useLanguageStore();
 
   const previousSignals = useRef<Record<string, SignalAction>>({});
   const isFirstMount = useRef(true);
@@ -22,35 +24,51 @@ export const useSignalNotifier = () => {
       positions.forEach(pos => {
         const quote = quotes[pos.ticker.toUpperCase()];
         if (quote) {
-          previousSignals.current[quote.ticker] = generateTimingSignal(quote).action;
+          previousSignals.current[quote.ticker] = generateTimingSignal(quote, language, {
+            averageBuyPrice: pos.averageBuyPrice,
+            shares: pos.shares,
+            targetSellPrice: pos.targetSellPrice,
+            stopLossPrice: pos.stopLossPrice,
+            currencySymbol: pos.currencySymbol
+          }).action;
         }
       });
       watchlist.forEach(t => {
         const quote = quotes[t.toUpperCase()];
         if (quote) {
-          previousSignals.current[quote.ticker] = generateTimingSignal(quote).action;
+          previousSignals.current[quote.ticker] = generateTimingSignal(quote, language).action;
         }
       });
       isFirstMount.current = false;
       return;
     }
 
-    // 1. Check Personal Holdings for timing signal changes
+    // 1. Check Personal Holdings for timing signal changes calibrated to average buy price
     if (notifyPersonalHoldings) {
       positions.forEach(pos => {
         const quote = quotes[pos.ticker.toUpperCase()];
         if (!quote) return;
 
-        const currentSignal = generateTimingSignal(quote);
+        const currentSignal = generateTimingSignal(quote, language, {
+          averageBuyPrice: pos.averageBuyPrice,
+          shares: pos.shares,
+          targetSellPrice: pos.targetSellPrice,
+          stopLossPrice: pos.stopLossPrice,
+          currencySymbol: pos.currencySymbol
+        });
         const lastAction = previousSignals.current[quote.ticker];
 
         if (lastAction && lastAction !== currentSignal.action) {
+          const pnlStr = currentSignal.pnlPercent !== undefined
+            ? ` (${currentSignal.pnlPercent >= 0 ? '+' : ''}${currentSignal.pnlPercent.toFixed(1)}%)`
+            : '';
+
           notificationService.notify({
             ticker: quote.ticker,
             companyName: quote.name,
             signalAction: currentSignal.action,
-            title: `Holding Alert: ${currentSignal.title}`,
-            message: `${quote.ticker} (${quote.name}): ${currentSignal.summary}`,
+            title: `Holding Alert: ${quote.ticker}${pnlStr} - ${currentSignal.title}`,
+            message: currentSignal.costBasisFeedback || `${quote.ticker}: ${currentSignal.summary}`,
             price: quote.price,
             category: 'HOLDING'
           });

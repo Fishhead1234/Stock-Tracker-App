@@ -1,6 +1,6 @@
 export type SignalAction = 'STRONG_BUY' | 'BUY' | 'HOLD' | 'TRIM' | 'STRONG_SELL';
 
-export type IndicatorCategory = 'RSI' | 'MACD' | 'SMA' | 'VOLUME' | 'SENTIMENT';
+export type IndicatorCategory = 'RSI' | 'MACD' | 'SMA' | 'VOLUME' | 'SENTIMENT' | 'COST_BASIS';
 
 export interface SignalReason {
   indicator: IndicatorCategory;
@@ -8,6 +8,14 @@ export interface SignalReason {
   detail: string;
   plainEnglishAnalogy: string;
   bullish: boolean;
+}
+
+export interface HoldingContext {
+  averageBuyPrice: number;
+  shares: number;
+  targetSellPrice?: number;
+  stopLossPrice?: number;
+  currencySymbol?: string;
 }
 
 export interface StockSignal {
@@ -23,4 +31,11 @@ export interface StockSignal {
   recommendedAction: string;
   educationalTip: string;
   timestamp: string;
+  // Personal Holding Specific Index & Feedback
+  isHolding?: boolean;
+  averageBuyPrice?: number;
+  pnlPercent?: number;
+  pnlAmount?: number;
+  costBasisFeedback?: string;
+  holdingStrategyAction?: 'TRIM_PROFIT' | 'DCA_DIP' | 'STOP_LOSS' | 'HOLD_PROFIT' | 'ACCUMULATE' | 'NONE';
 }

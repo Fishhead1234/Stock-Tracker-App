@@ -13,6 +13,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import java.util.Locale;
 import java.util.Random;
 
 /**
@@ -69,13 +70,18 @@ public class StockAlertReceiver extends BroadcastReceiver {
             boolean notificationSent = false;
             JSONArray holdingsArray = new JSONArray(holdingsJson);
 
-            // A. Check Personal Holdings first (highest priority)
+            // A. Check Personal Holdings first (highest priority) - calibrated to user's average buy price
             if (notifyHoldings && holdingsArray.length() > 0) {
                 for (int i = 0; i < holdingsArray.length(); i++) {
                     JSONObject holding = holdingsArray.getJSONObject(i);
                     String ticker = holding.optString("ticker", "");
                     String signalAction = holding.optString("action", "HOLD");
                     String currentPrice = holding.optString("currentPrice", holding.optString("subtitle", "$0.00"));
+                    double avgBuyPrice = holding.optDouble("averageBuyPrice", 0.0);
+                    String avgBuyPriceStr = holding.optString("averageBuyPriceFormatted", avgBuyPrice > 0 ? String.format(Locale.US, "$%.2f", avgBuyPrice) : "");
+                    double pnlPercent = holding.optDouble("pnlPercent", 0.0);
+                    String feedback = holding.optString("costBasisFeedback", "");
+                    String strategy = holding.optString("holdingStrategy", "");
                     String pnl = holding.optString("pnl", "");
 
                     String lastNotifiedAction = prefs.getString("last_notif_action_" + ticker, "");
@@ -93,17 +99,45 @@ public class StockAlertReceiver extends BroadcastReceiver {
 
                     String notifTitle;
                     String notifBody;
-                    if (signalAction.contains("BUY")) {
-                        notifTitle = "🟢 Buy Window: " + ticker;
-                        notifBody = ticker + " (" + currentPrice + ") is in an attractive accumulation range. Technical indicators confirm support.";
-                    } else if (signalAction.contains("SELL") || signalAction.contains("TRIM")) {
-                        notifTitle = "🔴 Trim Alert: " + ticker;
-                        notifBody = ticker + " (" + currentPrice + ") reached resistance. Consider taking partial profits or reviewing stop-loss.";
+
+                    String pnlSign = pnlPercent >= 0 ? "+" : "";
+                    String pnlFormatted = pnlSign + String.format(Locale.US, "%.1f", pnlPercent) + "%";
+
+                    // Cost-Basis Calibrated Feedback
+                    if ("TRIM_PROFIT".equals(strategy) || (pnlPercent >= 18.0) || (signalAction.contains("SELL") && pnlPercent >= 10.0)) {
+                        notifTitle = "💰 Take Profit: " + ticker + " (" + pnlFormatted + ")";
+                        notifBody = !feedback.isEmpty()
+                                ? feedback
+                                : ticker + " (" + currentPrice + ") is " + pnlFormatted + " above your " + avgBuyPriceStr + " avg cost. Consider trimming partial shares to lock in gains.";
+                    } else if ("STOP_LOSS".equals(strategy) || pnlPercent <= -10.0 || (signalAction.contains("SELL") && pnlPercent <= -7.0)) {
+                        notifTitle = "⚠️ Capital Defense: " + ticker + " (" + pnlFormatted + ")";
+                        notifBody = !feedback.isEmpty()
+                                ? feedback
+                                : ticker + " (" + currentPrice + ") has dropped " + pnlFormatted + " below your " + avgBuyPriceStr + " avg buy price. Review stop-loss rules to protect principal.";
+                    } else if ("DCA_DIP".equals(strategy) || (signalAction.contains("BUY") && pnlPercent <= -3.0)) {
+                        notifTitle = "🟢 DCA Opportunity: " + ticker + " (" + pnlFormatted + ")";
+                        notifBody = !feedback.isEmpty()
+                                ? feedback
+                                : ticker + " (" + currentPrice + ") is down " + pnlFormatted + " below your " + avgBuyPriceStr + " avg cost with technical support. Good window to lower average price.";
+                    } else if (signalAction.contains("BUY")) {
+                        notifTitle = "🟢 Buy Window: " + ticker + " (" + pnlFormatted + ")";
+                        notifBody = !feedback.isEmpty()
+                                ? feedback
+                                : ticker + " (" + currentPrice + ") shows strong upward momentum (" + pnlFormatted + " vs " + avgBuyPriceStr + " cost basis).";
+                    } else if (pnlPercent >= 3.0) {
+                        // Holding winner - periodic update if over 6 hours since last note
+                        if (now - lastNotifTickerTime < 6 * 3600 * 1000L) continue;
+                        notifTitle = "📈 Holding Winner: " + ticker + " (" + pnlFormatted + ")";
+                        notifBody = !feedback.isEmpty()
+                                ? feedback
+                                : ticker + " is performing well (" + pnlFormatted + " above your " + avgBuyPriceStr + " avg cost). Trend remains constructive—let winners run.";
                     } else {
                         // General holding update if over 6 hours since last note
                         if (now - lastNotifTickerTime < 6 * 3600 * 1000L) continue;
-                        notifTitle = "📊 Portfolio Check: " + ticker;
-                        notifBody = ticker + " is currently " + pnl + ". Timing signal remains " + signalAction + ".";
+                        notifTitle = "📊 Holding Status: " + ticker + " (" + pnlFormatted + ")";
+                        notifBody = !feedback.isEmpty()
+                                ? feedback
+                                : ticker + " is currently " + currentPrice + " vs your " + avgBuyPriceStr + " cost basis (" + pnlFormatted + "). Position steady.";
                     }
 
                     int notifId = Math.abs(ticker.hashCode());

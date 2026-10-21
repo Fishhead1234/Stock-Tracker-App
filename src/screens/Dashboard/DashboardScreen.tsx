@@ -84,11 +84,24 @@ export const DashboardScreen: React.FC = () => {
     .map(ticker => quotes[ticker.toUpperCase()])
     .filter((q): q is StockQuote => Boolean(q));
 
-  // Pre-calculate timing signals and counts for watched stocks
-  const watchedWithSignals = watchedQuotes.map(stock => ({
-    stock,
-    signal: generateTimingSignal(stock, language)
-  }));
+  // Pre-calculate timing signals and counts for watched stocks (holding-aware if user owns it)
+  const watchedWithSignals = watchedQuotes.map(stock => {
+    const pos = positions.find(p => p.ticker.toUpperCase() === stock.ticker.toUpperCase());
+    return {
+      stock,
+      signal: generateTimingSignal(
+        stock, 
+        language, 
+        pos ? {
+          averageBuyPrice: pos.averageBuyPrice,
+          shares: pos.shares,
+          targetSellPrice: pos.targetSellPrice,
+          stopLossPrice: pos.stopLossPrice,
+          currencySymbol: pos.currencySymbol
+        } : undefined
+      )
+    };
+  });
 
   const counts = {
     ALL: watchedQuotes.length,
@@ -236,7 +249,18 @@ export const DashboardScreen: React.FC = () => {
 
   const filteredWatched = watchedQuotes.filter(stock => {
     if (watchFilter === 'ALL') return true;
-    const s = generateTimingSignal(stock, language);
+    const pos = positions.find(p => p.ticker.toUpperCase() === stock.ticker.toUpperCase());
+    const s = generateTimingSignal(
+      stock, 
+      language,
+      pos ? {
+        averageBuyPrice: pos.averageBuyPrice,
+        shares: pos.shares,
+        targetSellPrice: pos.targetSellPrice,
+        stopLossPrice: pos.stopLossPrice,
+        currencySymbol: pos.currencySymbol
+      } : undefined
+    );
     return s.action === watchFilter;
   });
 
