@@ -20,8 +20,60 @@ import {
   Bell,
   Crown,
   BookOpen,
-  MessageSquare
+  MessageSquare,
+  Shuffle
 } from 'lucide-react';
+
+const DASHBOARD_ROTATING_TIPS = [
+  {
+    term: 'RSI',
+    title: "Track Global Timing: Don't Chase Overextended Rallies",
+    desc: 'Whether trading in Taipei, Seoul, London, or New York, buying when RSI > 70 carries high pullback risk. Let healthy pullbacks come to you.',
+    actionLabel: 'Learn RSI',
+  },
+  {
+    term: 'MACD',
+    title: 'Riding Momentum: Spotting Bullish Moving Average Crossovers',
+    desc: 'When the fast line crosses above the slower signal line, buying momentum is accelerating. Wait for confirmation before entering.',
+    actionLabel: 'Learn MACD',
+  },
+  {
+    term: 'Dollar-Cost Averaging (DCA)',
+    title: 'Dollar-Cost Averaging: Lower Your Cost Basis on Red Days',
+    desc: 'Investing fixed dollar amounts at regular intervals automatically buys more shares when prices are cheap and fewer when expensive.',
+    actionLabel: 'Learn DCA',
+  },
+  {
+    term: 'Golden Cross',
+    title: 'Golden Cross: Institutional Trend Shift Confirmation',
+    desc: 'When the 50-day moving average crosses above the 200-day moving average, algorithmic funds and pensions increase exposure.',
+    actionLabel: 'Learn Golden Cross',
+  },
+  {
+    term: 'lesson-risk-management',
+    title: 'Rule #1: Capital Preservation & Defensive Position Sizing',
+    desc: 'Never put more than 5% to 10% of your total net worth into a single speculative stock. A small loss should never wipe you out.',
+    actionLabel: 'Learn Risk Rules',
+  },
+  {
+    term: 'lesson-moving-averages',
+    title: 'The 200-Day SMA Floor: The Line in the Sand',
+    desc: 'Stocks trading above their 200-day average are in a macro bull trend. Key bounces off this floor offer great risk-to-reward entries.',
+    actionLabel: 'Learn 200 SMA',
+  },
+  {
+    term: 'lesson-volume',
+    title: 'Volume Surge: Confirming True Institutional Conviction',
+    desc: 'A rally on 2x average volume proves big institutions are accumulating. Moves on thin volume are prone to sudden traps.',
+    actionLabel: 'Learn Volume',
+  },
+  {
+    term: 'Death Cross',
+    title: 'Defensive Awareness: Spotting Bearish Death Crosses',
+    desc: 'When the 50 SMA drops below the 200 SMA, historical trend shifts downward. Review stops and avoid catching falling knives.',
+    actionLabel: 'Learn Death Cross',
+  },
+];
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { useMarketStore } from '../../store/marketStore';
 import { useSettingsStore } from '../../store/settingsStore';
@@ -59,6 +111,16 @@ export const DashboardScreen: React.FC = () => {
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [educationTerm, setEducationTerm] = useState<string | null>(null);
+  const [tipIndex, setTipIndex] = useState(() => Math.floor(Math.random() * DASHBOARD_ROTATING_TIPS.length));
+  const currentTip = DASHBOARD_ROTATING_TIPS[tipIndex % DASHBOARD_ROTATING_TIPS.length];
+
+  const handleNextTip = () => {
+    setTipIndex((prev) => (prev + 1) % DASHBOARD_ROTATING_TIPS.length);
+  };
+
+  const handleOpenCurrentTip = () => {
+    setEducationTerm(currentTip.term);
+  };
   const [isNotificationCenterOpen, setIsNotificationCenterOpen] = useState(false);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const [isLanguageModalOpen, setIsLanguageModalOpen] = useState(false);
@@ -446,7 +508,10 @@ export const DashboardScreen: React.FC = () => {
           <button
             type="button"
             data-touch-target="true"
-            onClick={() => setEducationTerm('RSI')}
+            onClick={() => {
+              handleOpenCurrentTip();
+              handleNextTip();
+            }}
             className={`flex-1 min-h-[44px] flex items-center justify-center gap-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
               isLight ? 'text-[#666666] hover:text-black' : 'text-slate-400 hover:text-white'
             }`}
@@ -479,29 +544,42 @@ export const DashboardScreen: React.FC = () => {
             }`}>
               <Lightbulb className="w-5 h-5" />
             </div>
-            <div className="space-y-1 min-w-0">
+            <div className="space-y-1 min-w-0 flex-1">
               <div className="flex items-center justify-between">
                 <span className={`text-[11px] uppercase font-bold tracking-wider font-mono ${
                   isLight ? 'text-[#FF9500]' : 'text-gold-400'
                 }`}>
                   {t('dash_trading_insight', 'Trading Insight')}
                 </span>
-                <button
-                  type="button"
-                  data-touch-target="true"
-                  onClick={() => setEducationTerm('RSI')}
-                  className={`text-xs font-semibold underline cursor-pointer ${
-                    isLight ? 'text-[#007AFF] hover:text-[#0062CC]' : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  {t('dash_learn_rsi', 'Learn RSI')}
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleNextTip}
+                    title="Next Tip"
+                    className={`text-xs font-semibold flex items-center gap-1 transition cursor-pointer active:scale-95 ${
+                      isLight ? 'text-[#666666] hover:text-black' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <Shuffle className="w-3 h-3" />
+                    <span>Next</span>
+                  </button>
+                  <button
+                    type="button"
+                    data-touch-target="true"
+                    onClick={handleOpenCurrentTip}
+                    className={`text-xs font-semibold underline cursor-pointer ${
+                      isLight ? 'text-[#007AFF] hover:text-[#0062CC]' : 'text-gold-400 hover:text-gold-300'
+                    }`}
+                  >
+                    {currentTip.actionLabel}
+                  </button>
+                </div>
               </div>
               <h4 className={`text-sm font-bold ${isLight ? 'text-[#000000]' : 'text-white'}`}>
-                {t('dash_insight_title', "Track Global Timing: Don't Chase Overextended Rallies")}
+                {currentTip.title}
               </h4>
               <p className={`text-[13px] leading-relaxed ${isLight ? 'text-[#666666]' : 'text-slate-300'}`}>
-                {t('dash_insight_desc', 'Whether trading in Taipei, Seoul, London, or New York, buying when RSI > 70 carries high pullback risk. Let healthy pullbacks come to you.')}
+                {currentTip.desc}
               </p>
             </div>
           </div>
@@ -999,7 +1077,15 @@ export const DashboardScreen: React.FC = () => {
       )}
 
       {educationTerm && (
-        <EducationModal termOrId={educationTerm} onClose={() => setEducationTerm(null)} />
+        <EducationModal 
+          termOrId={educationTerm} 
+          onClose={() => setEducationTerm(null)} 
+          onNextTip={() => {
+            const nextIdx = (tipIndex + 1) % DASHBOARD_ROTATING_TIPS.length;
+            setTipIndex(nextIdx);
+            setEducationTerm(DASHBOARD_ROTATING_TIPS[nextIdx].term);
+          }}
+        />
       )}
 
       {isNotificationCenterOpen && (
