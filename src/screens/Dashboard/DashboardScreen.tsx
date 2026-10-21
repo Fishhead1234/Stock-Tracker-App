@@ -249,16 +249,23 @@ export const DashboardScreen: React.FC = () => {
       <div className="px-4 space-y-4">
         {/* Header with Universal Exchange Badge & Notifications / Pro Actions */}
         <div className="flex items-center justify-between pt-1 gap-2">
-          <div className="min-w-0">
-            <div className={`flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider font-mono ${
-              isLight ? 'text-[#FF9500]' : 'text-gold-400'
-            }`}>
-              <Globe className="w-3.5 h-3.5 shrink-0" />
-              <span className="truncate">{userName ? t('header_hub', 'Global Portfolio Hub') : t('header_universal_tracker', 'Universal Exchange Tracker')}</span>
+          <div className="flex items-center gap-2.5 min-w-0">
+            <img 
+              src="/favicon.svg" 
+              alt="InvestLearn" 
+              className="w-10 h-10 rounded-xl shadow-xs shrink-0 border border-black/10 dark:border-white/10" 
+            />
+            <div className="min-w-0">
+              <div className={`flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider font-mono ${
+                isLight ? 'text-[#FF9500]' : 'text-gold-400'
+              }`}>
+                <Globe className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">{userName ? t('header_hub', 'Global Portfolio Hub') : t('header_universal_tracker', 'Universal Exchange Tracker')}</span>
+              </div>
+              <h2 className={`text-xl font-extrabold tracking-tight truncate ${isLight ? 'text-[#000000]' : 'text-white'}`}>
+                {userName ? `👋 Hi, ${userName}!` : 'InvestLearn'}
+              </h2>
             </div>
-            <h2 className={`text-xl font-extrabold tracking-tight truncate ${isLight ? 'text-[#000000]' : 'text-white'}`}>
-              {userName ? `👋 Hi, ${userName}!` : t('header_hub', 'Global Portfolio Hub')}
-            </h2>
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">

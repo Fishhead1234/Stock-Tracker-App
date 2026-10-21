@@ -205,9 +205,11 @@ export const OnboardingScreen: React.FC = () => {
         {/* STEP 1: Universal Global Platform & Purpose */}
         {step === 1 && (
           <div className="space-y-4 animate-fadeIn">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#007AFF] via-[#34C759] to-[#FF9500] flex items-center justify-center shadow-md">
-              <Globe2 className="w-7 h-7 text-white" />
-            </div>
+            <img 
+              src="/favicon.svg" 
+              alt="InvestLearn Logo" 
+              className="w-16 h-16 rounded-2xl shadow-md border border-black/10 dark:border-white/10" 
+            />
 
             <div className="space-y-1.5">
               <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium ${

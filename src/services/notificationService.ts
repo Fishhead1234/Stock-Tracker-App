@@ -173,7 +173,7 @@ class NotificationService {
     // 2. Web Browser Fallback
     if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
       try {
-        const icon = '/favicon.ico';
+        const icon = '/favicon.png';
         const notification = new Notification(`InvestLearn: ${ticker} - ${title}`, {
           body: `${message} (Price: $${price.toFixed(2)})`,
           icon,
