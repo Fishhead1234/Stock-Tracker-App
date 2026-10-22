@@ -4,19 +4,18 @@ import { Position } from '../types/portfolio';
 import { STOCK_DIRECTORY } from './stockDirectory';
 import { useSettingsStore } from '../store/settingsStore';
 import { Capacitor, CapacitorHttp } from '@capacitor/core';
-import { VoicePersona } from './speechService';
 
 export const INITIAL_GREETING_MESSAGE: AdvisorMessage = {
   id: 'msg_welcome',
   role: 'assistant',
-  content: `Hey there! 👋 I'm **Nova**, your personal AI Investment Coach & Portfolio Roaster.
+  content: `Hey there! 👋 I'm **Nova**, your personal AI Investment Coach.
 
-Looking for stocks or ETFs that actually make sense? Want an honest, unfiltered reality check on your portfolio? I'm here to give it to you straight—with a clear **"Why"**, a sound **"Next Step"**, and zero corporate fluff.
+Looking for stocks or ETFs that match your investment goals? Want an objective review of your portfolio? I'm here to give you clear, grounded guidance—with a sound **"Why"**, a practical **"Next Step"**, and educational reasoning.
 
 To get started, what should we look at?`,
   timestamp: Date.now(),
   quickReplies: [
-    { id: 'goal_roast', label: '🔥 Roast My Portfolio', prompt: 'Roast my portfolio and give me an honest, spicy reality check on my holdings.' },
+    { id: 'goal_review', label: '📊 Review My Portfolio', prompt: 'Review my portfolio and provide an objective analysis of my holdings and asset allocation.' },
     { id: 'goal_safe', label: '🛡️ Safe & Steady Long-Term', prompt: 'I want safe and steady long-term wealth without stressing over daily market dips.' },
     { id: 'goal_tech', label: '🚀 High-Growth Tech & AI', prompt: 'I want higher growth and want to participate in AI and mega tech trends.' },
     { id: 'goal_new', label: '❓ I am completely new, guide me', prompt: 'I have never invested before and have no idea where to start. Walk me through the basics step-by-step.' }
@@ -27,14 +26,13 @@ class AIAdvisorService {
 
   /**
    * Main responder: Calls Gemini if API key is configured, or generates an intelligent
-   * grounded educational response tailored to the user's profile, market quotes, tone, and holdings.
+   * grounded educational response tailored to the user's profile, market quotes, and holdings.
    */
   public async generateAdvisorResponse(
     messages: AdvisorMessage[],
     profile: InvestorProfile,
     quotes: Record<string, StockQuote>,
     lang: string = 'en',
-    tone: VoicePersona = 'spicy_sarcastic',
     positions: Position[] = []
   ): Promise<{ content: string; recommendations?: StockRecommendationCard[]; quickReplies?: Array<{ id: string; label: string; prompt: string }> }> {
     const lastUserMsg = messages.filter(m => m.role === 'user').slice(-1)[0]?.content || '';
@@ -46,7 +44,7 @@ class AIAdvisorService {
 
     if (apiKey) {
       try {
-        const geminiResult = await this.callGeminiAdvisor(apiKey, messages, profile, quotes, lang, tone, positions);
+        const geminiResult = await this.callGeminiAdvisor(apiKey, messages, profile, quotes, lang, positions);
         if (geminiResult) {
           return geminiResult;
         }
@@ -56,11 +54,11 @@ class AIAdvisorService {
     }
 
     // Local Intelligent Grounded Advisor Engine
-    return this.generateLocalAdvisorResponse(lower, profile, quotes, lang, tone, positions);
+    return this.generateLocalAdvisorResponse(lower, profile, quotes, lang, positions);
   }
 
   /**
-   * Direct Gemini API Call with grounded system prompt for investment coaching & roasts
+   * Direct Gemini API Call with grounded system prompt for investment coaching
    */
   private async callGeminiAdvisor(
     apiKey: string,
@@ -68,31 +66,17 @@ class AIAdvisorService {
     profile: InvestorProfile,
     quotes: Record<string, StockQuote>,
     lang: string,
-    tone: VoicePersona,
     positions: Position[]
   ): Promise<{ content: string; recommendations?: StockRecommendationCard[]; quickReplies?: Array<{ id: string; label: string; prompt: string }> } | null> {
-    const isSpicy = tone === 'spicy_sarcastic';
-
-    const systemPrompt = isSpicy
-      ? `You are "Nova", a witty, spicy, sarcastic, and sharp Wall Street AI mentor and portfolio roaster in the InvestLearn mobile app.
-Your personality:
-- Sarcastic, sassy, sharp, and brutally honest about retail trading mistakes (FOMOing at the peak, bagholding loser stocks, panic selling dips, zero diversification, meme gambling).
-- Highly entertaining and witty, but ALWAYS financially grounded in solid investment principles (Dollar-Cost Averaging, broad Index ETFs like VOO/USF, stop losses, position sizing).
-- If the user asks to roast their portfolio, inspect their actual holdings: ${JSON.stringify(positions)} and deliver a hilarious, spicy roast of their asset allocation, bad timing, or lack of holdings!
-- When recommending specific stocks, include a structured tag at the end in the format:
-RECOMMENDATION: TICKER | MATCH_PERCENT | TIER(FOUNDATION/GROWTH/DIVIDEND) | WHY_FITS_YOU | ACTION_STEP_1; ACTION_STEP_2
-
-Current User Profile: ${JSON.stringify(profile)}
-Active Stock Quotes: ${Object.keys(quotes).slice(0, 15).join(', ')}
-Respond in language: ${lang}.`
-      : `You are "Nova", an elite, empathetic, and encouraging AI Investment Mentor for beginner and retail investors in the InvestLearn mobile app.
+    const systemPrompt = `You are "Nova", an elite, empathetic, objective, and encouraging AI Investment Mentor for beginner and retail investors in the InvestLearn mobile app.
 Your mission:
-1. Help beginners choose stocks/ETFs that match their personal horizon, risk appetite, and interests.
+1. Help beginners choose stocks and ETFs that match their personal horizon, risk appetite, and interests.
 2. Always explain "WHY THIS FITS YOU" in plain English without confusing jargon.
-3. If recommending index ETFs (e.g. VOO, VOOV, USF.NZ), explain why broad diversification beats stock picking for beginners.
-4. If recommending tech (e.g. NVDA, AAPL), outline the risk boundaries and dollar-cost averaging (DCA) rules.
-5. Provide actionable next steps: allocation percentage, entry pace, and what to monitor.
-6. When recommending specific stocks, include a structured tag at the end in the format:
+3. If reviewing a portfolio, inspect the user's actual holdings: ${JSON.stringify(positions)}. Provide a constructive, objective breakdown of diversification, position sizing, risk exposure, and actionable steps to balance it.
+4. If recommending index ETFs (e.g. VOO, VOOV, USF.NZ), explain why broad diversification beats stock picking for beginners.
+5. If recommending tech (e.g. NVDA, AAPL), outline the risk boundaries and dollar-cost averaging (DCA) rules.
+6. Provide actionable next steps: allocation percentage, entry pace, and what to monitor.
+7. When recommending specific stocks, include a structured tag at the end in the format:
 RECOMMENDATION: TICKER | MATCH_PERCENT | TIER(FOUNDATION/GROWTH/DIVIDEND) | WHY_FITS_YOU | ACTION_STEP_1; ACTION_STEP_2
 
 Current User Profile: ${JSON.stringify(profile)}
@@ -171,7 +155,7 @@ Respond in language: ${lang}.`;
       content: cleanedLines.join('\n').trim(),
       recommendations: recs.length > 0 ? recs : undefined,
       quickReplies: [
-        { id: 'q_roast', label: '🔥 Roast My Portfolio', prompt: 'Roast my portfolio and tell me what mistakes I am making.' },
+        { id: 'q_review', label: '📊 Review My Portfolio', prompt: 'Review my portfolio and provide an objective analysis of my holdings.' },
         { id: 'q_why', label: '💡 Why these picks?', prompt: 'Can you break down why you picked these over individual tech stocks?' },
         { id: 'q_how_much', label: '💵 How much to start?', prompt: 'How much money should I start with, and how often should I buy?' }
       ]
@@ -186,15 +170,12 @@ Respond in language: ${lang}.`;
     profile: InvestorProfile,
     quotes: Record<string, StockQuote>,
     lang: string,
-    tone: VoicePersona = 'spicy_sarcastic',
     positions: Position[] = []
   ): { content: string; recommendations?: StockRecommendationCard[]; quickReplies?: Array<{ id: string; label: string; prompt: string }> } {
 
-    const isSpicy = tone === 'spicy_sarcastic';
-
-    // Scenario 0: User asks for a Portfolio Roast
-    if (lower.includes('roast') || lower.includes('critique') || lower.includes('rate my portfolio')) {
-      return this.generatePortfolioRoast(positions, quotes, isSpicy);
+    // Scenario 0: User asks for a Portfolio Review / Health Check
+    if (lower.includes('review') || lower.includes('portfolio') || lower.includes('health') || lower.includes('critique') || lower.includes('rate my portfolio') || lower.includes('roast') || lower.includes('holding')) {
+      return this.generatePortfolioReview(positions, quotes);
     }
 
     // Scenario 1: User mentions Safe / Long-Term / S&P 500 / ETFs / Beginner
@@ -216,23 +197,17 @@ Respond in language: ${lang}.`;
         ]
       );
 
-      const content = isSpicy
-        ? `Look at you, making a sensible life choice for once! 🛡️ While everyone else is busy buying meme coins at 3 AM, **broad Index ETFs are how real fortunes are actually built** without losing your hair.
+      const content = `Great choice! 🛡️ For long-term peace of mind, **broad Index ETFs are the gold standard** for beginner wealth building.
 
-Here is the unfiltered truth: Picking single stocks as a beginner is usually just donating your hard-earned cash to Wall Street hedge funds. With an index ETF, you own a sliver of hundreds of giant corporations simultaneously. When one trips, the others carry it.
+Here is why: When you buy single stocks, you take on "company risk"—if a CEO resigns or a product flops, your portfolio drops. But with an Index ETF, you own a tiny slice of hundreds of top corporations simultaneously. If one company dips, the others support it.
 
-Here are your two rock-solid foundation anchors:`
-        : `Great choice! 🛡️ For long-term peace of mind, **broad Index ETFs are the undisputed gold standard** for beginner wealth building.
-
-Here is why: When you buy single stocks, you take on "company risk"—if a CEO resigns or a product flops, your portfolio drops. But with an Index ETF, you own a tiny slice of hundreds of top corporations simultaneously. If one dips, the others support it.
-
-Here are your two top customized matches:`;
+Here are two top customized matches:`;
 
       return {
         content,
         recommendations: [voov, usf],
         quickReplies: [
-          { id: 'q_roast', label: '🔥 Roast My Portfolio', prompt: 'Roast my portfolio and tell me what mistakes I am making.' },
+          { id: 'q_review', label: '📊 Review My Portfolio', prompt: 'Review my portfolio and provide an objective analysis of my holdings.' },
           { id: 'q_dca', label: '🔄 What is DCA?', prompt: 'Can you explain Dollar-Cost Averaging in simple terms?' },
           { id: 'q_tech_add', label: '🚀 Can I add a little Tech too?', prompt: 'Can I combine this safe ETF with a high-growth tech stock like Nvidia or Apple?' }
         ]
@@ -258,13 +233,7 @@ Here are your two top customized matches:`;
         ]
       );
 
-      const content = isSpicy
-        ? `Ah, tech and AI. Let me guess—you saw a green candle on social media and now you want to go all-in at the peak? 🚀
-
-Listen up: Artificial intelligence is a genuine revolution, but buying overextended momentum when RSI is 75 is the classic retail trap. If you want tech gains without checking the market 40 times a day in a cold sweat, use the **Core & Satellite strategy**.
-
-Anchor 50% in a Growth ETF like **VOOG**, and keep individual rockets like **NVDA** capped at 15%–20%. That way, when tech takes a 15% breather, your portfolio doesn't look like a war zone.`
-        : `Tech & AI represent massive generational growth trends! 🚀 
+      const content = `Tech & AI represent massive generational growth trends! 🚀
 
 However, as your coach, here is the golden rule: **"Core & Satellite Strategy."** 
 Never put 100% of your money into a single volatile tech stock. Instead, pair a Growth ETF (like **VOOG**) with high-conviction leaders (like **NVDA**). That way, you capture huge AI upside without risking devastating drawdowns.
@@ -275,7 +244,7 @@ Check out these tailored matches:`;
         content,
         recommendations: [voog, nvda],
         quickReplies: [
-          { id: 'q_roast', label: '🔥 Roast My Portfolio', prompt: 'Roast my portfolio and tell me what mistakes I am making.' },
+          { id: 'q_review', label: '📊 Review My Portfolio', prompt: 'Review my portfolio and provide an objective analysis of my holdings.' },
           { id: 'q_nvda_risk', label: '⚠️ Is Nvidia too expensive?', prompt: 'Is Nvidia currently too expensive to buy, or should I wait for a dip?' },
           { id: 'q_tesla_fit', label: '🚗 What about Tesla (TSLA)?', prompt: 'Is Tesla (TSLA) a good fit alongside Nvidia?' }
         ]
@@ -293,25 +262,19 @@ Check out these tailored matches:`;
         ]
       );
 
-      const content = isSpicy
-        ? `Oh, Tesla! ⚡ The favorite stock of adrenaline junkies and Elon tweet watchers everywhere.
-
-Let's be completely real: Tesla doesn't trade like a traditional company—it trades like a roller coaster with no seatbelts. It can surge 20% on robotaxi hype or dump 25% on a price cut before lunch.
-
-If you enjoy sleeping at night, **never make Tesla your biggest holding**. Cap it at 5%–10% as your speculative fun allocation, and let boring index funds carry the rest of your future retirement.`
-        : `Here is an honest, objective breakdown on **Tesla (TSLA)**: ⚡
+      const content = `Here is an honest, objective breakdown on **Tesla (TSLA)**: ⚡
 
 Tesla is a **polarizing, high-beta stock**. It behaves more like a high-speed roller coaster than a steady ship:
 - **The Upside**: Autonomous AI (FSD), robotaxis, energy storage, and massive brand loyalty.
 - **The Risk**: Fierce EV price competition, sensitive to interest rates, and high valuation multiples.
 
-If you are a beginner, **do not make Tesla your primary holding**. If you love the company, treat it as a small "spice" in your portfolio (5%–10% max) while keeping the majority in broad index funds.`;
+If you are a beginner, **do not make Tesla your primary holding**. If you love the company, treat it as a small "satellite" in your portfolio (5%–10% max) while keeping the majority in broad index funds.`;
 
       return {
         content,
         recommendations: [tsla],
         quickReplies: [
-          { id: 'q_roast', label: '🔥 Roast My Portfolio', prompt: 'Roast my portfolio and tell me what mistakes I am making.' },
+          { id: 'q_review', label: '📊 Review My Portfolio', prompt: 'Review my portfolio and provide an objective analysis of my holdings.' },
           { id: 'q_balance_tsla', label: '⚖️ Balance with ETFs?', prompt: 'How should I balance Tesla with safe index ETFs?' },
           { id: 'q_other_picks', label: '🔍 What else do you suggest?', prompt: 'What other stocks or ETFs would you suggest for me?' }
         ]
@@ -320,30 +283,22 @@ If you are a beginner, **do not make Tesla your primary holding**. If you love t
 
     // Scenario 4: User asks about Dollar-Cost Averaging (DCA) or How much to start with
     if (lower.includes('dca') || lower.includes('dollar-cost') || lower.includes('how much') || lower.includes('start with') || lower.includes('budget')) {
-      const content = isSpicy
-        ? `**Dollar-Cost Averaging (DCA)**: The single greatest antidote to retail trader panic! 💡
-
-Here is the secret: You are NOT a psychic. Neither am I, and neither is that guy on Twitter claiming he predicted the exact market bottom. Trying to time the perfect entry is a fool's errand.
-
-With DCA, you invest a fixed amount (say $50 or $100) on the same day every month. When the market is euphoric and expensive, your money automatically buys fewer shares. When the market crashes and everyone is crying on Reddit, your money automatically scoops up shares on discount!
-
-Start with whatever won't hurt your weekend plans—even **$30 a month** in an index ETF creates serious compound wealth.`
-        : `**Dollar-Cost Averaging (DCA)** is the single most powerful habit in investing! 💡
+      const content = `**Dollar-Cost Averaging (DCA)** is the single most powerful habit in investing! 💡
 
 ### What is it?
 Instead of stressing over whether today is the "perfect time" to buy, you invest a **fixed amount of money at regular intervals** (e.g. $50 every month or every payday).
 
-### Why it works like magic:
-1. When stock prices are **high**, your $50 automatically buys **fewer** shares.
-2. When stock prices **drop**, your $50 automatically buys **more** shares on sale!
-3. Over time, your average purchase price smooths out, completely removing emotional stress and the fear of "buying at the top."
+### Why it works:
+1. When stock prices are **high**, your money automatically buys **fewer** shares.
+2. When stock prices **drop**, your money automatically buys **more** shares on discount!
+3. Over time, your average purchase price smooths out, removing emotional stress and the fear of "buying at the top."
 
 **Recommendation**: Start with whatever doesn't hurt your monthly budget—even **$25 or $50 a month** in an index ETF like **VOOV** or **USF.NZ** builds massive long-term compound momentum.`;
 
       return {
         content,
         quickReplies: [
-          { id: 'q_roast', label: '🔥 Roast My Portfolio', prompt: 'Roast my portfolio and tell me what mistakes I am making.' },
+          { id: 'q_review', label: '📊 Review My Portfolio', prompt: 'Review my portfolio and provide an objective analysis of my holdings.' },
           { id: 'q_rec_etf', label: '🎯 Best ETF for DCA', prompt: 'Which specific ETF is best for my monthly DCA plan?' },
           { id: 'q_compound', label: '📈 Compound Growth', prompt: 'Explain how compound interest turns small monthly investments into large wealth.' }
         ]
@@ -351,22 +306,16 @@ Instead of stressing over whether today is the "perfect time" to buy, you invest
     }
 
     // Scenario 5: General fallback / Conversation continuer
-    const content = isSpicy
-      ? `I hear you! But let's cut through the noise and talk real strategy. 
-
-Every dollar you throw into the market should have a specific job, not just a prayer. Tell me:
-1. **How long can you leave this money untouched?** (1–2 years vs 5–10+ years)
-2. **What happens to your heart rate when a stock drops 10% in a week?** (Do you panic-sell, or do you buy the dip like a pro?)`
-      : `I hear you! As your investment mentor, my goal is to make sure every dollar you put to work has a clear purpose.
+    const content = `I hear you! As your investment coach, my goal is to make sure every dollar you put to work has a clear purpose.
 
 To give you the most tailored stock and ETF recommendations, tell me:
 1. **How many years** can you leave your investments alone to grow? (e.g. 1–2 yrs vs 5–10+ yrs)
-2. **What's your risk comfort?** (Do you prefer stability, or are you comfortable with roller coasters for higher gains?)`;
+2. **What is your risk comfort?** (Do you prefer stability with index ETFs, or are you comfortable with volatility for higher tech gains?)`;
 
     return {
       content,
       quickReplies: [
-        { id: 'goal_roast', label: '🔥 Roast My Portfolio', prompt: 'Roast my portfolio and tell me what mistakes I am making.' },
+        { id: 'goal_review', label: '📊 Review My Portfolio', prompt: 'Review my portfolio and provide an objective analysis of my holdings.' },
         { id: 'resp_long_safe', label: '🛡️ 5+ years, prefer low risk', prompt: 'I have a 5+ year timeline and prefer low risk with broad index ETFs.' },
         { id: 'resp_long_growth', label: '🚀 5+ years, love tech growth', prompt: 'I have a 5+ year timeline and want aggressive tech and AI growth.' }
       ]
@@ -374,20 +323,20 @@ To give you the most tailored stock and ETF recommendations, tell me:
   }
 
   /**
-   * Generates a witty, spicy, sarcastic portfolio roast based on actual user holdings
+   * Generates a constructive, objective portfolio health review based on actual user holdings
    */
-  private generatePortfolioRoast(
+  private generatePortfolioReview(
     positions: Position[],
-    quotes: Record<string, StockQuote>,
-    isSpicy: boolean
+    quotes: Record<string, StockQuote>
   ): { content: string; recommendations?: StockRecommendationCard[]; quickReplies?: Array<{ id: string; label: string; prompt: string }> } {
     if (!positions || positions.length === 0) {
       return {
-        content: `You want me to roast your portfolio? Darling, you don't even HAVE a portfolio yet! 💀
+        content: `You don't currently have any open stock or ETF holdings recorded in your portfolio. 📊
 
-Right now, your asset allocation is **100% Cash** and **100% Procrastination**. You're watching inflation chew through your purchasing power while standing on the sidelines like a deer in the headlights!
+**How to start strong:**
+The simplest and most reliable way to begin is by picking a broad-market index ETF (like **VOOV** or **USF.NZ**) and setting up a monthly Dollar-Cost Averaging (DCA) routine with whatever comfortable amount you choose (such as $30–$50/month). 
 
-Here is your spicy reality check: Stop waiting for the 'perfect dip' that never arrives. Put your first $50 into a broad index ETF like **VOOV** or **USF.NZ**, set up monthly Dollar-Cost Averaging, and actually start building wealth instead of dreaming about it! 🍿`,
+This protects you from individual company risks while letting you participate directly in long-term economic growth!`,
         quickReplies: [
           { id: 'q_get_started', label: '🚀 How do I start my portfolio?', prompt: 'What is the very first stock or ETF I should buy today?' },
           { id: 'q_dca_plan', label: '🔄 Show me a DCA plan', prompt: 'Give me a simple $50 monthly DCA plan.' }
@@ -403,21 +352,23 @@ Here is your spicy reality check: Stop waiting for the 'perfect dip' that never 
       const pnlStr = (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(1) + '%';
 
       return {
-        content: `Alright, let's inspect this masterpiece... You have literally put everything into **${p.ticker}**! 🎢
+        content: `📊 **Portfolio Analysis for ${p.ticker}:**
 
-You bought at **$${p.averageBuyPrice.toFixed(2)}**, current price is **$${currentPrice.toFixed(2)}** (${pnlStr}).
+You currently have all of your invested capital in **${p.ticker}**.
+- **Average Buy Price**: $${p.averageBuyPrice.toFixed(2)}
+- **Current Market Price**: $${currentPrice.toFixed(2)} (${pnlStr})
 
-Putting 100% of your money into one single ticker is not an investment strategy—it's a high-stakes lottery ticket with a ticker symbol! If that company's CEO trips over their shoelaces tomorrow, your entire net worth takes a nosedive.
+**Key Takeaway**: Holding only one single stock creates high concentration risk. If unexpected company or sector headwinds occur, your entire portfolio absorbs the shock.
 
-**The Fix**: Balance this lone wolf with a solid 50% foundation in an S&P 500 ETF (like **VOOV**). You can still keep ${p.ticker}, but without risking cardiac arrest every earnings season! 🛡️`,
+**Constructive Next Step**: Consider balancing this position with a diversified core foundation, such as an S&P 500 ETF (like **VOOV** or **USF.NZ**). That way, you can keep your conviction in ${p.ticker} while spreading your foundation across hundreds of resilient companies. 🛡️`,
         quickReplies: [
           { id: 'q_balance_etf', label: '🛡️ Best ETF to balance this', prompt: `What index ETF should I pair with ${p.ticker} to protect myself?` },
-          { id: 'q_trim_rule', label: '💰 Should I take profits or cut losses?', prompt: `Given my entry at $${p.averageBuyPrice.toFixed(2)}, should I trim or hold?` }
+          { id: 'q_trim_rule', label: '💰 Should I take profits or hold?', prompt: `Given my entry at $${p.averageBuyPrice.toFixed(2)}, how should I manage this position?` }
         ]
       };
     }
 
-    // Multiple positions roast
+    // Multiple positions analysis
     let worstPosition = positions[0];
     let worstPnl = 999;
     let bestPosition = positions[0];
@@ -441,28 +392,34 @@ Putting 100% of your money into one single ticker is not an investment strategy�
     const worstStr = (worstPnl >= 0 ? '+' : '') + worstPnl.toFixed(1) + '%';
     const bestStr = (bestPnl >= 0 ? '+' : '') + bestPnl.toFixed(1) + '%';
 
-    let roastBody = '';
+    let performanceSummary = '';
     if (worstPnl < -8) {
-      roastBody = `I see you're holding **${worstPosition.ticker}** down **${worstStr}** from your **$${worstPosition.averageBuyPrice.toFixed(2)}** cost basis. Let me guess: you saw a green candle on social media, thought 'this is going to the moon', bought the exact peak, and suddenly became an accidental 'long-term investor'? 🍿
-
-Rule number one of not going broke: Never marry a losing stock without a stop-loss. Either dollar-cost average down if the company's fundamentals are actually intact, or stop holding bags out of pure pride!`;
-    } else if (bestPnl > 15) {
-      roastBody = `On the bright side, **${bestPosition.ticker}** is carrying the team up **${bestStr}**! Enjoy that dopamine hit, but remember: paper gains aren't real money until you lock them in. If it hits your target sell price, trim 20% to take your chips off the table.`;
+      performanceSummary = `- **Position Under Pressure**: **${worstPosition.ticker}** is currently ${worstStr} from your $${worstPosition.averageBuyPrice.toFixed(2)} cost basis. Evaluate if the core investment thesis remains intact. For individual stocks, maintain stop-loss discipline; for broad index ETFs, pullbacks can serve as attractive DCA entry points.`;
     } else {
-      roastBody = `Your portfolio (${tickerList}) is currently floating in limbo. Nothing is catastrophic, but you're probably checking the charts 15 times a day waiting for excitement. Stick to your DCA rules and stop staring at the 1-minute chart!`;
+      performanceSummary = `- **Downside Risk**: Your holdings are currently trading within manageable ranges near your average buy prices. Maintain disciplined position sizing.`;
+    }
+
+    let profitSummary = '';
+    if (bestPnl > 12) {
+      profitSummary = `- **Top Performer**: **${bestPosition.ticker}** is leading your portfolio at ${bestStr} over your purchase price of $${bestPosition.averageBuyPrice.toFixed(2)}. If this reaches your designated target, consider taking partial profits (e.g. trimming 15%–20%) to lock in realized gains.`;
+    } else {
+      profitSummary = `- **Growth Trajectory**: Positions are tracking close to breakeven. Continue regular scheduled additions rather than trying to time daily swings.`;
     }
 
     return {
-      content: `🔥 **Nova's Spicy Portfolio Roast:**
+      content: `📊 **Portfolio Health & Diversification Review:**
 
-You are currently juggling **${positions.length} positions**: [${tickerList}].
+You are currently holding **${positions.length} positions**: [${tickerList}].
 
-${roastBody}
+${profitSummary}
+${performanceSummary}
 
-**The Diagnosis**: You have courage, but discipline is what actually buys yachts. Keep broad index ETFs as at least 50% of your total balance so your individual stock bets don't ruin your sleep! ☕`,
+**Strategic Recommendations**:
+1. **Core Foundation**: Ensure at least 50% of your total portfolio is invested in broad-market index ETFs (e.g. S&P 500 or Total Market) to buffer individual stock volatility.
+2. **Rebalancing**: Review your position weights periodically to prevent any single stock from dominating more than 20% of your total net worth.`,
       quickReplies: [
-        { id: 'q_fix_worst', label: `⚠️ What should I do with ${worstPosition.ticker}?`, prompt: `Give me an action plan for ${worstPosition.ticker} which is currently ${worstStr}.` },
-        { id: 'q_lock_profit', label: `💰 Lock gains on ${bestPosition.ticker}?`, prompt: `Should I trim ${bestPosition.ticker} to lock in ${bestStr}?` },
+        { id: 'q_fix_worst', label: `⚠️ Action plan for ${worstPosition.ticker}`, prompt: `Give me a constructive action plan for ${worstPosition.ticker} which is currently ${worstStr}.` },
+        { id: 'q_lock_profit', label: `💰 Managing gains on ${bestPosition.ticker}`, prompt: `Should I take partial profits on ${bestPosition.ticker} (${bestStr}) or continue holding?` },
         { id: 'q_etf_anchor', label: '🛡️ Recommend safe ETFs for balance', prompt: 'Which index ETFs should I add to anchor this portfolio?' }
       ]
     };

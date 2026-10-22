@@ -4,7 +4,6 @@ import { aiAdvisorService, INITIAL_GREETING_MESSAGE } from '../services/aiAdviso
 import { useMarketStore } from './marketStore';
 import { useLanguageStore } from './languageStore';
 import { usePortfolioStore } from './portfolioStore';
-import { speechService, VoiceGender, VoicePersona } from '../services/speechService';
 
 interface AdvisorState {
   messages: AdvisorMessage[];
@@ -12,10 +11,6 @@ interface AdvisorState {
   isTyping: boolean;
   pendingPrompt: string | null;
   shouldFocusInput: boolean;
-  voiceGender: VoiceGender;
-  personaTone: VoicePersona;
-  setVoiceGender: (gender: VoiceGender) => void;
-  setPersonaTone: (tone: VoicePersona) => void;
   setPendingPrompt: (prompt: string | null) => void;
   setShouldFocusInput: (focus: boolean) => void;
   sendMessage: (text: string) => Promise<void>;
@@ -23,15 +18,12 @@ interface AdvisorState {
   resetChat: () => void;
 }
 
-const STORAGE_KEY = 'investlearn_advisor_chat_v3';
+const STORAGE_KEY = 'investlearn_advisor_chat_v4';
 
 const loadSavedAdvisorState = (): { 
   messages: AdvisorMessage[]; 
   profile: InvestorProfile;
-  voiceGender: VoiceGender;
-  personaTone: VoicePersona;
 } => {
-  const currentSpeech = speechService.getSettings();
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
@@ -40,8 +32,6 @@ const loadSavedAdvisorState = (): {
         return {
           messages: parsed.messages,
           profile: parsed.profile || {},
-          voiceGender: parsed.voiceGender || currentSpeech.gender || 'female',
-          personaTone: parsed.personaTone || currentSpeech.persona || 'spicy_sarcastic',
         };
       }
     }
@@ -51,8 +41,6 @@ const loadSavedAdvisorState = (): {
   return {
     messages: [INITIAL_GREETING_MESSAGE],
     profile: {},
-    voiceGender: currentSpeech.gender || 'female',
-    personaTone: currentSpeech.persona || 'spicy_sarcastic',
   };
 };
 
@@ -61,12 +49,10 @@ export const useAdvisorStore = create<AdvisorState>((set, get) => {
 
   const persist = (
     messages: AdvisorMessage[], 
-    profile: InvestorProfile,
-    voiceGender: VoiceGender,
-    personaTone: VoicePersona
+    profile: InvestorProfile
   ) => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ messages, profile, voiceGender, personaTone }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ messages, profile }));
     } catch (e) {
       console.error('Failed to persist advisor chat', e);
     }
@@ -78,20 +64,6 @@ export const useAdvisorStore = create<AdvisorState>((set, get) => {
     isTyping: false,
     pendingPrompt: null,
     shouldFocusInput: false,
-    voiceGender: initial.voiceGender,
-    personaTone: initial.personaTone,
-
-    setVoiceGender: (voiceGender: VoiceGender) => {
-      set({ voiceGender });
-      speechService.saveSettings({ gender: voiceGender });
-      persist(get().messages, get().profile, voiceGender, get().personaTone);
-    },
-
-    setPersonaTone: (personaTone: VoicePersona) => {
-      set({ personaTone });
-      speechService.saveSettings({ persona: personaTone });
-      persist(get().messages, get().profile, get().voiceGender, personaTone);
-    },
 
     setPendingPrompt: (pendingPrompt) => set({ pendingPrompt }),
     setShouldFocusInput: (shouldFocusInput) => set({ shouldFocusInput }),
@@ -99,7 +71,7 @@ export const useAdvisorStore = create<AdvisorState>((set, get) => {
     updateProfile: (partial) => {
       const updatedProfile = { ...get().profile, ...partial };
       set({ profile: updatedProfile });
-      persist(get().messages, updatedProfile, get().voiceGender, get().personaTone);
+      persist(get().messages, updatedProfile);
     },
 
     sendMessage: async (text: string) => {
@@ -115,7 +87,7 @@ export const useAdvisorStore = create<AdvisorState>((set, get) => {
 
       const currentMessages = [...get().messages, userMsg];
       set({ messages: currentMessages, isTyping: true });
-      persist(currentMessages, get().profile, get().voiceGender, get().personaTone);
+      persist(currentMessages, get().profile);
 
       // Infer profile updates from common keywords
       const lower = trimmed.toLowerCase();
@@ -130,14 +102,12 @@ export const useAdvisorStore = create<AdvisorState>((set, get) => {
         const quotes = useMarketStore.getState().quotes;
         const lang = useLanguageStore.getState().language;
         const positions = usePortfolioStore.getState().positions;
-        const tone = get().personaTone;
 
         const response = await aiAdvisorService.generateAdvisorResponse(
           currentMessages,
           currentProfile,
           quotes,
           lang,
-          tone,
           positions
         );
 
@@ -152,13 +122,10 @@ export const useAdvisorStore = create<AdvisorState>((set, get) => {
 
         const finalMessages = [...currentMessages, aiMsg];
         set({ messages: finalMessages, isTyping: false });
-        persist(finalMessages, currentProfile, get().voiceGender, get().personaTone);
+        persist(finalMessages, currentProfile);
       } catch (err) {
         console.error('Failed to get advisor response', err);
-        const isSpicy = get().personaTone === 'spicy_sarcastic';
-        const errorContent = isSpicy
-          ? "Ugh, the market data feed glitched—probably because someone tried to trade on a toaster! Try asking me again, or tell me to roast your portfolio!"
-          : "I'm having a little trouble connecting to market data right now, but feel free to ask me about Dollar-Cost Averaging, Index ETFs, or any specific stock like Nvidia or Tesla!";
+        const errorContent = "I'm having a little trouble connecting to market data right now, but feel free to ask me about Dollar-Cost Averaging, Index ETFs, or any specific stock like Nvidia or Tesla!";
 
         const errorMsg: AdvisorMessage = {
           id: 'msg_' + Date.now() + '_err',
@@ -166,14 +133,14 @@ export const useAdvisorStore = create<AdvisorState>((set, get) => {
           content: errorContent,
           timestamp: Date.now(),
           quickReplies: [
-            { id: 'q_roast_retry', label: '🔥 Roast My Portfolio', prompt: 'Roast my portfolio and tell me what mistakes I am making.' },
+            { id: 'q_review_retry', label: '📊 Review My Portfolio', prompt: 'Review my portfolio and provide an objective analysis of my holdings.' },
             { id: 'q_retry', label: '🔄 Ask about Index ETFs', prompt: 'Tell me about safe index ETFs like VOO or USF.' },
             { id: 'q_dca', label: '💡 What is Dollar-Cost Averaging?', prompt: 'What is Dollar-Cost Averaging?' }
           ]
         };
         const finalMessages = [...currentMessages, errorMsg];
         set({ messages: finalMessages, isTyping: false });
-        persist(finalMessages, currentProfile, get().voiceGender, get().personaTone);
+        persist(finalMessages, currentProfile);
       }
     },
 
@@ -181,7 +148,7 @@ export const useAdvisorStore = create<AdvisorState>((set, get) => {
       const resetMessages = [INITIAL_GREETING_MESSAGE];
       const resetProfile = {};
       set({ messages: resetMessages, profile: resetProfile, isTyping: false });
-      persist(resetMessages, resetProfile, get().voiceGender, get().personaTone);
+      persist(resetMessages, resetProfile);
     }
   };
 });
