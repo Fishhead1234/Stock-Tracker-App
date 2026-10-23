@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { X, Check, Trash2, Edit3, DollarSign, Calendar, FileText, AlertTriangle } from 'lucide-react';
+import { X, Check, Trash2, Edit3, Calendar, FileText, AlertTriangle } from 'lucide-react';
 import { Position } from '../../types/portfolio';
 import { StockQuote } from '../../types/stock';
 import { usePortfolioStore } from '../../store/portfolioStore';
+import { useSettingsStore } from '../../store/settingsStore';
 
 interface Props {
   stock: StockQuote;
@@ -12,6 +13,8 @@ interface Props {
 
 export const EditHoldingModal: React.FC<Props> = ({ stock, position, onClose }) => {
   const { updatePosition, deletePosition } = usePortfolioStore();
+  const { themeMode } = useSettingsStore();
+  const isLight = themeMode === 'neutral-light';
 
   const [sharesInput, setSharesInput] = useState<string>(position.shares.toString());
   const [priceInput, setPriceInput] = useState<string>(position.averageBuyPrice.toString());
@@ -55,28 +58,42 @@ export const EditHoldingModal: React.FC<Props> = ({ stock, position, onClose }) 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
       <div 
-        className="bg-navy-900 border border-navy-700/80 rounded-3xl w-full max-w-md max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-slide-up"
+        className={`border rounded-3xl w-full max-w-md max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-slide-up transition-colors duration-200 ${
+          isLight ? 'bg-white border-[rgba(0,0,0,0.12)] text-[#000000]' : 'bg-navy-900 border-navy-700/80 text-white'
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-4 border-b border-navy-800 flex items-center justify-between bg-navy-950/80">
+        <div className={`p-4 border-b flex items-center justify-between transition-colors ${
+          isLight ? 'bg-[#F8F9FA] border-[rgba(0,0,0,0.08)]' : 'bg-navy-950/80 border-navy-800'
+        }`}>
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-growth-500/20 border border-growth-500/30 flex items-center justify-center text-growth-400">
+            <div className={`w-8 h-8 rounded-xl border flex items-center justify-center ${
+              isLight ? 'bg-[#34C759]/15 border-[#34C759]/30 text-[#34C759]' : 'bg-growth-500/20 border-growth-500/30 text-growth-400'
+            }`}>
               <Edit3 className="w-4 h-4" />
             </div>
             <div>
-              <span className="text-[10px] uppercase font-bold text-growth-400 tracking-wider font-mono">
+              <span className={`text-[10px] uppercase font-bold tracking-wider font-mono ${
+                isLight ? 'text-[#34C759]' : 'text-growth-400'
+              }`}>
                 Modify Tracked Holding
               </span>
-              <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
+              <h3 className={`text-sm font-bold flex items-center gap-1.5 ${
+                isLight ? 'text-[#000000]' : 'text-white'
+              }`}>
                 <span>{stock.ticker}</span>
-                <span className="text-xs text-slate-400 font-normal">({stock.name})</span>
+                <span className={`text-xs font-normal ${isLight ? 'text-[#666666]' : 'text-slate-400'}`}>
+                  ({stock.name})
+                </span>
               </h3>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-navy-800 hover:bg-navy-700 text-slate-300 flex items-center justify-center transition"
+            className={`w-8 h-8 rounded-full flex items-center justify-center transition ${
+              isLight ? 'bg-[#E5E5EA] text-[#666666] hover:text-black' : 'bg-navy-800 text-slate-300 hover:text-white'
+            }`}
           >
             <X className="w-4 h-4" />
           </button>
@@ -85,18 +102,24 @@ export const EditHoldingModal: React.FC<Props> = ({ stock, position, onClose }) 
         {/* Form Body */}
         <form onSubmit={handleSave} className="p-5 overflow-y-auto space-y-4">
           {/* Current Live Market Reference */}
-          <div className="p-3 rounded-2xl bg-navy-950/60 border border-navy-800 flex items-center justify-between text-xs font-mono">
-            <span className="text-slate-400">Current Market Price:</span>
-            <span className="font-bold text-white">
+          <div className={`p-3 rounded-2xl border flex items-center justify-between text-xs font-mono ${
+            isLight ? 'bg-[#F2F2F7] border-[rgba(0,0,0,0.08)]' : 'bg-navy-950/60 border-navy-800'
+          }`}>
+            <span className={isLight ? 'text-[#666666]' : 'text-slate-400'}>Current Market Price:</span>
+            <span className={`font-bold ${isLight ? 'text-[#000000]' : 'text-white'}`}>
               {curr}{stock.price.toFixed(2)} {stock.currency}
             </span>
           </div>
 
           {/* Number of Shares Input */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300 flex items-center justify-between">
+            <label className={`text-xs font-semibold flex items-center justify-between ${
+              isLight ? 'text-[#333333]' : 'text-slate-300'
+            }`}>
               <span>Total Shares Owned</span>
-              <span className="text-[10px] text-slate-500 font-mono">Current: {position.shares}</span>
+              <span className={`text-[10px] font-mono ${isLight ? 'text-[#8E8E93]' : 'text-slate-500'}`}>
+                Current: {position.shares}
+              </span>
             </label>
             <div className="relative">
               <input
@@ -107,22 +130,32 @@ export const EditHoldingModal: React.FC<Props> = ({ stock, position, onClose }) 
                 value={sharesInput}
                 onChange={(e) => setSharesInput(e.target.value)}
                 placeholder="e.g. 10"
-                className="w-full bg-navy-950 border border-navy-750 focus:border-growth-500 rounded-xl px-3.5 py-2.5 text-xs text-white font-mono placeholder-slate-600 focus:outline-none transition"
+                className={`w-full rounded-xl px-3.5 py-2.5 text-xs font-mono focus:outline-none transition border ${
+                  isLight 
+                    ? 'bg-[#F2F2F7] border-[rgba(0,0,0,0.12)] text-black focus:border-[#007AFF] placeholder-slate-400' 
+                    : 'bg-navy-950 border-navy-750 text-white focus:border-growth-500 placeholder-slate-600'
+                }`}
               />
-              <span className="absolute right-3 top-2.5 text-xs text-slate-500 font-mono">shares</span>
+              <span className={`absolute right-3 top-2.5 text-xs font-mono ${isLight ? 'text-[#8E8E93]' : 'text-slate-500'}`}>
+                shares
+              </span>
             </div>
           </div>
 
           {/* Average Purchase Price Input */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300 flex items-center justify-between">
+            <label className={`text-xs font-semibold flex items-center justify-between ${
+              isLight ? 'text-[#333333]' : 'text-slate-300'
+            }`}>
               <span>Average Purchase Price ({curr})</span>
-              <span className="text-[10px] text-slate-500 font-mono">
+              <span className={`text-[10px] font-mono ${isLight ? 'text-[#8E8E93]' : 'text-slate-500'}`}>
                 Current: {curr}{position.averageBuyPrice.toFixed(2)}
               </span>
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-2.5 text-xs text-slate-400 font-mono">{curr}</span>
+              <span className={`absolute left-3 top-2.5 text-xs font-mono ${isLight ? 'text-[#8E8E93]' : 'text-slate-400'}`}>
+                {curr}
+              </span>
               <input
                 type="number"
                 step="any"
@@ -131,32 +164,44 @@ export const EditHoldingModal: React.FC<Props> = ({ stock, position, onClose }) 
                 value={priceInput}
                 onChange={(e) => setPriceInput(e.target.value)}
                 placeholder={stock.price.toString()}
-                className="w-full bg-navy-950 border border-navy-750 focus:border-growth-500 rounded-xl pl-8 pr-3.5 py-2.5 text-xs text-white font-mono placeholder-slate-600 focus:outline-none transition"
+                className={`w-full rounded-xl pl-8 pr-3.5 py-2.5 text-xs font-mono focus:outline-none transition border ${
+                  isLight 
+                    ? 'bg-[#F2F2F7] border-[rgba(0,0,0,0.12)] text-black focus:border-[#007AFF] placeholder-slate-400' 
+                    : 'bg-navy-950 border-navy-750 text-white focus:border-growth-500 placeholder-slate-600'
+                }`}
               />
             </div>
-            <p className="text-[10px] text-slate-500">
+            <p className={`text-[10px] ${isLight ? 'text-[#8E8E93]' : 'text-slate-500'}`}>
               Enter your actual average cost basis per share to ensure accurate profit/loss tracking.
             </p>
           </div>
 
           {/* Purchase Date Input */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-slate-400" />
+            <label className={`text-xs font-semibold flex items-center gap-1.5 ${
+              isLight ? 'text-[#333333]' : 'text-slate-300'
+            }`}>
+              <Calendar className={`w-3.5 h-3.5 ${isLight ? 'text-[#8E8E93]' : 'text-slate-400'}`} />
               <span>Purchase Date</span>
             </label>
             <input
               type="date"
               value={purchaseDate}
               onChange={(e) => setPurchaseDate(e.target.value)}
-              className="w-full bg-navy-950 border border-navy-750 focus:border-growth-500 rounded-xl px-3.5 py-2.5 text-xs text-white font-mono placeholder-slate-600 focus:outline-none transition"
+              className={`w-full rounded-xl px-3.5 py-2.5 text-xs font-mono focus:outline-none transition border ${
+                isLight 
+                  ? 'bg-[#F2F2F7] border-[rgba(0,0,0,0.12)] text-black focus:border-[#007AFF]' 
+                  : 'bg-navy-950 border-navy-750 text-white focus:border-growth-500'
+              }`}
             />
           </div>
 
           {/* Notes / Investment Thesis */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-              <FileText className="w-3.5 h-3.5 text-slate-400" />
+            <label className={`text-xs font-semibold flex items-center gap-1.5 ${
+              isLight ? 'text-[#333333]' : 'text-slate-300'
+            }`}>
+              <FileText className={`w-3.5 h-3.5 ${isLight ? 'text-[#8E8E93]' : 'text-slate-400'}`} />
               <span>Personal Notes or Thesis (Optional)</span>
             </label>
             <textarea
@@ -164,27 +209,37 @@ export const EditHoldingModal: React.FC<Props> = ({ stock, position, onClose }) 
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="e.g. Long-term holding for AI growth cycle..."
-              className="w-full bg-navy-950 border border-navy-750 focus:border-growth-500 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-600 focus:outline-none transition resize-none"
+              className={`w-full rounded-xl px-3.5 py-2 text-xs focus:outline-none transition resize-none border ${
+                isLight 
+                  ? 'bg-[#F2F2F7] border-[rgba(0,0,0,0.12)] text-black focus:border-[#007AFF] placeholder-slate-400' 
+                  : 'bg-navy-950 border-navy-750 text-white focus:border-growth-500 placeholder-slate-600'
+              }`}
             />
           </div>
 
           {/* Real-time Recalculated Impact Summary Card */}
-          <div className="p-3.5 rounded-2xl bg-navy-950/80 border border-navy-800 space-y-2">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block font-mono">
+          <div className={`p-3.5 rounded-2xl border space-y-2 ${
+            isLight ? 'bg-[#F8F9FA] border-[rgba(0,0,0,0.08)]' : 'bg-navy-950/80 border-navy-800'
+          }`}>
+            <span className={`text-[10px] font-bold uppercase tracking-wider block font-mono ${
+              isLight ? 'text-[#666666]' : 'text-slate-400'
+            }`}>
               Updated Holding Preview
             </span>
             <div className="grid grid-cols-2 gap-2 text-xs font-mono">
               <div>
-                <span className="text-[10px] text-slate-500 font-sans block">Total Invested:</span>
-                <span className="text-slate-200 font-bold">{curr}{newCostBasis.toFixed(2)}</span>
+                <span className={`text-[10px] font-sans block ${isLight ? 'text-[#8E8E93]' : 'text-slate-500'}`}>Total Invested:</span>
+                <span className={`font-bold ${isLight ? 'text-[#000000]' : 'text-slate-200'}`}>{curr}{newCostBasis.toFixed(2)}</span>
               </div>
               <div>
-                <span className="text-[10px] text-slate-500 font-sans block">Current Equity:</span>
-                <span className="text-slate-200 font-bold">{curr}{newCurrentValue.toFixed(2)}</span>
+                <span className={`text-[10px] font-sans block ${isLight ? 'text-[#8E8E93]' : 'text-slate-500'}`}>Current Equity:</span>
+                <span className={`font-bold ${isLight ? 'text-[#000000]' : 'text-slate-200'}`}>{curr}{newCurrentValue.toFixed(2)}</span>
               </div>
-              <div className="col-span-2 pt-1.5 border-t border-navy-800/80 flex items-center justify-between">
-                <span className="text-[10px] text-slate-500 font-sans">Projected Return:</span>
-                <span className={`font-bold ${newProfit >= 0 ? 'text-growth-400' : 'text-loss-500'}`}>
+              <div className={`col-span-2 pt-1.5 border-t flex items-center justify-between ${
+                isLight ? 'border-[rgba(0,0,0,0.06)]' : 'border-navy-800/80'
+              }`}>
+                <span className={`text-[10px] font-sans ${isLight ? 'text-[#8E8E93]' : 'text-slate-500'}`}>Projected Return:</span>
+                <span className={`font-bold ${newProfit >= 0 ? isLight ? 'text-[#248A3D]' : 'text-growth-400' : 'text-loss-500'}`}>
                   {newProfit >= 0 ? '+' : ''}{curr}{newProfit.toFixed(2)} ({newProfitPercent >= 0 ? '+' : ''}{newProfitPercent.toFixed(1)}%)
                 </span>
               </div>
@@ -196,7 +251,11 @@ export const EditHoldingModal: React.FC<Props> = ({ stock, position, onClose }) 
             <button
               type="submit"
               disabled={numShares <= 0 || numPrice <= 0 || isSaved}
-              className="w-full py-3 bg-gradient-to-r from-growth-600 to-emerald-600 hover:from-growth-500 hover:to-emerald-500 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2 disabled:opacity-50"
+              className={`w-full py-3 font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2 disabled:opacity-50 text-white ${
+                isLight 
+                  ? 'bg-[#007AFF] hover:bg-[#0062CC]' 
+                  : 'bg-gradient-to-r from-growth-600 to-emerald-600 hover:from-growth-500 hover:to-emerald-500'
+              }`}
             >
               {isSaved ? (
                 <>
@@ -216,7 +275,11 @@ export const EditHoldingModal: React.FC<Props> = ({ stock, position, onClose }) 
               <button
                 type="button"
                 onClick={() => setShowConfirmDelete(true)}
-                className="w-full py-2 bg-navy-950 hover:bg-loss-950/40 text-slate-400 hover:text-loss-400 text-xs font-semibold rounded-xl border border-navy-800 hover:border-loss-500/40 transition flex items-center justify-center gap-1.5"
+                className={`w-full py-2.5 text-xs font-semibold rounded-xl border transition flex items-center justify-center gap-1.5 ${
+                  isLight 
+                    ? 'bg-[#F2F2F7] hover:bg-red-50 text-[#FF3B30] border-[rgba(0,0,0,0.08)] hover:border-[#FF3B30]/30' 
+                    : 'bg-navy-950 hover:bg-loss-950/40 text-slate-400 hover:text-loss-400 border-navy-800 hover:border-loss-500/40'
+                }`}
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Delete This Holding</span>
@@ -238,7 +301,9 @@ export const EditHoldingModal: React.FC<Props> = ({ stock, position, onClose }) 
                   <button
                     type="button"
                     onClick={() => setShowConfirmDelete(false)}
-                    className="flex-1 py-1.5 bg-navy-800 hover:bg-navy-700 text-slate-300 text-xs font-semibold rounded-lg transition"
+                    className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition ${
+                      isLight ? 'bg-[#E5E5EA] text-[#000000]' : 'bg-navy-800 text-slate-300'
+                    }`}
                   >
                     Cancel
                   </button>

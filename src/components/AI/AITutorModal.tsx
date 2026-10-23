@@ -25,8 +25,9 @@ interface Props {
 }
 
 export const AITutorModal: React.FC<Props> = ({ stock, initialPrompt, onClose }) => {
-  const { geminiApiKey, geminiModel, setGeminiApiKey, setActiveTab } = useSettingsStore();
+  const { geminiApiKey, geminiModel, setGeminiApiKey, setActiveTab, themeMode } = useSettingsStore();
   const { language } = useLanguageStore();
+  const isLight = themeMode === 'neutral-light';
   const [messages, setMessages] = useState<AIMessage[]>([]);
   const [inputQuery, setInputQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -192,21 +193,41 @@ export const AITutorModal: React.FC<Props> = ({ stock, initialPrompt, onClose })
   };
 
   // Basic Markdown-to-HTML parser for formatted responses
+  const formatInline = (text: string) => {
+    const parts = text.split(/(\*\*.*?\*\*|\*.*?\*|`.*?`)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return <strong key={i} className={`font-bold ${isLight ? 'text-black' : 'text-white'}`}>{part.slice(2, -2)}</strong>;
+      }
+      if (part.startsWith('*') && part.endsWith('*')) {
+        return <em key={i} className={`italic ${isLight ? 'text-[#444444]' : 'text-slate-300'}`}>{part.slice(1, -1)}</em>;
+      }
+      if (part.startsWith('`') && part.endsWith('`')) {
+        return <code key={i} className={`px-1 py-0.5 rounded font-mono text-[11px] ${
+          isLight ? 'bg-[#E5E5EA] text-[#6B21A8]' : 'bg-navy-950 text-purple-300'
+        }`}>{part.slice(1, -1)}</code>;
+      }
+      return part;
+    });
+  };
+
   const renderFormattedContent = (content: string) => {
     const lines = content.split('\n');
     return lines.map((line, idx) => {
       // Header 3
       if (line.startsWith('### ')) {
-        return <h3 key={idx} className="text-sm font-bold text-white mt-2 mb-1">{formatInline(line.slice(4))}</h3>;
+        return <h3 key={idx} className={`text-sm font-bold mt-2 mb-1 ${isLight ? 'text-black' : 'text-white'}`}>{formatInline(line.slice(4))}</h3>;
       }
       // Header 2
       if (line.startsWith('## ')) {
-        return <h2 key={idx} className="text-base font-bold text-white mt-2.5 mb-1.5">{formatInline(line.slice(3))}</h2>;
+        return <h2 key={idx} className={`text-base font-bold mt-2.5 mb-1.5 ${isLight ? 'text-black' : 'text-white'}`}>{formatInline(line.slice(3))}</h2>;
       }
       // Blockquote / Caution callout
       if (line.startsWith('> ')) {
         return (
-          <blockquote key={idx} className="border-l-2 border-gold-500/60 bg-gold-500/10 px-3 py-1.5 rounded-r-xl my-2 text-[12px] text-gold-300">
+          <blockquote key={idx} className={`border-l-2 px-3 py-1.5 rounded-r-xl my-2 text-[12px] ${
+            isLight ? 'border-amber-500 bg-amber-50 text-amber-900' : 'border-gold-500/60 bg-gold-500/10 text-gold-300'
+          }`}>
             {formatInline(line.slice(2))}
           </blockquote>
         );
@@ -214,7 +235,7 @@ export const AITutorModal: React.FC<Props> = ({ stock, initialPrompt, onClose })
       // Bullet list item
       if (line.startsWith('- ') || line.startsWith('* ')) {
         return (
-          <li key={idx} className="ml-4 list-disc text-slate-200 text-xs my-0.5 leading-relaxed">
+          <li key={idx} className={`ml-4 list-disc text-xs my-0.5 leading-relaxed ${isLight ? 'text-[#2C2C2E]' : 'text-slate-200'}`}>
             {formatInline(line.slice(2))}
           </li>
         );
@@ -223,70 +244,57 @@ export const AITutorModal: React.FC<Props> = ({ stock, initialPrompt, onClose })
       const numMatch = line.match(/^(\d+)\.\s(.*)/);
       if (numMatch) {
         return (
-          <div key={idx} className="flex items-start gap-1.5 text-xs text-slate-200 my-1 leading-relaxed">
-            <span className="font-mono text-purple-400 font-bold">{numMatch[1]}.</span>
+          <div key={idx} className={`flex gap-2 text-xs my-0.5 leading-relaxed ${isLight ? 'text-[#2C2C2E]' : 'text-slate-200'}`}>
+            <span className={`font-bold shrink-0 ${isLight ? 'text-purple-700' : 'text-purple-400'}`}>{numMatch[1]}.</span>
             <span>{formatInline(numMatch[2])}</span>
           </div>
         );
       }
-      // Empty line
+      // Empty line spacer
       if (!line.trim()) {
         return <div key={idx} className="h-1.5" />;
       }
       // Normal paragraph
       return (
-        <p key={idx} className="text-xs text-slate-300 my-0.5 leading-relaxed">
+        <p key={idx} className={`text-xs leading-relaxed my-0.5 ${isLight ? 'text-[#1C1C1E]' : 'text-slate-200'}`}>
           {formatInline(line)}
         </p>
       );
     });
   };
 
-  // Helper for inline markdown: bold, italic, code
-  const formatInline = (text: string): React.ReactNode => {
-    const parts = text.split(/(\*\*.*?\*\*|\*.*?\*|`.*?`)/g);
-    return parts.map((part, i) => {
-      if (part.startsWith('**') && part.endsWith('**')) {
-        return <strong key={i} className="font-bold text-white">{part.slice(2, -2)}</strong>;
-      }
-      if (part.startsWith('*') && part.endsWith('*')) {
-        return <em key={i} className="text-slate-300 italic">{part.slice(1, -1)}</em>;
-      }
-      if (part.startsWith('`') && part.endsWith('`')) {
-        return <code key={i} className="bg-navy-950 px-1 py-0.5 rounded text-purple-300 font-mono text-[11px]">{part.slice(1, -1)}</code>;
-      }
-      return part;
-    });
-  };
-
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/75 backdrop-blur-md animate-fade-in p-0 sm:p-4">
-      <div className="w-full max-w-lg bg-navy-900 border border-navy-800 rounded-t-3xl sm:rounded-3xl flex flex-col h-[85vh] sm:h-[80vh] shadow-2xl overflow-hidden animate-slide-up">
+      <div className={`w-full max-w-lg border rounded-t-3xl sm:rounded-3xl flex flex-col h-[85vh] sm:h-[80vh] shadow-2xl overflow-hidden animate-slide-up transition-colors duration-200 ${
+        isLight ? 'bg-white border-[rgba(0,0,0,0.12)] text-[#000000]' : 'bg-navy-900 border-navy-800 text-white'
+      }`}>
         
         {/* Header Bar */}
-        <div className="px-4 py-3 bg-navy-950/90 border-b border-navy-800/80 flex items-center justify-between shrink-0">
+        <div className={`px-4 py-3 border-b flex items-center justify-between shrink-0 transition-colors ${
+          isLight ? 'bg-[#F8F9FA] border-[rgba(0,0,0,0.08)]' : 'bg-navy-950/90 border-navy-800/80'
+        }`}>
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-white shadow-md">
               <Bot className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <h3 className="text-sm font-bold text-white tracking-tight">AI Market Tutor</h3>
+                <h3 className={`text-sm font-bold tracking-tight ${isLight ? 'text-black' : 'text-white'}`}>AI Market Tutor</h3>
                 {geminiApiKey ? (
-                  <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.5 rounded-full font-mono font-medium flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-[10px] bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30 px-1.5 py-0.5 rounded-full font-mono font-medium flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                     <span>{geminiModel || 'gemini-2.5-flash'}</span>
                   </span>
                 ) : (
-                  <span className="text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30 px-1.5 py-0.5 rounded-full font-mono font-medium">
+                  <span className="text-[10px] bg-purple-500/15 text-purple-600 dark:text-purple-300 border border-purple-500/30 px-1.5 py-0.5 rounded-full font-mono font-medium">
                     Educational Engine
                   </span>
                 )}
               </div>
-              <p className="text-[11px] text-slate-400">
+              <p className={`text-[11px] ${isLight ? 'text-[#666666]' : 'text-slate-400'}`}>
                 {stock ? (
                   <span className="flex items-center gap-1 font-mono">
-                    <strong className="text-slate-200">{stock.ticker}</strong>
+                    <strong className={isLight ? 'text-black' : 'text-slate-200'}>{stock.ticker}</strong>
                     <span>•</span>
                     <span>{stock.currencySymbol || '$'}{stock.price.toFixed(2)}</span>
                     <span>({stock.changePercent >= 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%)</span>
@@ -304,8 +312,8 @@ export const AITutorModal: React.FC<Props> = ({ stock, initialPrompt, onClose })
               title={geminiApiKey ? 'Gemini Key Connected' : 'Connect Gemini API Key'}
               className={`p-2 rounded-xl transition ${
                 geminiApiKey 
-                  ? 'text-emerald-400 hover:bg-navy-800' 
-                  : 'text-purple-400 hover:bg-navy-800'
+                  ? 'text-emerald-500 hover:bg-black/5 dark:hover:bg-navy-800' 
+                  : 'text-purple-500 hover:bg-black/5 dark:hover:bg-navy-800'
               }`}
             >
               <Key className="w-4 h-4" />
@@ -313,29 +321,37 @@ export const AITutorModal: React.FC<Props> = ({ stock, initialPrompt, onClose })
             <button
               onClick={handleResetChat}
               title="Clear Conversation"
-              className="p-2 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-navy-800 transition"
+              className={`p-2 rounded-xl transition ${
+                isLight ? 'text-[#8E8E93] hover:text-black hover:bg-[#E5E5EA]' : 'text-slate-400 hover:text-slate-200 hover:bg-navy-800'
+              }`}
             >
               <RotateCcw className="w-4 h-4" />
             </button>
             <button
               onClick={onClose}
-              className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-navy-800 transition"
+              className={`p-2 rounded-xl transition ${
+                isLight ? 'text-[#8E8E93] hover:text-black hover:bg-[#E5E5EA]' : 'text-slate-400 hover:text-white hover:bg-navy-800'
+              }`}
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
         </div>
 
         {/* Quick Key Banner / Connector */}
         {!geminiApiKey && !showKeyInput && (
-          <div className="px-4 py-1.5 bg-gradient-to-r from-purple-950/70 to-indigo-950/70 border-b border-purple-500/20 flex items-center justify-between text-[11px] text-purple-200 shrink-0">
+          <div className={`px-4 py-1.5 border-b flex items-center justify-between text-[11px] shrink-0 ${
+            isLight 
+              ? 'bg-[#F2F2F7] border-[rgba(0,0,0,0.06)] text-[#666666]' 
+              : 'bg-gradient-to-r from-purple-950/70 to-indigo-950/70 border-purple-500/20 text-purple-200'
+          }`}>
             <span className="flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-gold-400 shrink-0" />
+              <Sparkles className="w-3.5 h-3.5 text-[#FF9500] shrink-0" />
               <span>Smart Market Tutor Active</span>
             </span>
             <button
               onClick={() => setShowKeyInput(true)}
-              className="text-[10px] bg-purple-500/25 hover:bg-purple-500/40 text-purple-200 border border-purple-400/30 px-2 py-0.5 rounded-lg font-medium cursor-pointer transition flex items-center gap-1"
+              className="text-[10px] bg-purple-500/20 hover:bg-purple-500/30 text-purple-600 dark:text-purple-200 border border-purple-400/30 px-2 py-0.5 rounded-lg font-medium cursor-pointer transition flex items-center gap-1"
             >
               <Key className="w-2.5 h-2.5" />
               <span>Connect Free Gemini Key</span>
@@ -344,20 +360,22 @@ export const AITutorModal: React.FC<Props> = ({ stock, initialPrompt, onClose })
         )}
 
         {showKeyInput && (
-          <div className="p-3 bg-navy-950 border-b border-purple-500/30 text-xs text-slate-300 space-y-2 shrink-0 animate-fade-in">
+          <div className={`p-3 border-b text-xs space-y-2 shrink-0 animate-fade-in ${
+            isLight ? 'bg-[#F8F9FA] border-[rgba(0,0,0,0.08)] text-[#333333]' : 'bg-navy-950 border-purple-500/30 text-slate-300'
+          }`}>
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 font-bold text-white text-[11px]">
-                <Key className="w-3.5 h-3.5 text-purple-400" />
+              <div className={`flex items-center gap-1.5 font-bold text-[11px] ${isLight ? 'text-black' : 'text-white'}`}>
+                <Key className="w-3.5 h-3.5 text-purple-500" />
                 <span>Connect Free Google Gemini Key</span>
               </div>
               <button 
                 onClick={() => setShowKeyInput(false)} 
-                className="text-slate-400 hover:text-white p-1 rounded-lg"
+                className={`p-1 rounded-lg ${isLight ? 'text-[#8E8E93] hover:text-black' : 'text-slate-400 hover:text-white'}`}
               >
                 <X className="w-3.5 h-3.5" />
               </button>
             </div>
-            <p className="text-[11px] text-slate-400 leading-tight">
+            <p className={`text-[11px] leading-tight ${isLight ? 'text-[#666666]' : 'text-slate-400'}`}>
               Connect your own free API key from Google AI Studio for live, unrestricted conversational AI.
             </p>
             <div className="flex gap-1.5">
@@ -366,19 +384,23 @@ export const AITutorModal: React.FC<Props> = ({ stock, initialPrompt, onClose })
                 value={inlineKey}
                 onChange={(e) => setInlineKey(e.target.value)}
                 placeholder="Paste Gemini key (AIzaSy...)"
-                className="flex-1 bg-navy-900 border border-navy-700 rounded-xl px-2.5 py-1.5 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-purple-500 font-mono"
+                className={`flex-1 rounded-xl px-2.5 py-1.5 text-xs font-mono focus:outline-none border ${
+                  isLight 
+                    ? 'bg-white border-[rgba(0,0,0,0.15)] text-black placeholder:text-slate-400 focus:border-purple-500' 
+                    : 'bg-navy-900 border-navy-700 text-white placeholder:text-slate-600 focus:border-purple-500'
+                }`}
               />
               <button
                 type="button"
                 onClick={handleSaveInlineKey}
                 disabled={isTestingKey}
-                className="px-3 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold rounded-xl text-[11px] disabled:opacity-50 shrink-0"
+                className="px-3 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold rounded-xl text-[11px] disabled:opacity-50 shrink-0 cursor-pointer"
               >
                 {isTestingKey ? 'Testing...' : 'Save & Connect'}
               </button>
             </div>
             {keyStatus && (
-              <div className={`text-[10px] ${keyStatus.startsWith('✓') ? 'text-emerald-400' : 'text-danger-400'}`}>
+              <div className={`text-[10px] ${keyStatus.startsWith('✓') ? 'text-[#34C759]' : 'text-[#FF3B30]'}`}>
                 {keyStatus}
               </div>
             )}
@@ -387,7 +409,7 @@ export const AITutorModal: React.FC<Props> = ({ stock, initialPrompt, onClose })
                 href="https://aistudio.google.com/app/apikey"
                 target="_blank"
                 rel="noreferrer"
-                className="text-purple-400 hover:underline flex items-center gap-1"
+                className="text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1"
               >
                 <span>Get free key at Google AI Studio</span>
                 <ExternalLink className="w-2.5 h-2.5" />
@@ -399,7 +421,7 @@ export const AITutorModal: React.FC<Props> = ({ stock, initialPrompt, onClose })
                     setInlineKey('');
                     setKeyStatus('Key disconnected.');
                   }}
-                  className="text-slate-500 hover:text-danger-400 transition"
+                  className={`transition ${isLight ? 'text-[#8E8E93] hover:text-[#FF3B30]' : 'text-slate-500 hover:text-danger-400'}`}
                 >
                   Disconnect Key
                 </button>
@@ -418,7 +440,11 @@ export const AITutorModal: React.FC<Props> = ({ stock, initialPrompt, onClose })
                 className={`flex gap-2.5 items-start ${isUser ? 'justify-end' : 'justify-start'}`}
               >
                 {!isUser && (
-                  <div className="w-7 h-7 rounded-xl bg-purple-500/20 border border-purple-400/40 flex items-center justify-center text-purple-300 shrink-0 mt-0.5">
+                  <div className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 mt-0.5 border ${
+                    isLight 
+                      ? 'bg-purple-500/15 border-purple-500/25 text-purple-600' 
+                      : 'bg-purple-500/20 border-purple-400/40 text-purple-300'
+                  }`}>
                     <Bot className="w-4 h-4" />
                   </div>
                 )}
@@ -426,10 +452,10 @@ export const AITutorModal: React.FC<Props> = ({ stock, initialPrompt, onClose })
                 <div
                   className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 shadow-sm text-xs relative group ${
                     isUser
-                      ? 'bg-gradient-to-r from-growth-600 to-emerald-700 text-white rounded-tr-none'
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-tr-none'
                       : msg.error
-                      ? 'bg-danger-950/60 border border-danger-700/60 text-danger-200 rounded-tl-none'
-                      : 'bg-navy-950/90 border border-navy-800/90 text-slate-200 rounded-tl-none'
+                      ? isLight ? 'bg-red-50 border border-red-200 text-red-700 rounded-tl-none' : 'bg-danger-950/60 border border-danger-700/60 text-danger-200 rounded-tl-none'
+                      : isLight ? 'bg-[#F2F2F7] border border-[rgba(0,0,0,0.06)] text-[#1C1C1E] rounded-tl-none' : 'bg-navy-950/90 border border-navy-800/90 text-slate-200 rounded-tl-none'
                   }`}
                 >
                   {isUser ? (
@@ -441,12 +467,14 @@ export const AITutorModal: React.FC<Props> = ({ stock, initialPrompt, onClose })
                       {/* Copy button */}
                       <button
                         onClick={() => handleCopyText(msg.id, msg.content)}
-                        className="mt-2 text-[10px] text-slate-500 hover:text-slate-300 flex items-center gap-1 transition"
+                        className={`mt-2 text-[10px] flex items-center gap-1 transition ${
+                          isLight ? 'text-[#8E8E93] hover:text-black' : 'text-slate-500 hover:text-slate-300'
+                        }`}
                       >
                         {copiedId === msg.id ? (
                           <>
-                            <Check className="w-3 h-3 text-growth-400" />
-                            <span className="text-growth-400">Copied</span>
+                            <Check className="w-3 h-3 text-[#34C759]" />
+                            <span className="text-[#34C759]">Copied</span>
                           </>
                         ) : (
                           <>
@@ -460,7 +488,9 @@ export const AITutorModal: React.FC<Props> = ({ stock, initialPrompt, onClose })
                 </div>
 
                 {isUser && (
-                  <div className="w-7 h-7 rounded-xl bg-navy-800 border border-navy-700 flex items-center justify-center text-slate-300 shrink-0 mt-0.5">
+                  <div className={`w-7 h-7 rounded-xl border flex items-center justify-center shrink-0 mt-0.5 ${
+                    isLight ? 'bg-[#E5E5EA] border-[rgba(0,0,0,0.1)] text-[#666666]' : 'bg-navy-800 border-navy-700 text-slate-300'
+                  }`}>
                     <User className="w-4 h-4" />
                   </div>
                 )}
@@ -471,14 +501,20 @@ export const AITutorModal: React.FC<Props> = ({ stock, initialPrompt, onClose })
           {/* Typing Indicator */}
           {isLoading && (
             <div className="flex gap-2.5 items-start">
-              <div className="w-7 h-7 rounded-xl bg-purple-500/20 border border-purple-400/40 flex items-center justify-center text-purple-300 shrink-0">
+              <div className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 border ${
+                isLight ? 'bg-purple-500/15 border-purple-500/25 text-purple-600' : 'bg-purple-500/20 border-purple-400/40 text-purple-300'
+              }`}>
                 <Bot className="w-4 h-4 animate-bounce" />
               </div>
-              <div className="bg-navy-950/90 border border-navy-800 rounded-2xl rounded-tl-none px-4 py-3 flex items-center gap-1.5 shadow-sm">
-                <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
-                <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse delay-150" />
-                <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse delay-300" />
-                <span className="text-[11px] text-slate-400 font-mono ml-2">Analyzing market context...</span>
+              <div className={`border rounded-2xl rounded-tl-none px-4 py-3 flex items-center gap-1.5 shadow-sm ${
+                isLight ? 'bg-[#F2F2F7] border-[rgba(0,0,0,0.06)]' : 'bg-navy-950/90 border-navy-800'
+              }`}>
+                <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
+                <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse delay-150" />
+                <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse delay-300" />
+                <span className={`text-[11px] font-mono ml-2 ${isLight ? 'text-[#666666]' : 'text-slate-400'}`}>
+                  Analyzing market context...
+                </span>
               </div>
             </div>
           )}
@@ -487,16 +523,22 @@ export const AITutorModal: React.FC<Props> = ({ stock, initialPrompt, onClose })
         </div>
 
         {/* 1-Tap Quick Prompt Chips */}
-        <div className="px-3 pt-2 pb-1 border-t border-navy-800/80 bg-navy-950/60 shrink-0">
+        <div className={`px-3 pt-2 pb-1 border-t shrink-0 ${
+          isLight ? 'bg-[#F8F9FA] border-[rgba(0,0,0,0.08)]' : 'bg-navy-950/60 border-navy-800/80'
+        }`}>
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
             {quickPrompts.map((qp) => (
               <button
                 key={qp.id}
                 disabled={isLoading}
                 onClick={() => handleSendMessage(qp.prompt)}
-                className="shrink-0 text-[11px] bg-navy-900 hover:bg-purple-950/80 border border-navy-800 hover:border-purple-500/40 text-slate-300 hover:text-white px-2.5 py-1 rounded-xl transition flex items-center gap-1 active:scale-95 disabled:opacity-50"
+                className={`shrink-0 text-[11px] px-2.5 py-1 rounded-xl transition flex items-center gap-1 active:scale-95 disabled:opacity-50 border cursor-pointer ${
+                  isLight 
+                    ? 'bg-white hover:bg-[#F2F2F7] border-[rgba(0,0,0,0.1)] text-[#000000] shadow-xs' 
+                    : 'bg-navy-900 hover:bg-purple-950/80 border-navy-800 hover:border-purple-500/40 text-slate-300 hover:text-white'
+                }`}
               >
-                <Sparkles className="w-3 h-3 text-purple-400" />
+                <Sparkles className="w-3 h-3 text-purple-500" />
                 <span>{qp.label}</span>
               </button>
             ))}
@@ -504,7 +546,9 @@ export const AITutorModal: React.FC<Props> = ({ stock, initialPrompt, onClose })
         </div>
 
         {/* Input Form Bar */}
-        <div className="p-3 bg-navy-950 border-t border-navy-800 shrink-0">
+        <div className={`p-3 border-t shrink-0 ${
+          isLight ? 'bg-white border-[rgba(0,0,0,0.08)]' : 'bg-navy-950 border-navy-800'
+        }`}>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -519,21 +563,27 @@ export const AITutorModal: React.FC<Props> = ({ stock, initialPrompt, onClose })
               onChange={(e) => setInputQuery(e.target.value)}
               placeholder={stock ? `Ask about ${stock.ticker} charts, RSI, risk...` : 'Ask anything about investing...'}
               disabled={isLoading}
-              className="flex-1 bg-navy-900 border border-navy-700/80 focus:border-purple-500 rounded-2xl px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none transition"
+              className={`flex-1 rounded-2xl px-3.5 py-2.5 text-xs focus:outline-none transition border ${
+                isLight 
+                  ? 'bg-[#F2F2F7] border-[rgba(0,0,0,0.12)] text-black placeholder:text-slate-400 focus:border-purple-500' 
+                  : 'bg-navy-900 border-navy-700/80 text-white placeholder:text-slate-500 focus:border-purple-500'
+              }`}
             />
             <button
               type="submit"
               disabled={isLoading || !inputQuery.trim()}
-              className="w-10 h-10 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white flex items-center justify-center transition disabled:opacity-40 disabled:pointer-events-none shrink-0 shadow-md"
+              className="w-10 h-10 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white flex items-center justify-center transition disabled:opacity-40 disabled:pointer-events-none shrink-0 shadow-md cursor-pointer"
             >
               <Send className="w-4 h-4" />
             </button>
           </form>
 
           {/* Educational Compliance Notice */}
-          <div className="flex items-center justify-between mt-2 pt-1 border-t border-navy-900 text-[10px] text-slate-500 px-1">
+          <div className={`flex items-center justify-between mt-2 pt-1 border-t text-[10px] px-1 ${
+            isLight ? 'border-[rgba(0,0,0,0.06)] text-[#8E8E93]' : 'border-navy-900 text-slate-500'
+          }`}>
             <span className="flex items-center gap-1">
-              <ShieldAlert className="w-3 h-3 text-gold-400 shrink-0" />
+              <ShieldAlert className={`w-3 h-3 shrink-0 ${isLight ? 'text-[#FF9500]' : 'text-gold-400'}`} />
               Educational Tutor • Not financial advice
             </span>
             <button
@@ -541,7 +591,7 @@ export const AITutorModal: React.FC<Props> = ({ stock, initialPrompt, onClose })
                 onClose();
                 setActiveTab('settings');
               }}
-              className="text-purple-400 hover:text-purple-300 transition flex items-center gap-0.5"
+              className="text-purple-600 dark:text-purple-400 hover:underline transition flex items-center gap-0.5"
             >
               <span>API Settings</span>
               <ExternalLink className="w-2.5 h-2.5" />

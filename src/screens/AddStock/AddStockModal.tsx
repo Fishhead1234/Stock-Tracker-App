@@ -5,6 +5,7 @@ import { stockService } from '../../services/stockService';
 import { StockQuote } from '../../types/stock';
 import { SymbolGuideModal } from '../../components/Common/SymbolGuideModal';
 import { useLanguageStore } from '../../store/languageStore';
+import { useSettingsStore } from '../../store/settingsStore';
 
 interface Props {
   onClose: () => void;
@@ -14,6 +15,8 @@ interface Props {
 export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) => {
   const { addPosition } = usePortfolioStore();
   const { t } = useLanguageStore();
+  const { themeMode } = useSettingsStore();
+  const isLight = themeMode === 'neutral-light';
 
   const allStocks = stockService.getAllStocks();
   const initialStock = preselectedTicker 
@@ -214,13 +217,13 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
             {!isCreatingCustom && (
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-semibold text-slate-300">
+                  <label className="text-xs font-semibold text-[#1C1C1E] dark:text-slate-300">
                     Search All NYSE, NASDAQ & Global Stocks
                   </label>
                   <button
                     type="button"
                     onClick={() => setShowSymbolGuide(true)}
-                    className="text-[11px] text-gold-400 hover:text-gold-300 flex items-center gap-1 font-medium transition"
+                    className="text-[11px] text-amber-600 dark:text-gold-400 hover:text-amber-500 dark:hover:text-gold-300 flex items-center gap-1 font-medium transition"
                   >
                     <HelpCircle className="w-3.5 h-3.5" />
                     <span>How tickers work?</span>
@@ -228,22 +231,22 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
                 </div>
 
                 <div className="relative">
-                  <Search className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+                  <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3 top-3" />
                   <input
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Type ticker or name (e.g. SOFI, PLUG, NVDA, TSMC)..."
-                    className="w-full bg-navy-950 border border-navy-750 rounded-xl pl-9 pr-8 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-growth-500 transition"
+                    className="w-full bg-[#F2F2F7] dark:bg-navy-950 border border-[rgba(0,0,0,0.1)] dark:border-navy-750 rounded-xl pl-9 pr-8 py-2.5 text-xs text-black dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-growth-500 transition"
                   />
                   {isSearchingOnline && (
-                    <Loader2 className="w-4 h-4 text-growth-400 absolute right-3 top-3 animate-spin" />
+                    <Loader2 className="w-4 h-4 text-growth-500 dark:text-growth-400 absolute right-3 top-3 animate-spin" />
                   )}
                   {!isSearchingOnline && search.trim() && (
                     <button
                       type="button"
                       onClick={() => setSearch('')}
-                      className="absolute right-3 top-3 text-slate-500 hover:text-slate-300 text-xs"
+                      className="absolute right-3 top-3 text-slate-400 hover:text-black dark:text-slate-500 dark:hover:text-slate-300 text-xs"
                     >
                       ✕
                     </button>
@@ -252,8 +255,8 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
 
                 {/* Loading indicator when fetching live stock */}
                 {loadingTicker && (
-                  <div className="p-3 mt-2 rounded-xl bg-growth-950/40 border border-growth-600/40 flex items-center gap-2.5 text-xs text-growth-300 animate-pulse">
-                    <Loader2 className="w-4 h-4 animate-spin text-growth-400 shrink-0" />
+                  <div className="p-3 mt-2 rounded-xl bg-growth-500/10 dark:bg-growth-950/40 border border-growth-500/30 dark:border-growth-600/40 flex items-center gap-2.5 text-xs text-growth-700 dark:text-growth-300 animate-pulse">
+                    <Loader2 className="w-4 h-4 animate-spin text-growth-600 dark:text-growth-400 shrink-0" />
                     <span>
                       Syncing live market quote & indicators for <strong>{loadingTicker}</strong> from NYSE/NASDAQ...
                     </span>
@@ -266,7 +269,7 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
                     {/* Live Online Results from NYSE / NASDAQ */}
                     {deduplicatedOnline.length > 0 && (
                       <div className="space-y-1">
-                        <span className="text-[10px] uppercase font-bold text-growth-400 tracking-wider font-mono flex items-center gap-1">
+                        <span className="text-[10px] uppercase font-bold text-growth-600 dark:text-growth-400 tracking-wider font-mono flex items-center gap-1">
                           <Zap className="w-3 h-3" />
                           <span>Live Market Matches ({deduplicatedOnline.length})</span>
                         </span>
@@ -277,21 +280,21 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
                               type="button"
                               onClick={() => handleSelectOnlineItem(item)}
                               disabled={loadingTicker !== null}
-                              className="w-full p-2 rounded-xl bg-navy-950 hover:bg-navy-850 border border-navy-800 hover:border-growth-500/50 flex items-center justify-between text-left transition group"
+                              className="w-full p-2 rounded-xl bg-[#F8F9FA] dark:bg-navy-950 hover:bg-[#F2F2F7] dark:hover:bg-navy-850 border border-[rgba(0,0,0,0.08)] dark:border-navy-800 hover:border-growth-500/50 flex items-center justify-between text-left transition group"
                             >
                               <div className="flex items-center gap-2 min-w-0">
-                                <span className="px-1.5 py-0.5 rounded bg-growth-500/20 text-growth-300 font-mono font-bold text-xs">
+                                <span className="px-1.5 py-0.5 rounded bg-growth-500/20 text-growth-700 dark:text-growth-300 font-mono font-bold text-xs">
                                   {item.ticker}
                                 </span>
-                                <span className="text-[11px] text-slate-300 truncate group-hover:text-white max-w-[190px]">
+                                <span className="text-[11px] text-[#333333] dark:text-slate-300 truncate group-hover:text-black dark:group-hover:text-white max-w-[190px]">
                                   {item.name}
                                 </span>
                               </div>
                               <div className="flex items-center gap-1.5 shrink-0">
-                                <span className="text-[9px] uppercase px-1.5 py-0.5 rounded bg-navy-800 text-slate-400 font-mono border border-navy-700">
+                                <span className="text-[9px] uppercase px-1.5 py-0.5 rounded bg-black/5 dark:bg-navy-800 text-[#666666] dark:text-slate-400 font-mono border border-black/5 dark:border-navy-700">
                                   {item.exchange}
                                 </span>
-                                <span className="text-[10px] text-growth-400 font-semibold group-hover:underline">
+                                <span className="text-[10px] text-growth-600 dark:text-growth-400 font-semibold group-hover:underline">
                                   + Select
                                 </span>
                               </div>
@@ -304,7 +307,7 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
                     {/* Local / Pre-indexed Matches */}
                     {filteredLocalStocks.length > 0 && (
                       <div className="space-y-1 pt-1">
-                        <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider font-mono">
+                        <span className="text-[10px] uppercase font-bold text-[#666666] dark:text-slate-400 tracking-wider font-mono">
                           Indexed Equities
                         </span>
                         <div className="flex flex-wrap gap-1.5">
@@ -316,11 +319,11 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
                               className={`px-2 py-1 rounded-lg text-xs font-mono font-medium transition flex items-center gap-1 ${
                                 selectedStock.ticker === stk.ticker
                                   ? 'bg-growth-600 text-white shadow-sm'
-                                  : 'bg-navy-800 text-slate-300 hover:bg-navy-750'
+                                  : 'bg-[#F2F2F7] dark:bg-navy-800 text-[#333333] dark:text-slate-300 hover:bg-[#E5E5EA] dark:hover:bg-navy-750'
                               }`}
                             >
                               <span>{stk.ticker}</span>
-                              <span className="text-[10px] text-slate-400">({stk.currencySymbol}{stk.price.toFixed(0)})</span>
+                              <span className="text-[10px] text-[#8E8E93] dark:text-slate-400">({stk.currencySymbol}{stk.price.toFixed(0)})</span>
                             </button>
                           ))}
                         </div>
@@ -333,9 +336,9 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
                         type="button"
                         onClick={() => handleDirectLookup(search)}
                         disabled={loadingTicker !== null}
-                        className="w-full p-2.5 rounded-xl bg-growth-600/20 hover:bg-growth-600/30 border border-growth-500/40 text-growth-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition mt-1"
+                        className="w-full p-2.5 rounded-xl bg-growth-600/15 dark:bg-growth-600/20 hover:bg-growth-600/25 dark:hover:bg-growth-600/30 border border-growth-500/40 text-growth-700 dark:text-growth-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition mt-1"
                       >
-                        <Zap className="w-3.5 h-3.5 text-growth-400" />
+                        <Zap className="w-3.5 h-3.5 text-growth-600 dark:text-growth-400" />
                         <span>Instant Fetch: Load "{search.trim().toUpperCase()}" directly from NYSE / NASDAQ</span>
                       </button>
                     )}
@@ -345,7 +348,7 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
                 {/* Default chips when search is empty */}
                 {search.trim().length === 0 && (
                   <div className="mt-2">
-                    <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider font-mono block mb-1">
+                    <span className="text-[10px] uppercase font-bold text-[#8E8E93] dark:text-slate-500 tracking-wider font-mono block mb-1">
                       Quick Suggestions:
                     </span>
                     <div className="flex flex-wrap gap-1.5">
@@ -357,11 +360,11 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
                           className={`px-2 py-1 rounded-lg text-xs font-mono font-medium transition flex items-center gap-1 ${
                             selectedStock.ticker === stk.ticker
                               ? 'bg-growth-600 text-white shadow-sm'
-                              : 'bg-navy-800 text-slate-300 hover:bg-navy-750'
+                              : 'bg-[#F2F2F7] dark:bg-navy-800 text-[#333333] dark:text-slate-300 hover:bg-[#E5E5EA] dark:hover:bg-navy-750'
                           }`}
                         >
                           <span>{stk.ticker}</span>
-                          <span className="text-[10px] text-slate-400">({stk.currencySymbol}{stk.price.toFixed(0)})</span>
+                          <span className="text-[10px] text-[#8E8E93] dark:text-slate-400">({stk.currencySymbol}{stk.price.toFixed(0)})</span>
                         </button>
                       ))}
                     </div>
@@ -370,11 +373,11 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
 
                 {/* Add Custom / Unlisted Stock Link */}
                 <div className="pt-2.5 flex justify-between items-center text-[11px]">
-                  <span className="text-slate-500">Unlisted, OTC, or private equity?</span>
+                  <span className="text-[#8E8E93] dark:text-slate-500">Unlisted, OTC, or private equity?</span>
                   <button
                     type="button"
                     onClick={() => setIsCreatingCustom(true)}
-                    className="text-growth-400 hover:text-growth-300 font-semibold flex items-center gap-1"
+                    className="text-growth-600 dark:text-growth-400 hover:text-growth-500 dark:hover:text-growth-300 font-semibold flex items-center gap-1"
                   >
                     <Plus className="w-3 h-3" />
                     <span>Add Custom Stock</span>
@@ -385,16 +388,16 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
 
             {/* Custom Stock Creator Mode */}
             {isCreatingCustom && (
-              <div className="bg-navy-950/90 border border-navy-750 p-4 rounded-2xl space-y-3 animate-fadeIn">
-                <div className="flex items-center justify-between border-b border-navy-800 pb-2">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-growth-400">
+              <div className="bg-[#F8F9FA] dark:bg-navy-950/90 border border-[rgba(0,0,0,0.1)] dark:border-navy-750 p-4 rounded-2xl space-y-3 animate-fadeIn">
+                <div className="flex items-center justify-between border-b border-[rgba(0,0,0,0.08)] dark:border-navy-800 pb-2">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-growth-600 dark:text-growth-400">
                     <Sparkles className="w-3.5 h-3.5" />
                     <span>Add Any Custom or Unlisted Stock</span>
                   </div>
                   <button
                     type="button"
                     onClick={() => setIsCreatingCustom(false)}
-                    className="text-xs text-slate-400 hover:text-white"
+                    className="text-xs text-[#8E8E93] dark:text-slate-400 hover:text-black dark:hover:text-white"
                   >
                     Cancel
                   </button>
@@ -402,7 +405,7 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
 
                 <div className="space-y-2.5 text-xs">
                   <div>
-                    <label className="text-slate-300 font-semibold block mb-1">
+                    <label className="text-[#1C1C1E] dark:text-slate-300 font-semibold block mb-1">
                       Ticker Symbol (as shown in your broker)
                     </label>
                     <input
@@ -411,12 +414,12 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
                       value={customTicker}
                       onChange={(e) => setCustomTicker(e.target.value.toUpperCase())}
                       placeholder="e.g. 9988.HK, PLUG, 2330, SHOP.TO"
-                      className="w-full bg-navy-900 border border-navy-700 rounded-xl px-3 py-2 text-white font-mono uppercase focus:outline-none focus:border-growth-500"
+                      className="w-full bg-white dark:bg-navy-900 border border-[rgba(0,0,0,0.15)] dark:border-navy-700 rounded-xl px-3 py-2 text-black dark:text-white font-mono uppercase focus:outline-none focus:border-growth-500"
                     />
                   </div>
 
                   <div>
-                    <label className="text-slate-300 font-semibold block mb-1">
+                    <label className="text-[#1C1C1E] dark:text-slate-300 font-semibold block mb-1">
                       Company Name
                     </label>
                     <input
@@ -424,19 +427,19 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
                       value={customName}
                       onChange={(e) => setCustomName(e.target.value)}
                       placeholder="e.g. Alibaba Group"
-                      className="w-full bg-navy-900 border border-navy-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-growth-500"
+                      className="w-full bg-white dark:bg-navy-900 border border-[rgba(0,0,0,0.15)] dark:border-navy-700 rounded-xl px-3 py-2 text-black dark:text-white focus:outline-none focus:border-growth-500"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="text-slate-300 font-semibold block mb-1">
+                      <label className="text-[#1C1C1E] dark:text-slate-300 font-semibold block mb-1">
                         Exchange / Region
                       </label>
                       <select
                         value={customCountryCode}
                         onChange={(e) => setCustomCountryCode(e.target.value as any)}
-                        className="w-full bg-navy-900 border border-navy-700 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-growth-500"
+                        className="w-full bg-white dark:bg-navy-900 border border-[rgba(0,0,0,0.15)] dark:border-navy-700 rounded-xl px-3 py-2 text-black dark:text-white text-xs focus:outline-none focus:border-growth-500"
                       >
                         {Object.entries(countryExchangeConfigs).map(([code, cfg]) => (
                           <option key={code} value={code}>
@@ -447,7 +450,7 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
                     </div>
 
                     <div>
-                      <label className="text-slate-300 font-semibold block mb-1">
+                      <label className="text-[#1C1C1E] dark:text-slate-300 font-semibold block mb-1">
                         Current Price ({countryExchangeConfigs[customCountryCode].symbol})
                       </label>
                       <input
@@ -458,7 +461,7 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
                         value={customPrice}
                         onChange={(e) => setCustomPrice(e.target.value)}
                         placeholder="e.g. 85.50"
-                        className="w-full bg-navy-900 border border-navy-700 rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-growth-500"
+                        className="w-full bg-white dark:bg-navy-900 border border-[rgba(0,0,0,0.15)] dark:border-navy-700 rounded-xl px-3 py-2 text-black dark:text-white font-mono focus:outline-none focus:border-growth-500"
                       />
                     </div>
                   </div>
@@ -476,22 +479,22 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
             )}
 
             {/* Selected Stock Banner */}
-            <div className="p-3.5 bg-navy-950/80 rounded-xl border border-navy-800 flex items-center justify-between">
+            <div className="p-3.5 bg-[#F2F2F7] dark:bg-navy-950/80 rounded-xl border border-[rgba(0,0,0,0.08)] dark:border-navy-800 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-xl bg-navy-850 border border-navy-700/80 flex items-center justify-center font-bold text-white font-mono text-xs shadow-inner">
+                <div className="w-10 h-10 rounded-xl bg-white dark:bg-navy-850 border border-[rgba(0,0,0,0.1)] dark:border-navy-700/80 flex items-center justify-center font-bold text-[#1C1C1E] dark:text-white font-mono text-xs shadow-xs">
                   {selectedStock.exchange.slice(0, 5)}
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <h4 className="text-xs font-bold text-white font-mono">{selectedStock.ticker}</h4>
-                    <span className="text-[10px] text-slate-400">({selectedStock.country})</span>
+                    <h4 className="text-xs font-bold text-[#1C1C1E] dark:text-white font-mono">{selectedStock.ticker}</h4>
+                    <span className="text-[10px] text-[#8E8E93] dark:text-slate-400">({selectedStock.country})</span>
                   </div>
-                  <p className="text-[11px] text-slate-300 truncate max-w-[180px]">{selectedStock.name}</p>
+                  <p className="text-[11px] text-[#444444] dark:text-slate-300 truncate max-w-[180px]">{selectedStock.name}</p>
                 </div>
               </div>
               <div className="text-right font-mono">
-                <span className="text-xs font-bold text-white">{curr}{selectedStock.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
-                <span className="text-[10px] block text-slate-400">{selectedStock.currency}</span>
+                <span className="text-xs font-bold text-[#1C1C1E] dark:text-white">{curr}{selectedStock.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                <span className="text-[10px] block text-[#8E8E93] dark:text-slate-400">{selectedStock.currency}</span>
               </div>
             </div>
 
@@ -499,7 +502,7 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
             <form onSubmit={handleSubmit} className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">
+                  <label className="text-xs font-semibold text-[#1C1C1E] dark:text-slate-300 block mb-1">
                     Number of Shares
                   </label>
                   <input
@@ -510,12 +513,12 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
                     value={shares}
                     onChange={(e) => setShares(e.target.value)}
                     placeholder="e.g. 100"
-                    className="w-full bg-navy-950 border border-navy-750 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-growth-500"
+                    className="w-full bg-[#F2F2F7] dark:bg-navy-950 border border-[rgba(0,0,0,0.12)] dark:border-navy-750 rounded-xl px-3 py-2 text-xs text-black dark:text-white font-mono focus:outline-none focus:border-growth-500"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1">
+                  <label className="text-xs font-semibold text-[#1C1C1E] dark:text-slate-300 block mb-1">
                     Avg Buy Price ({curr})
                   </label>
                   <input
@@ -526,13 +529,13 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
                     value={buyPrice}
                     onChange={(e) => setBuyPrice(e.target.value)}
                     placeholder="e.g. 950.00"
-                    className="w-full bg-navy-950 border border-navy-750 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-growth-500"
+                    className="w-full bg-[#F2F2F7] dark:bg-navy-950 border border-[rgba(0,0,0,0.12)] dark:border-navy-750 rounded-xl px-3 py-2 text-xs text-black dark:text-white font-mono focus:outline-none focus:border-growth-500"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">
+                <label className="text-xs font-semibold text-[#1C1C1E] dark:text-slate-300 block mb-1">
                   Purchase Date
                 </label>
                 <input
@@ -540,20 +543,20 @@ export const AddStockModal: React.FC<Props> = ({ onClose, preselectedTicker }) =
                   required
                   value={purchaseDate}
                   onChange={(e) => setPurchaseDate(e.target.value)}
-                  className="w-full bg-navy-950 border border-navy-750 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-growth-500"
+                  className="w-full bg-[#F2F2F7] dark:bg-navy-950 border border-[rgba(0,0,0,0.12)] dark:border-navy-750 rounded-xl px-3 py-2 text-xs text-black dark:text-white font-mono focus:outline-none focus:border-growth-500"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">
-                  Personal Thesis / Notes <span className="text-slate-500 text-[10px] font-normal">(Optional)</span>
+                <label className="text-xs font-semibold text-[#1C1C1E] dark:text-slate-300 block mb-1">
+                  Personal Thesis / Notes <span className="text-[#8E8E93] dark:text-slate-500 text-[10px] font-normal">(Optional)</span>
                 </label>
                 <input
                   type="text"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="e.g. Core long-term holding"
-                  className="w-full bg-navy-950 border border-navy-750 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-growth-500"
+                  className="w-full bg-[#F2F2F7] dark:bg-navy-950 border border-[rgba(0,0,0,0.12)] dark:border-navy-750 rounded-xl px-3 py-2 text-xs text-black dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-growth-500"
                 />
               </div>
 
