@@ -15,27 +15,85 @@ import {
   ExternalLink,
   Flame,
   CheckCircle2,
-  Bot
+  Bot,
+  Lock,
+  Crown
 } from 'lucide-react';
 import { newsService } from '../../services/newsService';
 import { NewsArticle, NewsCategory } from '../../types/news';
 import { useMarketStore } from '../../store/marketStore';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { useSettingsStore } from '../../store/settingsStore';
+import { useSubscriptionStore } from '../../store/subscriptionStore';
 import { DisclaimerBanner } from '../../components/Common/DisclaimerBanner';
 import { AITutorModal } from '../../components/AI/AITutorModal';
+import { UpgradeProModal } from '../../components/Subscription/UpgradeProModal';
 import { useLanguageStore } from '../../store/languageStore';
 
 export const NewsScreen: React.FC = () => {
   const { language, t } = useLanguageStore();
   const { quotes, selectTicker, watchlist } = useMarketStore();
   const { positions } = usePortfolioStore();
-  const { setActiveTab } = useSettingsStore();
+  const { setActiveTab, themeMode } = useSettingsStore();
+  const { isPro } = useSubscriptionStore();
+  const isLight = themeMode === 'neutral-light';
 
   const [activeCategory, setActiveCategory] = useState<'ALL' | 'MY_STOCKS' | 'EARNINGS' | 'MACRO' | 'TECH' | 'REGULATION'>('ALL');
   const [showPrimarySourcesGuide, setShowPrimarySourcesGuide] = useState(false);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [aiInitialPrompt, setAiInitialPrompt] = useState<string | undefined>(undefined);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+  if (!isPro) {
+    return (
+      <div className="flex-1 flex flex-col pb-24 space-y-4">
+        <DisclaimerBanner />
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className={`w-full max-w-sm rounded-3xl p-6 text-center space-y-4 border shadow-lg ${
+            isLight ? 'bg-white border-black/10' : 'bg-navy-900 border-navy-800'
+          }`}>
+            <div className="w-14 h-14 rounded-2xl bg-[#FF9500]/15 border border-[#FF9500]/30 text-[#FF9500] flex items-center justify-center mx-auto">
+              <Lock className="w-7 h-7" />
+            </div>
+            <div className="space-y-1.5">
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#FF9500]/15 text-[#FF9500]">
+                <Crown className="w-3 h-3 fill-current" /> Pro Membership Required
+              </span>
+              <h2 className={`text-lg font-extrabold ${isLight ? 'text-black' : 'text-white'}`}>
+                Market News &amp; Intelligence Hub is Locked
+              </h2>
+              <p className={`text-xs leading-relaxed ${isLight ? 'text-[#666666]' : 'text-slate-400'}`}>
+                Your 30-day free trial has ended. Upgrade to InvestLearn Pro to access daily market pulse briefings, earnings catalysts, and executive news analysis.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => setShowUpgradeModal(true)}
+                className="w-full min-h-[48px] py-3 px-5 rounded-xl bg-[#FF9500] hover:bg-[#E08500] text-white font-extrabold text-xs shadow-md transition cursor-pointer active:scale-95 flex items-center justify-center gap-2"
+              >
+                <Crown className="w-4 h-4 fill-current" />
+                <span>Unlock InvestLearn Pro</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('education')}
+                className={`w-full min-h-[44px] py-2.5 px-4 rounded-xl border font-bold text-xs transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                  isLight ? 'bg-[#F2F2F7] text-[#007AFF] border-black/10' : 'bg-navy-950 text-slate-300 border-navy-800'
+                }`}
+              >
+                <BookOpen className="w-4 h-4" />
+                <span>Browse Free Education Hub</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        {showUpgradeModal && (
+          <UpgradeProModal onClose={() => setShowUpgradeModal(false)} />
+        )}
+      </div>
+    );
+  }
 
   const portfolioTickers = positions.map(p => p.ticker.toUpperCase());
   const userTrackedTickers = Array.from(new Set([...portfolioTickers, ...watchlist.map(t => t.toUpperCase())]));

@@ -21,7 +21,8 @@ import {
   Crown,
   BookOpen,
   MessageSquare,
-  Shuffle
+  Shuffle,
+  Lock
 } from 'lucide-react';
 
 const DASHBOARD_ROTATING_TIPS = [
@@ -104,7 +105,7 @@ export const DashboardScreen: React.FC = () => {
   const { quotes, selectTicker, watchlist, addToWatchlist, removeFromWatchlist } = useMarketStore();
   const { setActiveTab, themeMode, userName } = useSettingsStore();
   const { getUnreadCount } = useNotificationStore();
-  const { plan, getTrialDaysRemaining } = useSubscriptionStore();
+  const { isPro, plan, getTrialDaysRemaining } = useSubscriptionStore();
   const { language, t } = useLanguageStore();
 
   const isLight = themeMode === 'neutral-light';
@@ -430,7 +431,7 @@ export const DashboardScreen: React.FC = () => {
           <DataStatusBadge />
           <button
             type="button"
-            onClick={() => setIsManageMarketsOpen(true)}
+            onClick={() => isPro ? setIsManageMarketsOpen(true) : setIsUpgradeModalOpen(true)}
             data-touch-target="true"
             className={`shrink-0 font-sans text-[11px] font-bold px-2 py-1 rounded-md border flex items-center gap-1 transition active:scale-95 cursor-pointer ${
               isLight 
@@ -522,14 +523,18 @@ export const DashboardScreen: React.FC = () => {
         </div>
 
         {/* Portfolio Summary Card */}
-        <PortfolioSummaryCard
-          summary={summary}
-          onOpenAddStock={() => setIsAddModalOpen(true)}
-        />
+        {isPro && (
+          <>
+            <PortfolioSummaryCard
+              summary={summary}
+              onOpenAddStock={() => setIsAddModalOpen(true)}
+            />
 
-        {/* 7-Day Performance & Sector Allocation Chart */}
-        {summary.currentValue > 0 && (
-          <PortfolioChart currentValue={summary.currentValue} />
+            {/* 7-Day Performance & Sector Allocation Chart */}
+            {summary.currentValue > 0 && (
+              <PortfolioChart currentValue={summary.currentValue} />
+            )}
+          </>
         )}
 
         {/* Daily Bite-Sized Learning Tip Card */}
@@ -596,12 +601,41 @@ export const DashboardScreen: React.FC = () => {
             </div>
             {positions.length > 0 && (
               <span className={`text-xs font-mono ${isLight ? 'text-[#666666]' : 'text-slate-400'}`}>
-                {positions.length} active
+                {isPro ? `${positions.length} active` : `${positions.length} locked`}
               </span>
             )}
           </div>
 
-          {positions.length === 0 ? (
+          {!isPro ? (
+            <div className={`rounded-2xl p-5 text-center space-y-3 border ${
+              isLight ? 'bg-white border-[#FF9500]/40 shadow-card' : 'bg-navy-900/90 border-gold-500/40'
+            }`}>
+              <div className="w-11 h-11 rounded-2xl bg-[#FF9500]/15 border border-[#FF9500]/30 text-[#FF9500] flex items-center justify-center mx-auto">
+                <Lock className="w-5 h-5" />
+              </div>
+              <div className="space-y-1">
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#FF9500]/15 text-[#FF9500]">
+                  <Crown className="w-3 h-3 fill-current" /> Pro Membership Required
+                </span>
+                <h4 className={`text-sm font-bold ${isLight ? 'text-[#000000]' : 'text-white'}`}>
+                  Personal Holdings &amp; Cost-Basis Alerts Locked
+                </h4>
+                <p className={`text-xs max-w-xs mx-auto leading-relaxed ${isLight ? 'text-[#666666]' : 'text-slate-400'}`}>
+                  {positions.length > 0
+                    ? `Your ${positions.length} tracked holding(s) are safely saved. Upgrade to InvestLearn Pro to view and manage your personal holdings.`
+                    : 'Your 30-day free trial has ended. Upgrade to InvestLearn Pro to track personal holdings and cost-basis timing signals.'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsUpgradeModalOpen(true)}
+                className="min-h-[44px] px-5 py-2.5 rounded-xl bg-[#FF9500] hover:bg-[#E08500] text-white font-extrabold text-xs shadow-sm transition cursor-pointer active:scale-95 inline-flex items-center gap-1.5"
+              >
+                <Crown className="w-3.5 h-3.5 fill-current" />
+                <span>Unlock Personal Holdings</span>
+              </button>
+            </div>
+          ) : positions.length === 0 ? (
             <div className={`rounded-2xl p-6 text-center space-y-3 border ${
               isLight ? 'bg-white border-[rgba(0,0,0,0.1)] shadow-card' : 'bg-navy-900/60 border-navy-850'
             }`}>
@@ -660,6 +694,11 @@ export const DashboardScreen: React.FC = () => {
               <h3 className={`text-sm font-bold uppercase tracking-wider ${isLight ? 'text-[#000000]' : 'text-white'}`}>
                 {t('stocks_to_watch_title', 'Stocks to Watch')}
               </h3>
+              {!isPro && (
+                <span className="text-[10px] px-2 py-0.5 rounded-full font-mono font-bold bg-[#FF9500]/15 text-[#FF9500] border border-[#FF9500]/30">
+                  VIEW ONLY
+                </span>
+              )}
             </div>
             <span className={`text-[13px] font-mono ${isLight ? 'text-[#666666]' : 'text-slate-400'}`}>
               {searchExplorer.trim() 
@@ -670,40 +709,58 @@ export const DashboardScreen: React.FC = () => {
             </span>
           </div>
 
-          {/* Search to find & add any stock to watch */}
-          <div className="relative">
-            <Search className={`w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none ${
-              isLight ? 'text-[#8E8E93]' : 'text-slate-500'
-            }`} />
-            <input
-              type="text"
-              value={searchExplorer}
-              onChange={(e) => setSearchExplorer(e.target.value)}
-              placeholder={t('search_placeholder', 'Search over 5,000+ global stocks (e.g. AAPL, 2330.TW, 005930.KS)...')}
-              className={`w-full h-[48px] rounded-xl pl-10 pr-10 text-xs transition border focus:outline-none ${
-                isLight 
-                  ? 'bg-white border-[rgba(0,0,0,0.12)] text-[#000000] placeholder-[#8E8E93] focus:border-[#007AFF] shadow-xs' 
-                  : 'bg-navy-950 border-navy-750 text-white placeholder-slate-500 focus:border-growth-500'
-              }`}
-            />
-            {isSearchingOnline && (
-              <Loader2 className={`w-4 h-4 absolute right-3.5 top-1/2 -translate-y-1/2 animate-spin ${
-                isLight ? 'text-[#007AFF]' : 'text-growth-400'
+          {/* Search to find & add any stock to watch (Locked when trial expired) */}
+          {isPro ? (
+            <div className="relative">
+              <Search className={`w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none ${
+                isLight ? 'text-[#8E8E93]' : 'text-slate-500'
               }`} />
-            )}
-            {!isSearchingOnline && searchExplorer.trim() && (
-              <button
-                type="button"
-                data-touch-target="true"
-                onClick={() => setSearchExplorer('')}
-                className={`w-10 h-10 flex items-center justify-center absolute right-1 top-1/2 -translate-y-1/2 text-xs cursor-pointer ${
-                  isLight ? 'text-[#8E8E93] hover:text-black' : 'text-slate-400 hover:text-white'
+              <input
+                type="text"
+                value={searchExplorer}
+                onChange={(e) => setSearchExplorer(e.target.value)}
+                placeholder={t('search_placeholder', 'Search over 5,000+ global stocks (e.g. AAPL, 2330.TW, 005930.KS)...')}
+                className={`w-full h-[48px] rounded-xl pl-10 pr-10 text-xs transition border focus:outline-none ${
+                  isLight 
+                    ? 'bg-white border-[rgba(0,0,0,0.12)] text-[#000000] placeholder-[#8E8E93] focus:border-[#007AFF] shadow-xs' 
+                    : 'bg-navy-950 border-navy-750 text-white placeholder-slate-500 focus:border-growth-500'
                 }`}
-              >
-                ✕
-              </button>
-            )}
-          </div>
+              />
+              {isSearchingOnline && (
+                <Loader2 className={`w-4 h-4 absolute right-3.5 top-1/2 -translate-y-1/2 animate-spin ${
+                  isLight ? 'text-[#007AFF]' : 'text-growth-400'
+                }`} />
+              )}
+              {!isSearchingOnline && searchExplorer.trim() && (
+                <button
+                  type="button"
+                  data-touch-target="true"
+                  onClick={() => setSearchExplorer('')}
+                  className={`w-10 h-10 flex items-center justify-center absolute right-1 top-1/2 -translate-y-1/2 text-xs cursor-pointer ${
+                    isLight ? 'text-[#8E8E93] hover:text-black' : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setIsUpgradeModalOpen(true)}
+              className={`w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border text-xs flex items-center justify-between transition cursor-pointer ${
+                isLight
+                  ? 'bg-white border-black/10 text-[#666666] hover:border-[#FF9500]/50'
+                  : 'bg-navy-950/80 border-navy-800 text-slate-400 hover:border-gold-500/40'
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <Lock className="w-3.5 h-3.5 text-[#FF9500] shrink-0" />
+                <span>Watchlist is view-only after trial. Upgrade to add or remove stocks.</span>
+              </span>
+              <span className="text-[#FF9500] font-bold shrink-0 ml-2">Upgrade →</span>
+            </button>
+          )}
 
           {/* Timing Signal Filter Toggle Pills (Visible when not searching) */}
           {watchedQuotes.length > 0 && searchExplorer.trim().length === 0 && (
@@ -1008,7 +1065,7 @@ export const DashboardScreen: React.FC = () => {
                     key={stk.ticker}
                     stock={stk}
                     onClick={() => handleStockClick(stk.ticker)}
-                    onRemove={() => removeFromWatchlist(stk.ticker)}
+                    onRemove={isPro ? () => removeFromWatchlist(stk.ticker) : undefined}
                   />
                 ))
               )}
@@ -1027,6 +1084,10 @@ export const DashboardScreen: React.FC = () => {
           type="button"
           data-touch-target="true"
           onClick={() => {
+            if (!isPro) {
+              setIsUpgradeModalOpen(true);
+              return;
+            }
             const searchInput = document.querySelector('input[type="text"]') as HTMLInputElement;
             if (searchInput) {
               searchInput.focus();
@@ -1046,7 +1107,7 @@ export const DashboardScreen: React.FC = () => {
         <button
           type="button"
           data-touch-target="true"
-          onClick={() => setIsAddModalOpen(true)}
+          onClick={() => isPro ? setIsAddModalOpen(true) : setIsUpgradeModalOpen(true)}
           className={`flex-1 min-h-[48px] px-4 py-2.5 rounded-lg text-xs font-bold text-white flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-95 shadow-sm ${
             isLight 
               ? 'bg-[#007AFF] hover:bg-[#0062CC]' 

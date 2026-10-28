@@ -10,12 +10,14 @@ import {
   ChevronDown,
   ChevronUp,
   MessageSquare,
-  Plus
+  Plus,
+  Crown
 } from 'lucide-react';
 import { useMarketStore } from '../../store/marketStore';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { useSettingsStore } from '../../store/settingsStore';
 import { useLanguageStore } from '../../store/languageStore';
+import { useSubscriptionStore } from '../../store/subscriptionStore';
 import { stockService } from '../../services/stockService';
 import { PriceChart } from '../../components/StockDetail/PriceChart';
 import { TechnicalGauges } from '../../components/StockDetail/TechnicalGauges';
@@ -24,6 +26,7 @@ import { PositionStats } from '../../components/StockDetail/PositionStats';
 import { AddStockModal } from '../AddStock/AddStockModal';
 import { AITutorCard } from '../../components/AI/AITutorCard';
 import { AITutorModal } from '../../components/AI/AITutorModal';
+import { UpgradeProModal } from '../../components/Subscription/UpgradeProModal';
 import { generateTimingSignal } from '../../services/signalEngine';
 import { DisclaimerBanner } from '../../components/Common/DisclaimerBanner';
 
@@ -32,6 +35,7 @@ export const StockDetailScreen: React.FC = () => {
   const { positions } = usePortfolioStore();
   const { setActiveTab, themeMode } = useSettingsStore();
   const { language, t } = useLanguageStore();
+  const { isPro } = useSubscriptionStore();
 
   const isLight = themeMode === 'neutral-light';
 
@@ -39,6 +43,7 @@ export const StockDetailScreen: React.FC = () => {
   const [isEditingPrice, setIsEditingPrice] = useState(false);
   const [editPriceInput, setEditPriceInput] = useState('');
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const [initialAiPrompt, setInitialAiPrompt] = useState<string | undefined>(undefined);
   const [expandedMetric, setExpandedMetric] = useState<string | null>(null);
 
@@ -122,7 +127,7 @@ export const StockDetailScreen: React.FC = () => {
 
           <button
             type="button"
-            onClick={() => toggleWatchlist(stock.ticker)}
+            onClick={() => isPro ? toggleWatchlist(stock.ticker) : setIsUpgradeModalOpen(true)}
             data-touch-target="true"
             className={`w-11 h-11 rounded-full border flex items-center justify-center transition cursor-pointer active:scale-90 ${
               isWatched
@@ -190,6 +195,10 @@ export const StockDetailScreen: React.FC = () => {
                   </span>
                   <button
                     onClick={() => {
+                      if (!isPro) {
+                        setIsUpgradeModalOpen(true);
+                        return;
+                      }
                       setEditPriceInput(stock.price.toString());
                       setIsEditingPrice(true);
                     }}
@@ -296,14 +305,35 @@ export const StockDetailScreen: React.FC = () => {
         {/* Interactive Price Chart with Timeframes */}
         <PriceChart history={stock.history} currentPrice={stock.price} />
 
-        {/* Gemini AI Market Tutor Card & 1-Tap Prompts */}
-        <AITutorCard
-          stock={stock}
-          onOpenChat={(prompt) => {
-            setInitialAiPrompt(prompt);
-            setIsAiModalOpen(true);
-          }}
-        />
+        {/* Gemini AI Market Tutor Card & 1-Tap Prompts (Locked when trial expired) */}
+        {isPro ? (
+          <AITutorCard
+            stock={stock}
+            onOpenChat={(prompt) => {
+              setInitialAiPrompt(prompt);
+              setIsAiModalOpen(true);
+            }}
+          />
+        ) : (
+          <div className={`rounded-2xl p-4 border text-center space-y-2.5 ${
+            isLight ? 'bg-white border-[#FF9500]/40' : 'bg-navy-900/90 border-gold-500/40'
+          }`}>
+            <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-[#FF9500]">
+              <Lock className="w-4 h-4" />
+              <span>AI Market Tutor Locked (Pro Required)</span>
+            </div>
+            <p className={`text-xs ${isLight ? 'text-[#666666]' : 'text-slate-400'}`}>
+              Upgrade to InvestLearn Pro to ask AI questions about {stock.ticker}&apos;s RSI, MACD, and timing setup.
+            </p>
+            <button
+              type="button"
+              onClick={() => setIsUpgradeModalOpen(true)}
+              className="px-4 py-2 rounded-xl bg-[#FF9500] hover:bg-[#E08500] text-white font-bold text-xs transition cursor-pointer"
+            >
+              Unlock AI Tutor
+            </button>
+          </div>
+        )}
 
         {/* Intelligent Timing Advice & Beginner Breakdown */}
         <SignalExplanation signal={signal} />
@@ -311,12 +341,33 @@ export const StockDetailScreen: React.FC = () => {
         {/* Visual Technical Gauges (RSI, MACD, SMAs, Volume) */}
         <TechnicalGauges indicators={stock.indicators} currentPrice={stock.price} />
 
-        {/* User's Position & Dollar-Cost Averaging Calculator */}
-        <PositionStats
-          stock={stock}
-          position={position}
-          onOpenAddModal={() => setIsAddModalOpen(true)}
-        />
+        {/* User's Position & Dollar-Cost Averaging Calculator (Locked when trial expired) */}
+        {isPro ? (
+          <PositionStats
+            stock={stock}
+            position={position}
+            onOpenAddModal={() => setIsAddModalOpen(true)}
+          />
+        ) : (
+          <div className={`rounded-2xl p-4 border text-center space-y-2.5 ${
+            isLight ? 'bg-white border-[#FF9500]/40' : 'bg-navy-900/90 border-gold-500/40'
+          }`}>
+            <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-[#FF9500]">
+              <Crown className="w-4 h-4 fill-current" />
+              <span>Personal Holding &amp; DCA Calculator Locked</span>
+            </div>
+            <p className={`text-xs ${isLight ? 'text-[#666666]' : 'text-slate-400'}`}>
+              Upgrade to InvestLearn Pro to log your shares of {stock.ticker}, track cost-basis returns, and run DCA simulations.
+            </p>
+            <button
+              type="button"
+              onClick={() => setIsUpgradeModalOpen(true)}
+              className="px-4 py-2 rounded-xl bg-[#FF9500] hover:bg-[#E08500] text-white font-bold text-xs transition cursor-pointer"
+            >
+              Unlock Personal Holdings
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Wireframe 2: Persistent Bottom Thumb Zone Actions */}
@@ -326,19 +377,23 @@ export const StockDetailScreen: React.FC = () => {
         <button
           type="button"
           data-touch-target="true"
-          onClick={() => setIsAddModalOpen(true)}
+          onClick={() => isPro ? setIsAddModalOpen(true) : setIsUpgradeModalOpen(true)}
           className={`flex-1 min-h-[48px] px-4 py-2.5 rounded-lg text-xs font-bold text-white flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-95 shadow-sm ${
             isLight ? 'bg-[#007AFF] hover:bg-[#0062CC]' : 'bg-growth-600 hover:bg-growth-500'
           }`}
         >
           <Plus className="w-4 h-4 stroke-[2.5]" />
-          <span>{position ? t('detail_in_portfolio', 'In Portfolio') : t('detail_log_to_portfolio', '+ Log Holding')}</span>
+          <span>{position && isPro ? t('detail_in_portfolio', 'In Portfolio') : t('detail_log_to_portfolio', '+ Log Holding')}</span>
         </button>
 
         <button
           type="button"
           data-touch-target="true"
           onClick={() => {
+            if (!isPro) {
+              setIsUpgradeModalOpen(true);
+              return;
+            }
             setInitialAiPrompt(
               language === 'ko'
                 ? `${stock.ticker}의 현재 타이밍 신호와 RSI 보조지표를 초보자 눈높이에서 쉽게 설명해 주실 수 있나요?`
@@ -371,6 +426,10 @@ export const StockDetailScreen: React.FC = () => {
             setInitialAiPrompt(undefined);
           }}
         />
+      )}
+
+      {isUpgradeModalOpen && (
+        <UpgradeProModal onClose={() => setIsUpgradeModalOpen(false)} />
       )}
     </div>
   );

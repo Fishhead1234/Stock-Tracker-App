@@ -1446,7 +1446,7 @@ export const SettingsScreen: React.FC = () => {
             isLight ? 'text-[#8E8E93]' : 'text-slate-500'
           }`}
         >
-          <p>InvestLearn v1.2.27 • Neutral Light Native Architecture</p>
+          <p>InvestLearn v1.2.28 • Neutral Light Native Architecture</p>
           <p>Google Play Billing Ready • 30-Day Full Access Trial</p>
         </div>
       </div>

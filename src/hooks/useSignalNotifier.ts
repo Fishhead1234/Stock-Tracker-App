@@ -3,6 +3,7 @@ import { usePortfolioStore } from '../store/portfolioStore';
 import { useMarketStore } from '../store/marketStore';
 import { useNotificationStore } from '../store/notificationStore';
 import { useLanguageStore } from '../store/languageStore';
+import { useSubscriptionStore } from '../store/subscriptionStore';
 import { generateTimingSignal } from '../services/signalEngine';
 import { notificationService } from '../services/notificationService';
 import { SignalAction } from '../types/signal';
@@ -12,12 +13,13 @@ export const useSignalNotifier = () => {
   const { quotes, watchlist } = useMarketStore();
   const { notificationsEnabled, notifyPersonalHoldings, notifyWatchlist } = useNotificationStore();
   const { language } = useLanguageStore();
+  const { isPro } = useSubscriptionStore();
 
   const previousSignals = useRef<Record<string, SignalAction>>({});
   const isFirstMount = useRef(true);
 
   useEffect(() => {
-    if (!notificationsEnabled) return;
+    if (!notificationsEnabled || !isPro) return;
 
     // Skip firing notifications immediately on first app load, just index initial states
     if (isFirstMount.current) {
@@ -108,5 +110,5 @@ export const useSignalNotifier = () => {
         previousSignals.current[quote.ticker] = currentSignal.action;
       });
     }
-  }, [quotes, positions, watchlist, notificationsEnabled, notifyPersonalHoldings, notifyWatchlist]);
+  }, [quotes, positions, watchlist, notificationsEnabled, notifyPersonalHoldings, notifyWatchlist, isPro]);
 };
