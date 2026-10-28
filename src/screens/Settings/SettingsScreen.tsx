@@ -80,11 +80,42 @@ export const SettingsScreen: React.FC = () => {
   } = useNotificationStore();
 
   const { 
+    isAdmin,
     plan, 
     getTrialDaysRemaining, 
     lifetimeSeatsTotal, 
-    lifetimeSeatsClaimed 
+    lifetimeSeatsClaimed,
+    unlockAdmin,
+    lockAdmin,
+    resetSubscription,
+    setProStatus
   } = useSubscriptionStore();
+
+  const [adminTapCount, setAdminTapCount] = useState(0);
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [adminPassInput, setAdminPassInput] = useState('');
+  const [adminStatusMsg, setAdminStatusMsg] = useState<string | null>(null);
+
+  const handleSecretAdminTap = () => {
+    const next = adminTapCount + 1;
+    setAdminTapCount(next);
+    if (next >= 5) {
+      setShowAdminLogin(true);
+      setAdminTapCount(0);
+    }
+  };
+
+  const handleAdminPassSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (unlockAdmin(adminPassInput)) {
+      setAdminPassInput('');
+      setShowAdminLogin(false);
+      setAdminStatusMsg('✓ Admin unlocked — Unrestricted Lifetime Pro active');
+      setTimeout(() => setAdminStatusMsg(null), 4000);
+    } else {
+      setAdminStatusMsg('✕ Incorrect passcode');
+    }
+  };
 
   const [inputKey, setInputKey] = useState(finnhubApiKey);
   const [nameDraft, setNameDraft] = useState(userName || '');
@@ -676,23 +707,31 @@ export const SettingsScreen: React.FC = () => {
             : 'bg-gradient-to-r from-navy-900 via-navy-850 to-navy-900 border-gold-500/40'
         }`}>
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div
+              onClick={handleSecretAdminTap}
+              className="flex items-center gap-2 select-none cursor-pointer"
+            >
               <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
                 isLight ? 'bg-[#FF9500]/15 text-[#FF9500]' : 'bg-gold-500/20 text-gold-400'
               }`}>
                 <Crown className="w-4 h-4 fill-current" />
               </div>
               <div>
-                <h3 className={`text-xs font-bold uppercase tracking-wider ${
+                <h3 className={`text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${
                   isLight ? 'text-[#000000]' : 'text-white'
                 }`}>
-                  {t('membership_status', 'Membership Status')}
+                  <span>{t('membership_status', 'Membership Status')}</span>
+                  {isAdmin && (
+                    <span className="px-1.5 py-0.5 rounded bg-[#34C759]/20 text-[#34C759] text-[9px] font-mono">
+                      ADMIN
+                    </span>
+                  )}
                 </h3>
                 <p className={`text-[11px] font-medium ${
                   isLight ? 'text-[#666666]' : 'text-slate-300'
                 }`}>
                   {plan === 'LIFETIME'
-                    ? "Founder's Lifetime Pass (Active)"
+                    ? isAdmin ? "Admin / Founder's Lifetime Pass (Unrestricted)" : "Founder's Lifetime Pass (Active)"
                     : plan === 'ANNUAL'
                     ? 'Pro Annual Member'
                     : plan === 'MONTHLY'
@@ -717,6 +756,114 @@ export const SettingsScreen: React.FC = () => {
               <span>{plan === 'LIFETIME' ? 'LIFETIME' : plan === 'FREE' ? 'FREE TIER' : 'PRO ACTIVE'}</span>
             </span>
           </div>
+
+          {showAdminLogin && !isAdmin && (
+            <form
+              onSubmit={handleAdminPassSubmit}
+              className={`p-3 rounded-xl border space-y-2 animate-fade-in ${
+                isLight ? 'bg-[#F2F2F7] border-black/15' : 'bg-navy-950 border-navy-700'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#007AFF] dark:text-gold-400">
+                  🔐 Admin / Tester Unlock
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAdminLogin(false);
+                    setAdminStatusMsg(null);
+                  }}
+                  className="text-[11px] text-[#8E8E93] hover:underline"
+                >
+                  Cancel
+                </button>
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="password"
+                  value={adminPassInput}
+                  onChange={(e) => setAdminPassInput(e.target.value)}
+                  placeholder="Enter admin passcode..."
+                  autoFocus
+                  className={`flex-1 rounded-lg px-3 py-2 text-xs font-mono focus:outline-none ${
+                    isLight
+                      ? 'bg-white border border-black/15 text-[#000000]'
+                      : 'bg-navy-900 border border-navy-750 text-white'
+                  }`}
+                />
+                <button
+                  type="submit"
+                  className="px-3.5 py-2 rounded-lg bg-[#007AFF] hover:bg-[#0062CC] text-white text-xs font-bold transition cursor-pointer"
+                >
+                  Unlock
+                </button>
+              </div>
+              {adminStatusMsg && (
+                <p className="text-[11px] text-[#FF3B30] font-medium">{adminStatusMsg}</p>
+              )}
+            </form>
+          )}
+
+          {isAdmin && (
+            <div className={`p-3 rounded-xl border space-y-2 animate-fade-in ${
+              isLight ? 'bg-[#34C759]/10 border-[#34C759]/30' : 'bg-navy-950/90 border-growth-500/30'
+            }`}>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#34C759]">
+                  ⚡ Admin Tester Controls
+                </span>
+                <button
+                  type="button"
+                  onClick={lockAdmin}
+                  className="text-[10px] text-[#8E8E93] hover:underline cursor-pointer"
+                >
+                  Hide Admin
+                </button>
+              </div>
+              <div className="grid grid-cols-3 gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setProStatus(true, 'LIFETIME')}
+                  className={`py-1.5 px-2 rounded-lg text-[10px] font-bold border transition cursor-pointer ${
+                    plan === 'LIFETIME'
+                      ? 'bg-[#34C759] text-white border-[#34C759]'
+                      : isLight
+                      ? 'bg-white text-[#000000] border-black/10'
+                      : 'bg-navy-900 text-slate-300 border-navy-750'
+                  }`}
+                >
+                  Lifetime Pro
+                </button>
+                <button
+                  type="button"
+                  onClick={resetSubscription}
+                  className={`py-1.5 px-2 rounded-lg text-[10px] font-bold border transition cursor-pointer ${
+                    plan === 'TRIAL'
+                      ? 'bg-[#007AFF] text-white border-[#007AFF]'
+                      : isLight
+                      ? 'bg-white text-[#000000] border-black/10'
+                      : 'bg-navy-900 text-slate-300 border-navy-750'
+                  }`}
+                >
+                  Reset 30d Trial
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setProStatus(false, 'FREE')}
+                  className={`py-1.5 px-2 rounded-lg text-[10px] font-bold border transition cursor-pointer ${
+                    plan === 'FREE'
+                      ? 'bg-[#FF3B30] text-white border-[#FF3B30]'
+                      : isLight
+                      ? 'bg-white text-[#000000] border-black/10'
+                      : 'bg-navy-900 text-slate-300 border-navy-750'
+                  }`}
+                >
+                  Test Expired
+                </button>
+              </div>
+            </div>
+          )}
 
           {(plan === 'TRIAL' || plan === 'FREE') && (
             <div className={`p-3 rounded-xl border flex items-center justify-between text-xs ${
@@ -1292,11 +1439,14 @@ export const SettingsScreen: React.FC = () => {
           </div>
         </div>
 
-        {/* App Version & Packaging Info */}
-        <div className={`text-center pt-2 text-xs space-y-1 font-mono ${
-          isLight ? 'text-[#8E8E93]' : 'text-slate-500'
-        }`}>
-          <p>InvestLearn v1.2.0 • Neutral Light Native Architecture</p>
+        {/* App Version & Packaging Info (5 taps for Admin Unlock) */}
+        <div
+          onClick={handleSecretAdminTap}
+          className={`text-center pt-2 text-xs space-y-1 font-mono select-none cursor-pointer ${
+            isLight ? 'text-[#8E8E93]' : 'text-slate-500'
+          }`}
+        >
+          <p>InvestLearn v1.2.27 • Neutral Light Native Architecture</p>
           <p>Google Play Billing Ready • 30-Day Full Access Trial</p>
         </div>
       </div>

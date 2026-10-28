@@ -24,18 +24,49 @@ export const UpgradeProModal: React.FC<UpgradeProModalProps> = ({ onClose }) => 
   const { t } = useLanguageStore();
   const { 
     isPro, 
+    isAdmin,
     plan, 
     getTrialDaysRemaining, 
     lifetimeSeatsTotal, 
     lifetimeSeatsClaimed,
     subscribe, 
-    restorePurchases 
+    restorePurchases,
+    unlockAdmin,
+    resetSubscription
   } = useSubscriptionStore();
 
   const [selectedPlan, setSelectedPlan] = useState<'LIFETIME' | 'ANNUAL' | 'MONTHLY'>('LIFETIME');
   const [isProcessing, setIsProcessing] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [restoreStatus, setRestoreStatus] = useState<string | null>(null);
+
+  // Hidden 5-tap admin access state
+  const [secretTapCount, setSecretTapCount] = useState(0);
+  const [showAdminPrompt, setShowAdminPrompt] = useState(false);
+  const [adminPassword, setAdminPassword] = useState('');
+  const [adminError, setAdminError] = useState<string | null>(null);
+
+  const handleSecretHeaderTap = () => {
+    const next = secretTapCount + 1;
+    setSecretTapCount(next);
+    if (next >= 5) {
+      setShowAdminPrompt(true);
+      setSecretTapCount(0);
+    }
+  };
+
+  const handleAdminUnlock = (e: React.FormEvent) => {
+    e.preventDefault();
+    setAdminError(null);
+    if (unlockAdmin(adminPassword)) {
+      setAdminPassword('');
+      setShowAdminPrompt(false);
+      setSuccessMessage('🔓 Admin Mode Activated — Unrestricted Lifetime Pro Unlocked!');
+      setTimeout(() => onClose(), 1200);
+    } else {
+      setAdminError('Invalid admin passcode.');
+    }
+  };
 
   const trialDays = getTrialDaysRemaining();
   const seatsLeft = Math.max(0, lifetimeSeatsTotal - lifetimeSeatsClaimed);
@@ -137,14 +168,67 @@ export const UpgradeProModal: React.FC<UpgradeProModalProps> = ({ onClose }) => 
             <X className="w-5 h-5" />
           </button>
 
-          <div className="flex items-center gap-2 text-[#34C759] text-xs font-bold uppercase tracking-wider">
+          <div
+            onClick={handleSecretHeaderTap}
+            className="flex items-center gap-2 text-[#34C759] text-xs font-bold uppercase tracking-wider select-none cursor-pointer w-fit"
+          >
             <Crown className="w-4 h-4 fill-[#34C759]" />
             <span>InvestLearn Pro Membership</span>
+            {isAdmin && (
+              <span className="ml-1 px-1.5 py-0.5 rounded bg-[#34C759]/20 text-[#34C759] text-[9px] font-mono">
+                ADMIN
+              </span>
+            )}
           </div>
 
-          <h2 className="text-xl font-extrabold text-[#000000] dark:text-white mt-1 tracking-tight">
+          <h2
+            onClick={handleSecretHeaderTap}
+            className="text-xl font-extrabold text-[#000000] dark:text-white mt-1 tracking-tight select-none"
+          >
             Master the Markets with Timing Confidence
           </h2>
+
+          {showAdminPrompt && (
+            <form
+              onSubmit={handleAdminUnlock}
+              className="mt-3 p-3 rounded-xl bg-white dark:bg-navy-950 border border-black/15 dark:border-navy-700 space-y-2 animate-fade-in"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#007AFF] dark:text-gold-400">
+                  Admin / Developer Access
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAdminPrompt(false);
+                    setAdminError(null);
+                  }}
+                  className="text-[11px] text-[#8E8E93] hover:text-[#000000] dark:hover:text-white"
+                >
+                  Cancel
+                </button>
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="password"
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
+                  placeholder="Enter admin passcode..."
+                  autoFocus
+                  className="flex-1 rounded-lg px-3 py-2 text-xs font-mono bg-[#F2F2F7] dark:bg-navy-900 border border-black/10 dark:border-navy-750 text-[#000000] dark:text-white focus:outline-none focus:border-[#007AFF]"
+                />
+                <button
+                  type="submit"
+                  className="px-3.5 py-2 rounded-lg bg-[#007AFF] hover:bg-[#0062CC] text-white text-xs font-bold transition cursor-pointer"
+                >
+                  Unlock Pro
+                </button>
+              </div>
+              {adminError && (
+                <p className="text-[11px] text-[#FF3B30] font-medium">{adminError}</p>
+              )}
+            </form>
+          )}
 
           {/* 30-Day Trial Status Badge */}
           {plan === 'TRIAL' && (

@@ -2,8 +2,11 @@ import { create } from 'zustand';
 
 export type SubscriptionPlan = 'FREE' | 'TRIAL' | 'MONTHLY' | 'ANNUAL' | 'LIFETIME';
 
+export const ADMIN_PASSCODES = ['admin888', 'invest2026'];
+
 interface SubscriptionState {
   isPro: boolean;
+  isAdmin: boolean;
   plan: SubscriptionPlan;
   trialStartDate: string;
   lifetimeSeatsTotal: number;
@@ -20,6 +23,8 @@ interface SubscriptionState {
   restorePurchases: () => boolean;
   setProStatus: (isPro: boolean, plan?: SubscriptionPlan) => void;
   resetSubscription: () => void;
+  unlockAdmin: (passcode: string) => boolean;
+  lockAdmin: () => void;
 }
 
 const STORAGE_KEY = 'investlearn_subscription_v1';
@@ -55,6 +60,7 @@ const loadSavedSubscription = () => {
     const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
     if (raw) {
       const data = JSON.parse(raw);
+      data.isAdmin = Boolean(data.isAdmin);
       
       // If plan is TRIAL, guarantee trialStartDate aligns with our permanent install anchor
       if (data.plan === 'TRIAL') {
@@ -83,6 +89,7 @@ const loadSavedSubscription = () => {
     // First launch or unpersisted trial initialization:
     const initialData = {
       isPro: true,
+      isAdmin: false,
       plan: 'TRIAL' as SubscriptionPlan,
       trialStartDate: installDateStr,
       lifetimeSeatsTotal: 1000,
@@ -103,6 +110,7 @@ const loadSavedSubscription = () => {
   // Safe fallback
   return {
     isPro: true,
+    isAdmin: false,
     plan: 'TRIAL' as SubscriptionPlan,
     trialStartDate: new Date().toISOString(),
     lifetimeSeatsTotal: 1000,
@@ -120,6 +128,7 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => {
       const state = get();
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
         isPro: state.isPro,
+        isAdmin: state.isAdmin,
         plan: state.plan,
         trialStartDate: state.trialStartDate,
         lifetimeSeatsTotal: state.lifetimeSeatsTotal,
@@ -204,6 +213,27 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => {
         purchaseDate: null,
         transactionId: null
       });
+      persist();
+    },
+
+    unlockAdmin: (passcode: string) => {
+      const normalized = passcode.trim().toLowerCase();
+      if (ADMIN_PASSCODES.includes(normalized)) {
+        set({
+          isAdmin: true,
+          isPro: true,
+          plan: 'LIFETIME',
+          purchaseDate: new Date().toISOString(),
+          transactionId: `admin_founder_${Date.now()}`
+        });
+        persist();
+        return true;
+      }
+      return false;
+    },
+
+    lockAdmin: () => {
+      set({ isAdmin: false });
       persist();
     }
   };
